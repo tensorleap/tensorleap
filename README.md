@@ -1,6 +1,6 @@
 # README
 
-This is a base repository for Tensorleap's projects.  
+This is a repository containing Tensorleap's examples.
 It contains two elements:
 1) The .tensorleap folder containing the code needed to integrate a model and a dataset with the Tensorleap's system
 2) Terraform files required to open a GCP project to host the dataset
