@@ -1,0 +1,15 @@
+projectName = "coco"
+organization = "trial"
+framework = "tensorflow"
+datasetName = "coco"
+bucketName = "example-dataset"
+
+
+# config.toml schema version; you probably don't have to change this.
+version = "0.1.0"
+
+# Location of integration files (relative to .tensorleap directory)
+[integration]
+model = "model.py"
+dataset = "dataset.py"
+loss = "loss.py"
