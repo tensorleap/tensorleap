@@ -1,30 +1,11 @@
 # Adapted from https://www.tensorflow.org/tutorials/images/segmentation
-import numpy as np
 import tensorflow as tf
 import coco.pix2pix_upsample as pix2pix
 from coco.adapted_mobilenet_v2 import MobileNetV2
+from tensorflow.python.keras.engine.training import Model as TFModel
 
 
-def get_output_indices(outputs, inputs):
-    last_indices = np.zeros_like(outputs)
-    for i, output in enumerate(outputs):
-        last_indices[i] = len(tf.keras.Model(inputs=inputs, outputs=output).layers[1:])-1
-    return last_indices
-
-
-def encode_image(inputs, down_stack_layers, output_indices):
-    outputs = []
-    for i, layer in enumerate(down_stack_layers):
-        if i == 0:
-            x = layer(inputs)
-        else:
-            x = layer(x)
-        if i in output_indices:
-            outputs.append(x)
-    return outputs
-
-
-def unet_model(output_channels:int):
+def unet_model(output_channels: int) -> TFModel:
     base_model = MobileNetV2(
         input_shape=[128, 128, 3],
         include_top=False
@@ -43,7 +24,6 @@ def unet_model(output_channels:int):
     # Create the feature extraction model
     down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
     down_stack.trainable = False
-    print(1)
     up_stack = [
         pix2pix.upsample(512, 3),  # 4x4 -> 8x8
         pix2pix.upsample(256, 3),  # 8x8 -> 16x16
@@ -54,7 +34,6 @@ def unet_model(output_channels:int):
     inputs = tf.keras.layers.Input(shape=[128, 128, 3])
 
     # Downsampling through the model
-  #  encoded_image = encode_image(inputs, down_stack_layers, output_indices)
     skips = down_stack.call(inputs)
     x = skips[-1]
     skips = reversed(skips[:-1])
