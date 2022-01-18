@@ -9,3 +9,8 @@ resource "google_storage_bucket" "datasets" {
   }
 }
 
+resource "google_storage_bucket_access_control" "public_rule" {
+  bucket = local.dataset_bucket
+  role   = "READER"
+  entity = "allUsers"
+}

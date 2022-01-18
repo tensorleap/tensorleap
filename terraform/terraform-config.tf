@@ -2,7 +2,7 @@ terraform {
   required_version = "~> 0.14.3"
   backend "gcs" {
     bucket = "tensorleap-infra-nonprod"
-    prefix = "clients/trial/"
+    prefix = "clients/example/"
   }
   required_providers {
     google = {
