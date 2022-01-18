@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "coco"
+version = "0.1.0"
+description = ""
+authors = ["tom Koren <tom.koren@tensorleap.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.6.1, < 3.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+leapcli = "^0.2.3"
+tensorflow = "^2.4.0"
+Pillow = "^8.4.0"
+scikit-image = "^0.17.2"
+pycocotools = "^2.0.4"
+opencv-python = "^4.5.5.62"
+google-cloud-storage = "^2.0.0"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
