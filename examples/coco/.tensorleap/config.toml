@@ -2,7 +2,7 @@ projectName = "coco"
 organization = "trial"
 framework = "tensorflow"
 datasetName = "coco"
-bucketName = "example-dataset"
+bucketName = "example-datasets"
 
 
 # config.toml schema version; you probably don't have to change this.
