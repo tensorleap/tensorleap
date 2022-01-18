@@ -441,17 +441,12 @@ def _inverted_res_block(inputs, expansion, stride, alpha, filters, block_id):
   else:
     prefix = 'expanded_conv_'
 
-  # Depthwise
-  if stride == 2:
-    x = layers.ZeroPadding2D(
-        padding=imagenet_utils.correct_pad(x, 3),
-        name=prefix + 'pad')(x)
   x = layers.DepthwiseConv2D(
       kernel_size=3,
       strides=stride,
       activation=None,
       use_bias=False,
-      padding='same' if stride == 1 else 'valid',
+      padding='same' if stride in [1, 2] else 'valid',
       name=prefix + 'depthwise')(
           x)
   x = layers.BatchNormalization(

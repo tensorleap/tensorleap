@@ -55,13 +55,13 @@ def unet_model(output_channels:int):
 
     # Downsampling through the model
   #  encoded_image = encode_image(inputs, down_stack_layers, output_indices)
-    skips = down_stack(inputs)
+    skips = down_stack.call(inputs)
     x = skips[-1]
     skips = reversed(skips[:-1])
 
     # Upsampling and establishing the skip connections
     for up, skip in zip(up_stack, skips):
-        x = up(x)
+        x = up.call(x)
         concat = tf.keras.layers.Concatenate()
         x = concat([x, skip])
 
