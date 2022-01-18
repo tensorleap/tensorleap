@@ -23,6 +23,7 @@ poetry env use $( pyenv which python )
 poetry install
 
 ```
+
 ## Tensorleap Usage 
 
 ### Setting up the project and the dataset
