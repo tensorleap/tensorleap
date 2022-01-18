@@ -14,7 +14,7 @@
 # limitations under the License.
 # ==============================================================================
 
-# This was adapted to the TF platform by changing the sequential model to a regular
+# This was adapted to the TF platform by changing the TransposeConv2D to upsmaple + conv
 """Pix2pix.
 """
 

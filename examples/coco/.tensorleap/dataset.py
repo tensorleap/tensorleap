@@ -17,7 +17,7 @@ from skimage.io import imread
 
 from code_loader.contract.datasetclasses import SubsetResponse
 
-BUCKET_NAME = 'datasets-reteai'
+BUCKET_NAME = 'example-datasets'
 
 image_size = 128
 
