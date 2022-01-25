@@ -9,11 +9,6 @@ resource "google_storage_bucket" "datasets" {
   }
 }
 
-resource "google_storage_bucket_access_control" "public_rule" {
-  bucket = local.dataset_bucket
-  role   = "READER"
-  entity = "allUsers"
-}
 
 resource "random_string" "bucket_suffix" {
   length           = 8
@@ -25,3 +20,10 @@ resource "random_string" "bucket_suffix" {
     ignore_changes = all
   }
 }
+
+resource "google_storage_bucket_iam_member" "dataset-gcs" {
+  bucket = local.dataset_bucket
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
