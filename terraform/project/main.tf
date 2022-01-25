@@ -1,6 +1,18 @@
+resource "random_string" "suffix" {
+  length           = 8
+  upper            = false
+  special          = false
+  override_special = "/@£$"
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+
 resource "google_project" "project" {
   org_id              = local.org_id
-  project_id          = var.name
+  project_id          = "{var.name}-${random_string.suffix.result}"
   name                = var.name
   billing_account     = local.billing_account
   auto_create_network = false
