@@ -4,7 +4,8 @@ locals {
   dataset_bucket = google_storage_bucket.datasets.name
   owners = [
     "user:yotam@tensorleap.ai",
-    "user:tom.koren@tensorleap.ai"
+    "user:tom.koren@tensorleap.ai",
+    "user:danielle.benbashat@tensorleap.ai"
   ]
   editors = []
 }
