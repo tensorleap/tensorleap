@@ -6,7 +6,6 @@ from typing import List, Optional
 import cv2
 import numpy as np
 from code_loader import dataset_binder
-from code_loader.contract.datasetclasses import SubsetResponse
 from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 from google.cloud import storage
 from google.cloud.storage import Bucket
@@ -14,10 +13,11 @@ from google.oauth2 import service_account
 from pycocotools.coco import COCO
 from skimage.color import gray2rgb
 from skimage.io import imread
-
+from google.auth.credentials import AnonymousCredentials
 from code_loader.contract.datasetclasses import SubsetResponse
 
-BUCKET_NAME = 'example-datasets'
+BUCKET_NAME = 'example-datasets-47ml982d'
+PROJECT_ID = 'example-dev-project-nmrksf0o'
 
 image_size = 128
 
@@ -40,21 +40,13 @@ def get_length(data):
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
-    auth_secret_string = os.environ['AUTH_SECRET']
-    auth_secret = json.loads(auth_secret_string)
-    if type(auth_secret) is dict:
-        # getting credentials from dictionary account info
-        credentials = service_account.Credentials.from_service_account_info(auth_secret)
-    else:
-        # getting credentials from path
-        credentials = service_account.Credentials.from_service_account_file(auth_secret)
-    project = credentials.project_id
-    gcs_client = storage.Client(project=project, credentials=credentials)
-
+    print("connect")
+    gcs_client = storage.Client(project=PROJECT_ID, credentials=AnonymousCredentials())
     return gcs_client.bucket(bucket_name)
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
+    print("download")
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
         home_dir = os.getenv("HOME")
@@ -73,6 +65,7 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 
 
 def subset_images() -> List[SubsetResponse]:
+    print("subset")
     def load_set(coco):
         # get all images containing given categories, select one at random
         catIds = coco.getCatIds(categories)
@@ -82,13 +75,15 @@ def subset_images() -> List[SubsetResponse]:
         return imgs
 
     dataType = 'train2014'
-    annFile = '{}annotations/instances_{}.json'.format("COCO14/ms-coco/", dataType)
+    annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
     fpath = _download(annFile)
     # initialize COCO api for instance annotations
+    print(fpath)
     traincoco = COCO(fpath)
+    print(traincoco)
     x_train_raw = load_set(coco=traincoco)
     dataType = 'val2014'
-    annFile = '{}annotations/instances_{}.json'.format("COCO14/ms-coco/", dataType)
+    annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
     fpath = _download(annFile)
     # initialize COCO api for instance annotations
     valcoco = COCO(fpath)
@@ -100,9 +95,11 @@ def subset_images() -> List[SubsetResponse]:
 
 
 def input_image(idx, data):
+    print("subset")
+
     data = data.data
     x = data['samples'][idx]
-    filepath = "COCO14/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
     fpath = _download(filepath)
     img = imread(fpath)
     if len(img.shape) == 2:
@@ -116,6 +113,7 @@ def input_image(idx, data):
 
 
 def ground_truth_mask(idx, data):
+    print("GT")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -131,6 +129,7 @@ def ground_truth_mask(idx, data):
 
 
 def metadata_background_percent(idx, data):
+    print("BG")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -155,6 +154,7 @@ def metadata_background_percent(idx, data):
 
 
 def metadata_person_percent(idx, data):
+    print("person")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -179,6 +179,7 @@ def metadata_person_percent(idx, data):
 
 
 def metadata_bicycle_percent(idx, data):
+    print("metadata")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -201,7 +202,9 @@ def metadata_bicycle_percent(idx, data):
         percent_obj = 0.0
     return percent_obj
 
+
 def metadata_car_percent(idx, data):
+    print("car")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -226,9 +229,10 @@ def metadata_car_percent(idx, data):
 
 
 def metadata_brightness(idx, data):
+    print("bright")
     data = data.data
     x = data['samples'][idx]
-    filepath = "COCO14/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
     fpath = _download(filepath)
     img = imread(fpath)
     if len(img.shape) == 2:
