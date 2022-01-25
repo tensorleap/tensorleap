@@ -6,7 +6,5 @@ locals {
     "user:yotam@tensorleap.ai",
     "user:tom.koren@tensorleap.ai"
   ]
-  editors = [
-    "user:tom.koren@tensorleap.ai"
-  ]
+  editors = []
 }
