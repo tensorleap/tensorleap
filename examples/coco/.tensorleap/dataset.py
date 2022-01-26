@@ -88,7 +88,7 @@ def subset_images() -> List[SubsetResponse]:
     # initialize COCO api for instance annotations
     valcoco = COCO(fpath)
     x_test_raw = load_set(coco=valcoco)
-    train_size = min(len(x_train_raw),1000)
+    train_size = min(len(x_train_raw), 1000)
     return [
         SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size], 'subdir': 'train2014'}),
         SubsetResponse(length=100, data={'cocofile': valcoco, 'samples': x_test_raw[:100], 'subdir': 'val2014'})]
