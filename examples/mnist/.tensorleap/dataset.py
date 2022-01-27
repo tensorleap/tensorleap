@@ -214,7 +214,7 @@ dataset_binder.set_metadata(function=metadata_sample_average_brightness,
 
 
 dataset_binder.set_metadata(function=metadata_label, subset='images',
-                            metadata_type=DatasetMetadataType.str,
+                            metadata_type=DatasetMetadataType.string,
                             name='label')
 
 
