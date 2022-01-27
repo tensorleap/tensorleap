@@ -13,7 +13,6 @@ from pathlib import Path
 from tensorflow.keras.utils import to_categorical
 
 
-
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 BUCKET_NAME = 'example-datasets-47ml982d'
 
@@ -21,46 +20,19 @@ image_size = 128
 
 labels = np.arange(10).astype(str).tolist()
 
+
 ###########################
 ########## Utils ##########
 ###########################
 
 
-# scale pixels
-def prep_pixels(train: np.ndarray, test: np.ndarray) -> List[np.ndarray]:
-    # convert from integers to floats
-    train_norm = train.astype('float32')
-    test_norm = test.astype('float32')
-    # normalize to range 0-1
-    train_norm = train_norm / 255.0
-    test_norm = test_norm / 255.0
-    # return normalized images
-    return train_norm, test_norm
-
-
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     data_X = df.drop('label', axis=1).to_numpy()
-    data_X = np.reshape(data_X, (len(data_X), 28, 28, 1)) / 255.
+    data_X = np.reshape(data_X, (len(data_X), 28, 28, 1)) / 255.  # normalize to range 0-1
     data_Y = df.label.to_numpy()
     # one hot encode the target values
     data_Y = to_categorical(data_Y)
-    return data_X, data_Y
-
-
-# load train and test mnist dataset localy
-def load_datasets(train_file_path: Path, test_file_path: Path) -> List[np.ndarray]:
-
-    df = pd.read_csv(train_file_path)
-    train_X, train_Y = preprocess(df)
-
-    df = pd.read_csv(test_file_path)
-    test_X, test_Y = preprocess(df)
-
-    # summarize loaded dataset
-    print(f"Train: X={train_X.shape[0]}, y={train_Y.shape[0]}")
-    print(f"Test: X={test_X.shape[0]}, y={test_Y.shape[0]}")
-
-    return train_X, train_Y, test_X, test_Y
+    return [data_X, data_Y]
 
 
 def calc_classes_centroid(subset: SubsetResponse) -> dict:
@@ -74,6 +46,26 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
         avg_images_dict[label] = np.mean(inputs_label, axis=0)
 
     return avg_images_dict
+
+
+def calc_most_similar_class_and_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
+    """ find the most similar class average image (which isn't the ground truth)
+    based on euclidean distance from the sample"""
+    sample_input = subset.data['inputs'][idx]
+    label = subset.data['labels'][idx]
+    label = str(np.argmax(label))
+    distance = 0.
+    min_distance = float('+inf')
+    min_distance_class_label = None
+    for label_i in labels:
+        if label_i == label:
+            continue
+        class_average_image = dataset_binder.cache_container["word_to_index"]["classes_avg_images"][label_i]
+        distance = np.linalg.norm(class_average_image - sample_input)
+        if distance < min_distance:
+            min_distance = distance
+            min_distance_class_label = label
+    return [min_distance, min_distance_class_label]
 
 
 @lru_cache()
@@ -133,8 +125,8 @@ def subset_func() -> List[SubsetResponse]:
                                                     'labels': test_Y
                                                     })
 
-    avg_images_dict = calc_classes_centroid(train)
-    dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
+    # avg_images_dict = calc_classes_centroid(train)
+    # dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
 
     response = [train, val, test]
     return response
@@ -152,60 +144,27 @@ def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
     return label
 
 
-
-def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
-    """ preprocess the input sample """
-    input = subset.data['inputs'][idx]
-    return input[..., np.newaxis]
-
-
-def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
-    """" preprocess the ground truth """
-    label = subset.data['labels'][idx]
-    return label[..., np.newaxis]
-
-
 """ here we extract some metadata we want for our data """
 
 
-def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:  # TODO can I remove subset input?
     """ save the sample index number """
     return idx
 
 
-def metadata_sample_average_brightness(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray: # TODO : output the most closest class per image based on eualideian dis
-    """ calculate avrage pixels values per image """
-    sample_input = subset.data['inputs'][idx]
+def metadata_sample_average_brightness(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+    """ calculate average pixels values per image """
+    sample_input = subset.data['images'][idx]
     return np.mean(sample_input)
 
 
-def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:   # TODO: make sure it's possible to input all dataset
+def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
     """ calculate euclidean distance from the average image of the specific class"""
-    sample_input = subset.data['inputs'][idx]
+    sample_input = subset.data['images'][idx]
     label = subset.data['labels'][idx]
     label = str(np.argmax(label))
     class_average_image = dataset_binder.cache_container["word_to_index"]["classes_avg_images"][label]
     return np.linalg.norm(class_average_image - sample_input)
-
-
-def calc_most_similar_class_and_euclidean_diff(idx: int, subset: Union[SubsetResponse, list]):
-    """ find the most similar class average image (which isn't the ground truth)
-    based on euclidean distance from the sample"""
-    sample_input = subset.data['inputs'][idx]
-    label = subset.data['labels'][idx]
-    label = str(np.argmax(label))
-    distance = 0.
-    min_distance = float('+inf')
-    min_distance_class_label = None
-    for label_i in labels:
-        if label_i == label:
-            continue
-        class_average_image = dataset_binder.cache_container["word_to_index"]["classes_avg_images"][label_i]
-        distance = np.linalg.norm(class_average_image - sample_input)
-        if distance < min_distance:
-            min_distance = distance
-            min_distance_class_label = label
-    return [min_distance, min_distance_class_label]
 
 
 def metadata_most_similar_class_label(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
@@ -223,7 +182,7 @@ dataset_binder.set_subset(function=subset_func, name='images')
 dataset_binder.set_input(function=input_encoder,
                          subset='images',
                          input_type=DatasetInputType.Image,
-                         name='images')
+                         name='image')
 
 dataset_binder.set_ground_truth(function=gt_encoder,
                                 subset='images',
@@ -251,5 +210,5 @@ dataset_binder.set_metadata(function=metadata_most_similar_class_label, subset='
                             name='most_similar_class')
 
 dataset_binder.set_metadata(function=metadata_most_similar_class_diff, subset='images',
-                            metadata_type=DatasetMetadataType.string,
+                            metadata_type=DatasetMetadataType.float,
                             name='most_similar_class')
