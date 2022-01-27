@@ -1,8 +1,5 @@
 import os
-from typing import Union, List, Optional
-from pathlib import Path
-import numpy as np
-import math
+from typing import Optional, List, Union, Tuple, Any
 from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 from code_loader.contract.datasetclasses import SubsetResponse
 from code_loader import dataset_binder
@@ -10,9 +7,11 @@ from google.cloud import storage
 from google.cloud.storage import Bucket
 from google.auth.credentials import AnonymousCredentials
 from functools import lru_cache
+import numpy as np
+import pandas as pd
+from pathlib import Path
 from tensorflow.keras.utils import to_categorical
 
-from mnist.load_data import read_csv_file
 
 
 PROJECT_ID = 'example-dev-project-nmrksf0o'
@@ -22,16 +21,68 @@ image_size = 128
 
 labels = np.arange(10).astype(str).tolist()
 
+###########################
+########## Utils ##########
+###########################
+
+
+# scale pixels
+def prep_pixels(train: np.ndarray, test: np.ndarray) -> List[np.ndarray]:
+    # convert from integers to floats
+    train_norm = train.astype('float32')
+    test_norm = test.astype('float32')
+    # normalize to range 0-1
+    train_norm = train_norm / 255.0
+    test_norm = test_norm / 255.0
+    # return normalized images
+    return train_norm, test_norm
+
+
+def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
+    data_X = df.drop('label', axis=1).to_numpy()
+    data_X = np.reshape(data_X, (len(data_X), 28, 28, 1)) / 255.
+    data_Y = df.label.to_numpy()
+    # one hot encode the target values
+    data_Y = to_categorical(data_Y)
+    return data_X, data_Y
+
+
+# load train and test mnist dataset localy
+def load_datasets(train_file_path: Path, test_file_path: Path) -> List[np.ndarray]:
+
+    df = pd.read_csv(train_file_path)
+    train_X, train_Y = preprocess(df)
+
+    df = pd.read_csv(test_file_path)
+    test_X, test_Y = preprocess(df)
+
+    # summarize loaded dataset
+    print(f"Train: X={train_X.shape[0]}, y={train_Y.shape[0]}")
+    print(f"Test: X={test_X.shape[0]}, y={test_Y.shape[0]}")
+
+    return train_X, train_Y, test_X, test_Y
+
+
+def calc_classes_centroid(subset: SubsetResponse) -> dict:
+    """ per each class we calculate average image on the pixels.
+     returns dictionary key: class, values: images 28x28  """
+    avg_images_dict = {}
+    data_X = subset.data['images']
+    data_Y = subset.data['labels']
+    for label in labels:
+        inputs_label = data_X[np.argmax(data_Y, axis=1) == label]
+        avg_images_dict[label] = np.mean(inputs_label, axis=0)
+
+    return avg_images_dict
+
 
 @lru_cache()
-def _connect_to_gcs_and_return_bucket() -> Bucket:
-    print("connect")
-    # create storage client
+def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
     gcs_client = storage.Client(project=PROJECT_ID, credentials=AnonymousCredentials())
-    return gcs_client.bucket(BUCKET_NAME)   # get bucket object
+    return gcs_client.bucket(bucket_name)
 
 
-def _download_from_gcs(cloud_file_path: Path, local_file_path: Optional[Path] = None) -> Path:
+def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
     print("download")
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
@@ -42,7 +93,7 @@ def _download_from_gcs(cloud_file_path: Path, local_file_path: Optional[Path] = 
     if os.path.exists(local_file_path):
         return local_file_path
 
-    bucket = _connect_to_gcs_and_return_bucket()
+    bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
     dir_path = os.path.dirname(local_file_path)
     os.makedirs(dir_path, exist_ok=True)
     blob = bucket.blob(cloud_file_path)
@@ -50,64 +101,56 @@ def _download_from_gcs(cloud_file_path: Path, local_file_path: Optional[Path] = 
     return local_file_path
 
 
-def calc_classes_centroid(data: SubsetResponse):
-    avg_images_dict = {}
-    data_X = data['images']
-    data_Y = data['labels']
-    for label in labels:
-        inputs_label = data_X[np.argmax(data_Y, axis=1) == label]
-        avg_images_dict[label] = np.mean(inputs_label, axis=0)
-
-    return avg_images_dict
-
-
 def subset_func() -> List[SubsetResponse]:
 
     base_path = 'mnist/'
 
-    cloud_file_train_path = Path(base_path, 'mnist_train.csv')
-    cloud_file_test_path = Path(base_path, 'mnist_test.csv')
+    cloud_file_train_path = str(Path(base_path, 'mnist_train.csv'))
+    cloud_file_test_path = str(Path(base_path, 'mnist_test.csv'))
 
-    local_file_train_path = _download_from_gcs(cloud_file_train_path)
-    local_file_test_path = _download_from_gcs(cloud_file_test_path)
+    local_file_train_path = _download(cloud_file_train_path)
+    local_file_test_path = _download(cloud_file_test_path)
 
-    train_X, train_Y = read_csv_file(local_file_train_path)
-    test_X, test_Y = read_csv_file(local_file_test_path)
+    df = pd.read_csv(local_file_train_path)
+    train_X, train_Y = preprocess(df)
+
+    df = pd.read_csv(local_file_test_path)
+    test_X, test_Y = preprocess(df)
 
     val_split = int(len(train_X) * 0.8)
     train_X, val_X = train_X[:val_split], train_X[val_split:]
     train_Y, val_Y = train_Y[:val_split], train_Y[:val_split]
 
-    # basic preprocessing of the input
-    train_X = train_X.reshape((train_X.shape[0], 28, 28, 1))
-    val_X = val_X.reshape((val_X.shape[0], 28, 28, 1))
-    test_X = test_X.reshape((test_X.shape[0], 28, 28, 1))
-
-    # one hot encode the target values
-    train_Y = to_categorical(train_Y)
-    val_Y = to_categorical(val_Y)
-    test_Y = to_categorical(test_Y)
-
     train = SubsetResponse(length=len(train_X), data={'images': train_X,
-                                                      'labels': train_Y,
-                                                      'shape': image_size
+                                                      'labels': train_Y
                                                       })
 
     val = SubsetResponse(length=len(val_X), data={'images': val_X,
-                                                  'labels': val_Y,
-                                                  'shape': image_size
+                                                  'labels': val_Y
                                                   })
 
-    test = SubsetResponse(length=len(val_X), data={'images': test_X,
-                                                   'labels': test_Y,
-                                                   'shape': image_size   # TODO: do I need it? for what purpose
-                                                   })
+    test = SubsetResponse(length=len(test_X), data={'images': test_X,
+                                                    'labels': test_Y
+                                                    })
 
     avg_images_dict = calc_classes_centroid(train)
-    dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict  # TODO: do we need to keep inside "word_to_index"? or as another key?
+    dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
 
     response = [train, val, test]
     return response
+
+
+def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
+    """ preprocess the input sample """
+    input = subset.data['images'][idx]
+    return input
+
+
+def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+    """" preprocess the ground truth """
+    label = subset.data['labels'][idx]
+    return label
+
 
 
 def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
