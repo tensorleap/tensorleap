@@ -18,6 +18,8 @@ def build_model() -> tf.keras.Sequential:
     # compile model
     opt = SGD(learning_rate=0.01, momentum=0.9)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+    final_model = tf.keras.models.Model(inputs, removed_input_layers_model.call(concat)) # TODO as in anyclip compile
+    final_model.save(target_file_path)
     return model
 
 
@@ -26,3 +28,7 @@ def model_infer_one_sample(data: np.ndarray, model: tf.keras.Sequential):
     idx = np.random.choice(len(data))
     x = np.expand_dims(data[idx], axis=0)
     return model(x)
+
+
+model = build_model()
+print('hi')
