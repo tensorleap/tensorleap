@@ -1,34 +1,34 @@
 import tensorflow as tf
 from tensorflow.keras import Sequential
-from tensorflow.keras.optimizers import SGD
-from tensorflow.keras.layers import MaxPooling2D, Conv2D, Flatten, Dense, BatchNormalization
+from tensorflow.keras.layers import Dense, Dropout, Input, Conv2D, MaxPooling2D, Flatten, BatchNormalization
+from tensorflow.keras.models import Model
 import numpy as np
 
 
 # define baseline cnn model for mnist
-def build_model() -> tf.keras.Sequential:
+def build_model() -> tf.keras.Model:
+    input_shape = (28, 28, 1)
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=(28, 28, 1)))
+    model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=input_shape))
     model.add(BatchNormalization())
     model.add(MaxPooling2D((2, 2)))
     model.add(Flatten())
     model.add(Dense(100, activation='relu', kernel_initializer='he_uniform'))
     model.add(BatchNormalization())
     model.add(Dense(10, activation='softmax'))
-    # compile model
-    opt = SGD(learning_rate=0.01, momentum=0.9)
-    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
-    final_model = tf.keras.models.Model(inputs, removed_input_layers_model.call(concat)) # TODO as in anyclip compile
-    final_model.save(target_file_path)
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    # Convert to functional Model API
+    inputs = [tf.keras.layers.Input(shape=input_shape)]
+    concat = tf.keras.layers.Concatenate(-1)(inputs)
+    model = tf.keras.models.Model(inputs, model.call(concat)) # TODO as in anyclip remove compile
+
     return model
 
 
 # run model one one randomly selected sample
-def model_infer_one_sample(data: np.ndarray, model: tf.keras.Sequential):
+def model_infer_one_sample(data: np.ndarray, model: tf.keras.Model):
     idx = np.random.choice(len(data))
     x = np.expand_dims(data[idx], axis=0)
     return model(x)
 
-
-model = build_model()
-print('hi')
