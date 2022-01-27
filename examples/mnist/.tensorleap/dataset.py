@@ -188,7 +188,8 @@ dataset_binder.set_ground_truth(function=gt_encoder,
                                 subset='images',
                                 ground_truth_type=DatasetOutputType.Classes,
                                 name='classes',
-                                labels=labels)
+                                labels=labels,
+                                masked_input=None)
 
 # Set Meta Data
 
