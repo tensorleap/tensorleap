@@ -51,7 +51,7 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
 def calc_most_similar_class_and_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
     """ find the most similar class average image (which isn't the ground truth)
     based on euclidean distance from the sample"""
-    sample_input = subset.data['inputs'][idx]
+    sample_input = subset.data['images'][idx]
     label = subset.data['labels'][idx]
     label = str(np.argmax(label))
     distance = 0.
@@ -60,7 +60,7 @@ def calc_most_similar_class_and_euclidean_diff(idx: int, subset: SubsetResponse)
     for label_i in labels:
         if label_i == label:
             continue
-        class_average_image = dataset_binder.cache_container["word_to_index"]["classes_avg_images"][label_i]
+        class_average_image = dataset_binder.cache_container["classes_avg_images"][label_i]
         distance = np.linalg.norm(class_average_image - sample_input)
         if distance < min_distance:
             min_distance = distance
@@ -105,9 +105,11 @@ def subset_func() -> List[SubsetResponse]:
 
     df = pd.read_csv(local_file_train_path)
     train_X, train_Y = preprocess(df)
+    print('check we normalize the data:', np.max(train_X))
 
     df = pd.read_csv(local_file_test_path)
     test_X, test_Y = preprocess(df)
+    print('check we normalize the data:', np.max(test_X))
 
     val_split = int(len(train_X) * 0.8)
     train_X, val_X = train_X[:val_split], train_X[val_split:]
@@ -138,7 +140,7 @@ def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
     return input
 
 
-def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> str:
     """" preprocess the ground truth """
     label = subset.data['labels'][idx]
     return label
@@ -152,6 +154,12 @@ def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.n
     return idx
 
 
+def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:  # TODO can I remove subset input?
+    """ save the sample index number """
+    label = gt_encoder(idx, subset)
+    return label
+
+
 def metadata_sample_average_brightness(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
     """ calculate average pixels values per image """
     sample_input = subset.data['images'][idx]
@@ -163,7 +171,7 @@ def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetRe
     sample_input = subset.data['images'][idx]
     label = subset.data['labels'][idx]
     label = str(np.argmax(label))
-    class_average_image = dataset_binder.cache_container["word_to_index"]["classes_avg_images"][label]
+    class_average_image = dataset_binder.cache_container["classes_avg_images"][label]
     return np.linalg.norm(class_average_image - sample_input)
 
 
@@ -198,18 +206,26 @@ dataset_binder.set_metadata(function=metadata_sample_index,
                             metadata_type=DatasetMetadataType.int,
                             name='sample_index')
 
-dataset_binder.set_metadata(function=metadata_sample_average_brightness, subset='images',
+
+dataset_binder.set_metadata(function=metadata_sample_average_brightness,
+                            subset='images',
                             metadata_type=DatasetMetadataType.float,
                             name='sample_average_brightness')
 
-dataset_binder.set_metadata(function=metadata_euclidean_diff_from_class_centroid, subset='images',
-                            metadata_type=DatasetMetadataType.float,
-                            name='euclidean_diff_from_class_centroid')
 
-dataset_binder.set_metadata(function=metadata_most_similar_class_label, subset='images',
-                            metadata_type=DatasetMetadataType.string,
-                            name='most_similar_class')
+dataset_binder.set_metadata(function=metadata_label, subset='images',
+                            metadata_type=DatasetMetadataType.str,
+                            name='label')
 
-dataset_binder.set_metadata(function=metadata_most_similar_class_diff, subset='images',
-                            metadata_type=DatasetMetadataType.float,
-                            name='most_similar_class')
+
+# dataset_binder.set_metadata(function=metadata_euclidean_diff_from_class_centroid, subset='images',
+#                             metadata_type=DatasetMetadataType.float,
+#                             name='euclidean_diff_from_class_centroid')
+#
+# dataset_binder.set_metadata(function=metadata_most_similar_class_label, subset='images',
+#                             metadata_type=DatasetMetadataType.string,
+#                             name='most_similar_class_label')
+#
+# dataset_binder.set_metadata(function=metadata_most_similar_class_diff, subset='images',
+#                             metadata_type=DatasetMetadataType.float,
+#                             name='most_similar_class_diff')

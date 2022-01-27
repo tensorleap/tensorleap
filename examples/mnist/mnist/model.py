@@ -19,9 +19,8 @@ def build_model() -> tf.keras.Model:
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Convert to functional Model API
-    inputs = [tf.keras.layers.Input(shape=input_shape)]
-    concat = tf.keras.layers.Concatenate(-1)(inputs)
-    model = tf.keras.models.Model(inputs, model.call(concat)) # TODO as in anyclip remove compile
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    model = tf.keras.models.Model(inputs, model.call(inputs))
 
     return model
 
@@ -32,3 +31,6 @@ def model_infer_one_sample(data: np.ndarray, model: tf.keras.Model):
     x = np.expand_dims(data[idx], axis=0)
     return model(x)
 
+
+model = build_model()
+print('hi')
