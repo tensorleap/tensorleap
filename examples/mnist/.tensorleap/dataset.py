@@ -41,8 +41,9 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
     avg_images_dict = {}
     data_X = subset.data['images']
     data_Y = subset.data['labels']
+    labels = np.arange(10).astype(str).tolist()
     for label in labels:
-        inputs_label = data_X[np.argmax(data_Y, axis=1) == label]
+        inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
         avg_images_dict[label] = np.mean(inputs_label, axis=0)
 
     return avg_images_dict
@@ -127,8 +128,8 @@ def subset_func() -> List[SubsetResponse]:
                                                     'labels': test_Y
                                                     })
 
-    # avg_images_dict = calc_classes_centroid(train)
-    # dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
+    avg_images_dict = calc_classes_centroid(train)
+    dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
 
     response = [train, val, test]
     return response
@@ -136,8 +137,6 @@ def subset_func() -> List[SubsetResponse]:
 
 def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
     """ preprocess the input sample """
-    print("hi")
-    print(subset.data['images'][idx].dtype)
     return subset.data['images'][idx].astype('float32')
 
 
