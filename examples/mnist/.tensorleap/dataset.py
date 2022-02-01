@@ -116,20 +116,20 @@ def subset_func() -> List[SubsetResponse]:
     train_X, val_X = train_X[:val_split], train_X[val_split:]
     train_Y, val_Y = train_Y[:val_split], train_Y[:val_split]
 
-    train = SubsetResponse(length=200, data={'images': train_X,
+    train = SubsetResponse(length=len(train_X), data={'images': train_X,
                                                       'labels': train_Y
                                                       })
 
-    val = SubsetResponse(length=10, data={'images': val_X,
+    val = SubsetResponse(length=len(val_X), data={'images': val_X,
                                                   'labels': val_Y
                                                   })
 
-    test = SubsetResponse(length=10, data={'images': test_X,
+    test = SubsetResponse(length=len(test_X), data={'images': test_X,
                                                     'labels': test_Y
                                                     })
 
     avg_images_dict = calc_classes_centroid(train)
-    # dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
+    dataset_binder.cache_container["classes_avg_images"] = avg_images_dict
 
     response = [train, val, test]
     return response
