@@ -115,15 +115,15 @@ def subset_func() -> List[SubsetResponse]:
     train_X, val_X = train_X[:val_split], train_X[val_split:]
     train_Y, val_Y = train_Y[:val_split], train_Y[:val_split]
 
-    train = SubsetResponse(length=len(train_X), data={'images': train_X,
+    train = SubsetResponse(length=200, data={'images': train_X,
                                                       'labels': train_Y
                                                       })
 
-    val = SubsetResponse(length=len(val_X), data={'images': val_X,
+    val = SubsetResponse(length=10, data={'images': val_X,
                                                   'labels': val_Y
                                                   })
 
-    test = SubsetResponse(length=len(test_X), data={'images': test_X,
+    test = SubsetResponse(length=10, data={'images': test_X,
                                                     'labels': test_Y
                                                     })
 
@@ -136,14 +136,14 @@ def subset_func() -> List[SubsetResponse]:
 
 def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
     """ preprocess the input sample """
-    input = subset.data['images'][idx]
-    return input
+    print("hi")
+    print(subset.data['images'][idx].dtype)
+    return subset.data['images'][idx].astype('float32')
 
 
-def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> str:
+def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
     """" preprocess the ground truth """
-    label = subset.data['labels'][idx]
-    return label
+    return subset.data['labels'][idx].astype('float32')
 
 
 """ here we extract some metadata we want for our data """
@@ -154,10 +154,11 @@ def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.n
     return idx
 
 
-def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:  # TODO can I remove subset input?
+def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> int:  # TODO can I remove subset input?
     """ save the sample index number """
     label = gt_encoder(idx, subset)
-    return label
+    idx = label.argmax()
+    return int(idx)
 
 
 def metadata_sample_average_brightness(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
@@ -214,7 +215,7 @@ dataset_binder.set_metadata(function=metadata_sample_average_brightness,
 
 
 dataset_binder.set_metadata(function=metadata_label, subset='images',
-                            metadata_type=DatasetMetadataType.string,
+                            metadata_type=DatasetMetadataType.int,
                             name='label')
 
 

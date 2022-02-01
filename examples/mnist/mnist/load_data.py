@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Tuple
 import numpy as np
 import pandas as pd
 from pathlib import Path
