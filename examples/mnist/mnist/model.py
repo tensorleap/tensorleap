@@ -31,6 +31,3 @@ def model_infer_one_sample(data: np.ndarray, model: tf.keras.Model):
     x = np.expand_dims(data[idx], axis=0)
     return model(x)
 
-
-model = build_model()
-print('hi')
