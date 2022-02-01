@@ -1,9 +1,12 @@
-import numpy as np
-import pandas as pd
 from typing import Tuple, Union
-from pathlib import Path
 from tensorflow.keras.utils import to_categorical
+from code_loader.contract.datasetclasses import SubsetResponse
+from mnist.main import preprocess
 from mnist.model import build_model, model_infer_one_sample
+from pathlib import Path
+import pandas as pd
+import numpy as np
+
 
 # example of loading the mnist dataset and building baseline cnn model
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
@@ -28,14 +31,6 @@ def run_test_harness() -> np.ndarray:
     # infer the model
     return model_infer_one_sample(train_X, model)
 
-
-
-from code_loader.contract.datasetclasses import SubsetResponse
-from mnist.main import preprocess
-from mnist.model import build_model, model_infer_one_sample
-from pathlib import Path
-import pandas as pd
-import numpy as np
 
 def calc_classes_centroid(subset: SubsetResponse) -> dict:
     """ per each class we calculate average image on the pixels.
@@ -81,10 +76,7 @@ def check_funcs_to_metadata():
     return
 
 
-
-
-
-# Some sanity check
+# Some sanity checks
 if __name__ == "__main__":
     # run the test harness
     y = run_test_harness()
