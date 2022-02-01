@@ -129,7 +129,7 @@ def subset_func() -> List[SubsetResponse]:
                                                     })
 
     avg_images_dict = calc_classes_centroid(train)
-    dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
+    # dataset_binder.cache_container["word_to_index"]["classes_avg_images"] = avg_images_dict
 
     response = [train, val, test]
     return response
@@ -218,10 +218,10 @@ dataset_binder.set_metadata(function=metadata_label, subset='images',
                             name='label')
 
 
-# dataset_binder.set_metadata(function=metadata_euclidean_diff_from_class_centroid, subset='images',
-#                             metadata_type=DatasetMetadataType.float,
-#                             name='euclidean_diff_from_class_centroid')
-#
+dataset_binder.set_metadata(function=metadata_euclidean_diff_from_class_centroid, subset='images',
+                            metadata_type=DatasetMetadataType.float,
+                            name='euclidean_diff_from_class_centroid')
+
 # dataset_binder.set_metadata(function=metadata_most_similar_class_label, subset='images',
 #                             metadata_type=DatasetMetadataType.string,
 #                             name='most_similar_class_label')

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Tuple
+from typing import Tuple, Union
 from pathlib import Path
 from tensorflow.keras.utils import to_categorical
 from mnist.model import build_model, model_infer_one_sample
@@ -51,22 +51,34 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
     return avg_images_dict
 
 
-def run_model_infer():
+def calc_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetResponse, list], avg_images_dict: dict) -> np.ndarray:
+    """ calculate euclidean distance from the average image of the specific class"""
+    sample_input = subset.data['images'][idx]
+    label = subset.data['labels'][idx]
+    label = str(np.argmax(label))
+    class_average_image = avg_images_dict[label]
+    return np.linalg.norm(class_average_image - sample_input)
+
+
+def check_funcs_to_metadata():
     train_file_path = Path("data", "mnist_train.csv").resolve()
     test_file_path = Path("data", "mnist_test.csv").resolve()
     # load dataset
     df = pd.read_csv(train_file_path)
     train_X, train_Y = preprocess(df)
-    print('check we normalize the data:', np.max(train_X))
-    # build the model
-    model = build_model()
+    print(f'check we normalize the data. Max value is: {np.max(train_X)}, Min: {np.min(train_X)}')
 
     # check for leap API
     train = SubsetResponse(length=200, data={'images': train_X,
                                                       'labels': train_Y
                                                       })
     avg_images_dict = calc_classes_centroid(train)
-    return avg_images_dict
+    print(f'finish calculated average images classes')
+
+    idx = np.random.randint(len(train_X))
+    res = calc_euclidean_diff_from_class_centroid(idx, train, avg_images_dict)
+    print(f'euclidean diff from class centroid of image with index: {idx} is: {res}')
+    return
 
 
 
@@ -77,6 +89,6 @@ if __name__ == "__main__":
     # run the test harness
     y = run_test_harness()
     print(f"model raw output on one sample: {y}")
-    avg_images_dict = run_model_infer()
+    check_funcs_to_metadata()
     print(f"Done!")
 
