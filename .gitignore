@@ -9,4 +9,4 @@ test/*
 requirements.txt
 tests/
 *.gz
-imdb/aclimdb
+examples/imdb/aclImdb/
