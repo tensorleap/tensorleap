@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "imdb"
+version = "0.1.0"
+description = ""
+authors = ["tom Koren <tom.koren@tensorleap.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.6.1, < 3.7"
+leapcli = "^0.2.5"
+tensorflow-estimator = "~2.4.0"
+tensorflow = "~2.4.0"
+google-cloud-storage = "^2.0.0"   
+textstat = "^0.7.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
