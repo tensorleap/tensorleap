@@ -8,3 +8,5 @@ test/*
 *.h5
 requirements.txt
 tests/
+*.gz
+imdb/aclimdb
