@@ -114,7 +114,7 @@ def subset_func() -> List[SubsetResponse]:
 
     val_split = int(len(train_X) * 0.8)
     train_X, val_X = train_X[:val_split], train_X[val_split:]
-    train_Y, val_Y = train_Y[:val_split], train_Y[:val_split]
+    train_Y, val_Y = train_Y[:val_split], train_Y[val_split:]
 
     train = SubsetResponse(length=len(train_X), data={'images': train_X,
                                                       'labels': train_Y
