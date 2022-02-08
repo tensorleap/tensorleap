@@ -121,7 +121,7 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 def subset_func() -> List[SubsetResponse]:
     print("subset_func")
     tokenizer, train_dict = download_load_assets()
-    dataset_binder.cache_container["word_to_index"]["input_name"] = tokenizer.word_index
+    dataset_binder.cache_container["word_to_index"]["tokens"] = tokenizer.word_index
     max_size = 2*len(train_dict['pos'])
     train_size = min(NUMBER_OF_SAMPLES, int(0.9*max_size))
     half_t_size = int(train_size/2)
