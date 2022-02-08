@@ -8,7 +8,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.preprocessing.text import tokenizer_from_json
 import json
-from utils import standartize
+from imdb.utils import standartize, TransformerBlock, TokenAndPositionEmbedding
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 max_features = 10000
 sequence_length = 250
@@ -17,7 +17,7 @@ embedding_dim = 16
 
 
 def tensorleap_model():
-    vectorized_inputs = tf.keras.Input(shape=250, dtype="int64")
+    vectorized_inputs = tf.keras.Input(shape=sequence_length, dtype="int64")
     model = tf.keras.Sequential([
         layers.Embedding(max_features + 1, embedding_dim),
         layers.Dropout(0.2),
@@ -43,3 +43,28 @@ def infer_tensorleap_model(tokanizer_path: str) -> np.ndarray:
     tokanized_input = tokanizer.texts_to_sequences([standard_text])
     padded_input = pad_sequences(tokanized_input, maxlen=sequence_length)
     return model.predict(padded_input)
+
+
+def tensorleap_model_with_attention():
+    vectorized_inputs = tf.keras.Input(shape=sequence_length, dtype="int64")
+    positions = tf.keras.Input(shape=sequence_length, dtype="int64")
+    attention_mask = tf.keras.Input(shape=(sequence_length, sequence_length), dtype="int64")
+    transformer = TransformerBlock(embed_dim=embedding_dim,
+                                   num_heads=2,
+                                   ff_dim=28
+                                   )
+    embed = TokenAndPositionEmbedding(maxlen=sequence_length,
+                              vocab_size=max_features+1,
+                              embed_dim=embedding_dim)
+    model = tf.keras.Sequential([
+        layers.GlobalAveragePooling1D(),
+        layers.Dropout(0.2),
+        layers.Dense(2, activation='sigmoid')])
+    embedding = embed.call(vectorized_inputs, positions)
+    transformer_output = transformer.call(embedding, attention_mask=attention_mask)
+    x = transformer_output
+    for lr in model.layers:
+        x = lr(x)
+    output = layers.Softmax(axis=-1)(x)
+    tl_model = tf.keras.Model(inputs=[vectorized_inputs, positions, attention_mask], outputs=output)
+    return tl_model

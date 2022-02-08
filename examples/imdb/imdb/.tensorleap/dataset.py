@@ -19,7 +19,7 @@ import re
 import string
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 NUMBER_OF_SAMPLES = 20000
-crop_size = 128
+SEQUENCE_LENGTH = 250
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 METRIC_NAMES = ["flesch_reading", "flesch_kincaid", "coleman_liau_index", "automated_readability_index",
@@ -66,7 +66,7 @@ def load_tokanizer(tokanizer_path: str) -> TokenizerType:
 
 def download_load_assets() -> (TokenizerType, dict):
     print("download_load_assets")
-    cloud_path = join("assets", "train_dict.json")
+    cloud_path = join("assets", "train_dict_v2.json")
     local_path = _download(cloud_path)
     with open(local_path, 'r') as f:
         train_dict = json.load(f)
@@ -83,12 +83,15 @@ def create_input(train_dict: dict, half_t_size: int, half_v_size: int) -> (list,
     train_paths = train_dict['pos'][:half_t_size]+train_dict['neg'][:half_t_size]
     train_gt = get_gt(train_paths)
     train_metrics = train_dict['pos_metrics'][:half_t_size]+train_dict['neg_metrics'][:half_t_size]
+    train_lengths = train_dict['pos_length'][:half_t_size]+train_dict['neg_length'][:half_t_size]
     val_paths = train_dict['pos'][half_t_size:half_t_size+half_v_size] + \
                 train_dict['neg'][half_t_size:half_t_size+half_v_size]
     val_gt = get_gt(val_paths)
     val_metrics = train_dict['pos_metrics'][half_t_size:half_t_size+half_v_size] + \
                   train_dict['neg_metrics'][half_t_size:half_t_size+half_v_size]
-    return train_paths, train_gt, train_metrics, val_paths, val_gt, val_metrics
+    val_lengths = train_dict['pos_length'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_length'][half_t_size:half_t_size+half_v_size]
+    return train_paths, train_gt, train_metrics, train_lengths, val_paths, val_gt, val_metrics, val_lengths
 
 
 def _connect_to_gcs() -> Bucket:
@@ -127,12 +130,12 @@ def subset_func() -> List[SubsetResponse]:
     half_t_size = int(train_size/2)
     val_size = int(0.1*train_size)
     half_v_size = int(val_size/2)
-    train_paths, train_gt, train_metrics, val_paths, val_gt, val_metrics\
+    train_paths, train_gt, train_metrics, train_lengths, val_paths, val_gt, val_metrics, val_lengths\
         = create_input(train_dict, half_t_size, half_v_size)
     train = SubsetResponse(length=2*half_t_size, data={'paths': train_paths, 'gt': train_gt, 'tokenizer': tokenizer,
-                                                       'metrics': train_metrics})
+                                                       'metrics': train_metrics, 'length': train_lengths})
     val = SubsetResponse(length=2*half_v_size, data={'paths': val_paths, 'gt': val_gt, 'tokenizer': tokenizer,
-                                                     'metrics': val_metrics})
+                                                     'metrics': val_metrics, 'length': val_lengths})
     response = [train, val]
     return response
 
@@ -146,6 +149,10 @@ def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
     tokenizer = subset.data['tokenizer']
     padded_input = prepare_input(tokenizer, comment)
     return padded_input
+
+
+def input_positions(idx: int, subset: SubsetResponse) -> np.ndarray:
+    return np.arange(SEQUENCE_LENGTH)
 
 
 def gt_sentiment(idx: int, subset: Union[SubsetResponse, list]) -> list:
@@ -165,10 +172,23 @@ def metadata_encoder(metric_idx: int) -> Callable[[int, Union[SubsetResponse, li
     return func
 
 
+def input_attention_mask(idx: int, subset: SubsetResponse) -> np.ndarray:
+    string_length = subset.data['length'][idx]
+    mask = np.ones((SEQUENCE_LENGTH, SEQUENCE_LENGTH))
+    mask[:string_length, :string_length] = 0
+    return mask
+
+
 dataset_binder.set_subset(function=subset_func, name='IMDBComments')
 
 dataset_binder.set_input(function=input_tokens, subset='IMDBComments', input_type=DatasetInputType.Time_series,
                          name='tokens')
+
+dataset_binder.set_input(function=input_positions, subset='IMDBComments', input_type=DatasetInputType.Time_series,
+                         name="positions")
+
+dataset_binder.set_input(function=input_attention_mask, subset='IMDBComments', input_type=DatasetInputType.Time_series,
+                         name="input_mask")
 
 dataset_binder.set_ground_truth(function=gt_sentiment, subset='IMDBComments',
                                 ground_truth_type=DatasetOutputType.Classes,
