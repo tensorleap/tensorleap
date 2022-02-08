@@ -47,7 +47,7 @@ def infer_tensorleap_model(tokanizer_path: str) -> np.ndarray:
 
 def tensorleap_model_with_attention():
     vectorized_inputs = tf.keras.Input(shape=sequence_length, dtype="int64")
-    positions = tf.keras.Input(shape=sequence_length, dtype="int64")
+    positions_emb = tf.keras.Input(shape=(sequence_length, embedding_dim), dtype="int64")
     attention_mask = tf.keras.Input(shape=(sequence_length, sequence_length), dtype="int64")
     transformer = TransformerBlock(embed_dim=embedding_dim,
                                    num_heads=2,
@@ -60,11 +60,11 @@ def tensorleap_model_with_attention():
         layers.GlobalAveragePooling1D(),
         layers.Dropout(0.2),
         layers.Dense(2, activation='sigmoid')])
-    embedding = embed.call(vectorized_inputs, positions)
+    embedding = embed.call(vectorized_inputs, positions_emb)
     transformer_output = transformer.call(embedding, attention_mask=attention_mask)
     x = transformer_output
     for lr in model.layers:
         x = lr(x)
     output = layers.Softmax(axis=-1)(x)
-    tl_model = tf.keras.Model(inputs=[vectorized_inputs, positions, attention_mask], outputs=output)
+    tl_model = tf.keras.Model(inputs=[vectorized_inputs, positions_emb, attention_mask], outputs=output)
     return tl_model

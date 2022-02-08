@@ -20,12 +20,27 @@ import string
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 NUMBER_OF_SAMPLES = 20000
 SEQUENCE_LENGTH = 250
+ENCODING_DIMENSION = 16
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 METRIC_NAMES = ["flesch_reading", "flesch_kincaid", "coleman_liau_index", "automated_readability_index",
                 "dale_chall_readability_score", "difficult_words", "linsear_write_formula",
                 "gunning_fog", "fernandez_huerta", "szigriszt_pazos",
                 "gutierrez_polini", "crawford", "gulpease_index", "osman"]
+
+
+def get_pos_encoding_matrix(max_len, d_emb):
+    pos_enc = np.array(
+        [
+            [pos / np.power(10000, 2 * (j // 2) / d_emb) for j in range(d_emb)]
+            if pos != 0
+            else np.zeros(d_emb)
+            for pos in range(max_len)
+        ]
+    )
+    pos_enc[1:, 0::2] = np.sin(pos_enc[1:, 0::2])  # dim 2i
+    pos_enc[1:, 1::2] = np.cos(pos_enc[1:, 1::2])  # dim 2i+1
+    return pos_enc
 
 
 def standartize(comment: str) -> str:
@@ -151,8 +166,8 @@ def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
     return padded_input
 
 
-def input_positions(idx: int, subset: SubsetResponse) -> np.ndarray:
-    return np.arange(SEQUENCE_LENGTH)
+def input_position_embedding(idx: int, subset: SubsetResponse) -> np.ndarray:
+    return get_pos_encoding_matrix(SEQUENCE_LENGTH, ENCODING_DIMENSION)
 
 
 def gt_sentiment(idx: int, subset: Union[SubsetResponse, list]) -> list:
@@ -184,8 +199,8 @@ dataset_binder.set_subset(function=subset_func, name='IMDBComments')
 dataset_binder.set_input(function=input_tokens, subset='IMDBComments', input_type=DatasetInputType.Time_series,
                          name='tokens')
 
-dataset_binder.set_input(function=input_positions, subset='IMDBComments', input_type=DatasetInputType.Time_series,
-                         name="positions")
+dataset_binder.set_input(function=input_position_embedding, subset='IMDBComments', input_type=DatasetInputType.Time_series,
+                         name="positions_embedding")
 
 dataset_binder.set_input(function=input_attention_mask, subset='IMDBComments', input_type=DatasetInputType.Time_series,
                          name="input_mask")

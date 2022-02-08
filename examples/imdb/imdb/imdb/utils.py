@@ -153,8 +153,8 @@ class TokenAndPositionEmbedding:
         self.add_layer = layers.Add()
         self.max_len = maxlen
 
-    def call(self, tokens, positions):
-        positions = self.pos_emb(positions)
+    def call(self, tokens, pos_emb):
+        positions = pos_emb
         x = self.token_emb(tokens)
         embeddings_out = self.add_layer([x, positions])
         return embeddings_out
@@ -206,9 +206,4 @@ def get_pos_encoding_matrix(max_len, d_emb):
     pos_enc[1:, 0::2] = np.sin(pos_enc[1:, 0::2])  # dim 2i
     pos_enc[1:, 1::2] = np.cos(pos_enc[1:, 1::2])  # dim 2i+1
     return pos_enc
-#
-#
-# temp_lengths("/home/tomtensor/Work/Projects/examples/tensorleap/examples/imdb/aclImdb",
-#              "tokenizer.json",
-#              "train_dict.json",
-#              "test_dict.json")
+
