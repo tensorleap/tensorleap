@@ -169,7 +169,7 @@ def metadata_encoder(metric_idx: int) -> Callable[[int, Union[SubsetResponse, li
 
 dataset_binder.set_subset(function=subset_func, name='IMDBComments')
 
-dataset_binder.set_input(function=input_tokens, subset='IMDBComments', input_type=DatasetInputType.Time_series,
+dataset_binder.set_input(function=input_tokens, subset='IMDBComments', input_type=DatasetInputType.Text,
                          name='tokens')
 
 dataset_binder.set_ground_truth(function=gt_sentiment, subset='IMDBComments',
