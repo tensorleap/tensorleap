@@ -1,7 +1,7 @@
 projectName = "mnist"
 organization = "dani"
 framework = "tensorflow"
-datasetName = "mnist"
+datasetName = "tmp"
 bucketName = "bucket"
 
 # config.toml schema version; you probably don't have to change this.
