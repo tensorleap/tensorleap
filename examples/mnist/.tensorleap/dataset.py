@@ -221,7 +221,7 @@ dataset_binder.set_metadata(function=metadata_label, subset='images',
 dataset_binder.set_metadata(function=metadata_euclidean_diff_from_class_centroid, subset='images',
                             metadata_type=DatasetMetadataType.float,
                             name='euclidean_diff_from_class_centroid')
-
+#
 # dataset_binder.set_metadata(function=metadata_most_similar_class_label, subset='images',
 #                             metadata_type=DatasetMetadataType.string,
 #                             name='most_similar_class_label')

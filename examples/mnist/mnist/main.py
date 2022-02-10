@@ -1,7 +1,6 @@
 from typing import Tuple, Union
 from tensorflow.keras.utils import to_categorical
 from code_loader.contract.datasetclasses import SubsetResponse
-from mnist.main import preprocess
 from mnist.model import build_model, model_infer_one_sample
 from pathlib import Path
 import pandas as pd
