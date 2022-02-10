@@ -96,7 +96,6 @@ def subset_images() -> List[SubsetResponse]:
 
 def input_image(idx, data):
     print("subset")
-
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
