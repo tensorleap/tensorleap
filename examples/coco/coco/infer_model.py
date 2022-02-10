@@ -26,12 +26,11 @@ def infer_model():
 
     model = unet_model(output_channels=OUTPUT_CLASSES)
     model.compile(optimizer='adam',
-                  loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+                  loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
     img = load_image("./test_image/COCO_train2014_000000362499.jpg")
     res = model.predict(img)
     print("inferred succesfuly on a single coco image")
-
 
 if __name__ == "__main__":
     infer_model()
