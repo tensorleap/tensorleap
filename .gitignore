@@ -10,3 +10,4 @@ requirements.txt
 tests/
 *.gz
 examples/imdb/aclImdb/
+examples/coco/coco/coco_data/
