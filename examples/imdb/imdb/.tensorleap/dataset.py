@@ -44,7 +44,7 @@ def prepare_input(tokanizer: TokenizerType, input_text: str, sequence_length: in
     return padded_input[0, ...]
 
 
-def get_gt(samples_path: list) -> list:
+def get_gt(samples_path: List[str]) -> List[float]:
     print("get_gt")
     gt_list = [None]*len(samples_path)
     for i in range(len(samples_path)):
@@ -78,7 +78,9 @@ def download_load_assets() -> (TokenizerType, dict):
     return tokenizer, train_dict
 
 
-def create_input(train_dict: dict, half_t_size: int, half_v_size: int) -> (list, list, list, list, list, list):
+def create_input(train_dict: dict, half_t_size: int, half_v_size: int) -> (List[str], List[List[float]],
+                                                                           List[List[float]], List[str],
+                                                                           List[List[float]], List[List[float]]):
     print("create_input")
     train_paths = train_dict['pos'][:half_t_size]+train_dict['neg'][:half_t_size]
     train_gt = get_gt(train_paths)
@@ -148,7 +150,7 @@ def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
     return padded_input
 
 
-def gt_sentiment(idx: int, subset: Union[SubsetResponse, list]) -> list:
+def gt_sentiment(idx: int, subset: Union[SubsetResponse, list]) -> List[float]:
     print("gt_sentiment")
     return subset.data['gt'][idx]
 
