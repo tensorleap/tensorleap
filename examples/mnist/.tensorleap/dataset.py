@@ -49,7 +49,7 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
     return avg_images_dict
 
 
-def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
+def calc_most_similar_class_and_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
     """ find the most similar class average image (which isn't the ground truth)
     based on euclidean distance from the sample"""
     sample_input = subset.data['images'][idx]
@@ -65,7 +65,7 @@ def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: Subset
         distance = np.linalg.norm(class_average_image - sample_input)
         if distance < min_distance:
             min_distance = distance
-            min_distance_class_label = label_i
+            min_distance_class_label = label
     return [min_distance, min_distance_class_label]
 
 
@@ -148,12 +148,12 @@ def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
 """ here we extract some metadata we want for our data """
 
 
-def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:  # TODO can I remove subset input?
     """ save the sample index number """
     return idx
 
 
-def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> int:
+def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> int:  # TODO can I remove subset input?
     """ save the sample index number """
     label = gt_encoder(idx, subset)
     idx = label.argmax()
@@ -175,13 +175,13 @@ def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetRe
     return np.linalg.norm(class_average_image - sample_input)
 
 
-def metadata_most_similar_class_not_gt(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
-    _, min_distance_class_label = calc_most_similar_class_not_gt_label_euclidean_diff(idx, subset)
+def metadata_most_similar_class_label(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+    _, min_distance_class_label = calc_most_similar_class_and_euclidean_diff(idx, subset)
     return min_distance_class_label
 
 
-def metadata_most_similar_class_not_gt_diff(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
-    min_distance, _ = calc_most_similar_class_not_gt_label_euclidean_diff(idx, subset)
+def metadata_most_similar_class_diff(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+    min_distance, _ = calc_most_similar_class_and_euclidean_diff(idx, subset)
     return min_distance
 
 
@@ -199,7 +199,7 @@ dataset_binder.set_ground_truth(function=gt_encoder,
                                 labels=labels,
                                 masked_input=None)
 
-# Set Metadata
+# Set Meta Data
 
 dataset_binder.set_metadata(function=metadata_sample_index,
                             subset='images',
@@ -221,11 +221,11 @@ dataset_binder.set_metadata(function=metadata_label, subset='images',
 dataset_binder.set_metadata(function=metadata_euclidean_diff_from_class_centroid, subset='images',
                             metadata_type=DatasetMetadataType.float,
                             name='euclidean_diff_from_class_centroid')
-
-dataset_binder.set_metadata(function=metadata_most_similar_class_not_gt, subset='images',
-                            metadata_type=DatasetMetadataType.string,
-                            name='most_similar_class_not_gt_label')
-
-dataset_binder.set_metadata(function=metadata_most_similar_class_not_gt_diff, subset='images',
-                            metadata_type=DatasetMetadataType.float,
-                            name='most_similar_class_not_gt_diff')
+#
+# dataset_binder.set_metadata(function=metadata_most_similar_class_label, subset='images',
+#                             metadata_type=DatasetMetadataType.string,
+#                             name='most_similar_class_label')
+#
+# dataset_binder.set_metadata(function=metadata_most_similar_class_diff, subset='images',
+#                             metadata_type=DatasetMetadataType.float,
+#                             name='most_similar_class_diff')
