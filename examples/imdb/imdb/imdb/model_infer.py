@@ -12,7 +12,6 @@ from utils import standartize
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 max_features = 10000
 sequence_length = 250
-AUTOTUNE = tf.data.AUTOTUNE
 embedding_dim = 16
 
 
