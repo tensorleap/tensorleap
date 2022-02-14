@@ -11,6 +11,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from keras_preprocessing.text import Tokenizer as TokenizerType
 import textstat
 from pathlib import Path
+from typing import Tuple, Any, List
 
 
 def create_json_for_imdb(imdb_folder_path: str) -> None:
@@ -71,7 +72,7 @@ def fit_save_tokanizer(comment_paths: str) -> TokenizerType:
     return tokenizer
 
 
-def compute_metadata(comment: str) -> (list, tuple):
+def compute_metadata(comment: str) -> Tuple[List[str], Tuple[Any, ...]]:
     """
     Here we iterate throught the samples and create a metadata dict
     containing multiple text metrics that are used to estimate complexity.
