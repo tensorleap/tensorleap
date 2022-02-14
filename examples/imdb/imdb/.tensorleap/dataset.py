@@ -131,11 +131,10 @@ def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
 
 
 def gt_sentiment(idx: int, subset: SubsetResponse) -> List[float]:
-    return subset.data['gt'][idx]
-
-
-def metadata_path(idx: int, subset: SubsetResponse) -> str:
-    return subset.data['paths'][idx]
+    if subset.data['gt'][idx][0] == 1.0:
+        return "positive"
+    else:
+        return "negative"
 
 
 def metadata_encoder(metric_idx: int) -> Callable[[int, SubsetResponse], float]:
@@ -143,6 +142,10 @@ def metadata_encoder(metric_idx: int) -> Callable[[int, SubsetResponse], float]:
         return subset.data['metrics'][idx][metric_idx]
     func.__name__ = METRIC_NAMES[metric_idx]
     return func
+
+
+def gt_metadata(idx: int, subset: SubsetResponse) -> List[float]:
+    return subset.data['gt'][idx]
 
 
 dataset_binder.set_subset(function=subset_func, name='IMDBComments')
@@ -154,9 +157,9 @@ dataset_binder.set_ground_truth(function=gt_sentiment, subset='IMDBComments',
                                 ground_truth_type=DatasetOutputType.Classes,
                                 name='sentiment', labels=['positive', 'negative'], masked_input=None)
 
-dataset_binder.set_metadata(function=metadata_path, subset='IMDBComments',
+dataset_binder.set_metadata(function=gt_metadata, subset='IMDBComments',
                                 metadata_type=DatasetMetadataType.string,
-                                name='label')
+                                name='gt')
 
 for i in range(len(METRIC_NAMES)):
     dataset_binder.set_metadata(function=metadata_encoder(i), subset='IMDBComments',
