@@ -17,17 +17,12 @@ embedding_dim = 16
 
 def tensorleap_model():
     vectorized_inputs = tf.keras.Input(shape=250, dtype="int64")
-    model = tf.keras.Sequential([
-        layers.Embedding(max_features + 1, embedding_dim),
-        layers.Dropout(0.2),
-        layers.Dense(28, activation='relu'),
-        layers.GlobalAveragePooling1D(),
-        layers.Dropout(0.2),
-        layers.Dense(2, activation='sigmoid')])
-    x = vectorized_inputs
-    for lr in model.layers:
-        x = lr(x)
-    output = layers.Softmax(axis=-1)(x)
+    x = layers.Embedding(max_features + 1, embedding_dim)(vectorized_inputs)
+    x = layers.Dropout(0.2)(x)
+    x = layers.Dense(28, activation='relu')(x)
+    x = layers.GlobalAveragePooling1D()(x)
+    x = layers.Dropout(0.2)(x)
+    output = layers.Dense(2, activation='softmax')(x)
     tl_model = tf.keras.Model(inputs=vectorized_inputs, outputs=output)
     return tl_model
 
