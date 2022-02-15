@@ -61,11 +61,11 @@ def load_tokanizer(tokanizer_path: str) -> TokenizerType:
 
 
 def download_load_assets() -> Tuple[TokenizerType, Dict[str, np.ndarray]]:
-    cloud_path = join("assets", "train_dict.json")
+    cloud_path = join("assets", "train_dict_v3.json")
     local_path = _download(cloud_path)
     with open(local_path, 'r') as f:
         train_dict = json.load(f)
-    cloud_path = join("assets", "tokenizer.json")
+    cloud_path = join("assets", "tokenizer_v2.json")
     local_path = _download(cloud_path)
     tokenizer = load_tokanizer(local_path)
     return tokenizer, train_dict
@@ -106,16 +106,26 @@ def subset_func() -> List[SubsetResponse]:
     half_v_size = int(val_size/2)
     train_paths = train_dict['pos'][:half_t_size]+train_dict['neg'][:half_t_size]
     train_gt = get_gt(train_paths)
+
     train_metrics = train_dict['pos_metrics'][:half_t_size]+train_dict['neg_metrics'][:half_t_size]
     val_paths = train_dict['pos'][half_t_size:half_t_size+half_v_size] + \
                 train_dict['neg'][half_t_size:half_t_size+half_v_size]
     val_gt = get_gt(val_paths)
     val_metrics = train_dict['pos_metrics'][half_t_size:half_t_size+half_v_size] + \
                   train_dict['neg_metrics'][half_t_size:half_t_size+half_v_size]
+    train_lengths = train_dict['pos_length'][:half_t_size]+train_dict['neg_length'][:half_t_size]
+    val_lengths = train_dict['pos_length'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_length'][half_t_size:half_t_size+half_v_size]
+    train_oov = train_dict['pos_oov'][:half_t_size]+train_dict['neg_oov'][:half_t_size]
+    val_oov = train_dict['pos_oov'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_oov'][half_t_size:half_t_size+half_v_size]
+
     train = SubsetResponse(length=2*half_t_size, data={'paths': train_paths, 'gt': train_gt, 'tokenizer': tokenizer,
-                                                       'metrics': train_metrics})
+                                                       'metrics': train_metrics, 'length': train_lengths,
+                                                       'oov_count': train_oov})
     val = SubsetResponse(length=2*half_v_size, data={'paths': val_paths, 'gt': val_gt, 'tokenizer': tokenizer,
-                                                     'metrics': val_metrics})
+                                                     'metrics': val_metrics, 'length': val_lengths,
+                                                     'oov_count': val_oov})
     response = [train, val]
     return response
 
@@ -130,7 +140,7 @@ def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
     return padded_input
 
 
-def gt_sentiment(idx: int, subset: SubsetResponse) -> List[float]:
+def gt_metadata(idx: int, subset: SubsetResponse) -> str:
     if subset.data['gt'][idx][0] == 1.0:
         return "positive"
     else:
@@ -144,11 +154,28 @@ def metadata_encoder(metric_idx: int) -> Callable[[int, SubsetResponse], float]:
     return func
 
 
-def gt_metadata(idx: int, subset: SubsetResponse) -> List[float]:
+def gt_sentiment(idx: int, subset: SubsetResponse) -> List[float]:
     return subset.data['gt'][idx]
 
 
+def length_metadata(idx: int, subset: SubsetResponse) -> int:
+    return subset.data['length'][idx]
+
+
+def oov_metadata(idx: int, subset: SubsetResponse) -> int:
+    return subset.data['oov_count'][idx]
+
+
+def score_metadata(idx, subset: SubsetResponse) -> int:
+    return int(subset.data['paths'][idx].split("_")[1].split(".")[0])
+
+
+def score_confidence(idx, subset: SubsetResponse) -> int:
+    return abs(5 - int(subset.data['paths'][idx].split("_")[1].split(".")[0]))
+
+
 dataset_binder.set_subset(function=subset_func, name='IMDBComments')
+
 
 dataset_binder.set_input(function=input_tokens, subset='IMDBComments', input_type=DatasetInputType.Text,
                          name='tokens')
@@ -160,6 +187,25 @@ dataset_binder.set_ground_truth(function=gt_sentiment, subset='IMDBComments',
 dataset_binder.set_metadata(function=gt_metadata, subset='IMDBComments',
                                 metadata_type=DatasetMetadataType.string,
                                 name='gt')
+
+dataset_binder.set_metadata(function=oov_metadata, subset='IMDBComments',
+                                metadata_type=DatasetMetadataType.int,
+                                name='oov_count')
+
+dataset_binder.set_metadata(function=length_metadata, subset='IMDBComments',
+                                metadata_type=DatasetMetadataType.int,
+                                name='length')
+
+dataset_binder.set_metadata(function=score_metadata, subset='IMDBComments',
+                                metadata_type=DatasetMetadataType.int,
+                                name='score')
+
+dataset_binder.set_metadata(function=score_confidence, subset='IMDBComments',
+                                metadata_type=DatasetMetadataType.int,
+                                name='score_confidence')
+
+dataset_binder.set_metadata()
+
 
 for i in range(len(METRIC_NAMES)):
     dataset_binder.set_metadata(function=metadata_encoder(i), subset='IMDBComments',
