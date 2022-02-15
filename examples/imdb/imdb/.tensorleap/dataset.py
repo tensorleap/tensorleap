@@ -61,7 +61,7 @@ def load_tokanizer(tokanizer_path: str) -> TokenizerType:
 
 
 def download_load_assets() -> Tuple[TokenizerType, Dict[str, np.ndarray]]:
-    cloud_path = join("assets", "train_dict_v3.json")
+    cloud_path = join("assets", "train_dict_v4.json")
     local_path = _download(cloud_path)
     with open(local_path, 'r') as f:
         train_dict = json.load(f)
@@ -119,13 +119,20 @@ def subset_func() -> List[SubsetResponse]:
     train_oov = train_dict['pos_oov'][:half_t_size]+train_dict['neg_oov'][:half_t_size]
     val_oov = train_dict['pos_oov'][half_t_size:half_t_size+half_v_size] + \
                   train_dict['neg_oov'][half_t_size:half_t_size+half_v_size]
-
+    train_polarity = train_dict['pos_polarity'][:half_t_size]+train_dict['neg_polarity'][:half_t_size]
+    val_polarity = train_dict['pos_polarity'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_polarity'][half_t_size:half_t_size+half_v_size]
+    train_sentiment = train_dict['pos__sentiment'][:half_t_size]+train_dict['neg__sentiment'][:half_t_size]
+    val_sentiment = train_dict['pos__sentiment'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg__sentiment'][half_t_size:half_t_size+half_v_size]
     train = SubsetResponse(length=2*half_t_size, data={'paths': train_paths, 'gt': train_gt, 'tokenizer': tokenizer,
                                                        'metrics': train_metrics, 'length': train_lengths,
-                                                       'oov_count': train_oov})
+                                                       'oov_count': train_oov, 'polarity': train_polarity,
+                                                       'sentiment': train_sentiment})
     val = SubsetResponse(length=2*half_v_size, data={'paths': val_paths, 'gt': val_gt, 'tokenizer': tokenizer,
                                                      'metrics': val_metrics, 'length': val_lengths,
-                                                     'oov_count': val_oov})
+                                                     'oov_count': val_oov, 'polarity': val_polarity,
+                                                     'sentiment': val_sentiment})
     response = [train, val]
     return response
 
