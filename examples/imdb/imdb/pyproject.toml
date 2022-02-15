@@ -11,6 +11,7 @@ tensorflow-estimator = "~2.4.0"
 tensorflow = "~2.4.0"
 google-cloud-storage = "^2.0.0"   
 textstat = "^0.7.2"
+textblob = "~0.17.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
