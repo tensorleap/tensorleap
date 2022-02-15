@@ -7,11 +7,12 @@ from os.path import isfile, join, splitext, basename, dirname
 import json
 import re
 import string
-from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import Tokenizer, tokenizer_from_json
 from keras_preprocessing.text import Tokenizer as TokenizerType
 import textstat
 from pathlib import Path
 from typing import Tuple, Any, List
+from textblob import TextBlob
 
 
 def create_json_for_imdb(imdb_folder_path: str) -> None:
@@ -20,6 +21,7 @@ def create_json_for_imdb(imdb_folder_path: str) -> None:
     SUBFOLDERS = ["train", "test"]
     files_dict = {}
     gt_names = [POS_NAME, NEG_NAME]
+    tokenizer = load_tokanizer("tokenizer.json")
     for folder in SUBFOLDERS:
         curr_path = join(imdb_folder_path, folder)
         relative_path = join(basename(imdb_folder_path), folder)
@@ -30,19 +32,38 @@ def create_json_for_imdb(imdb_folder_path: str) -> None:
         files_dict[folder] = {gt_names[0]: pos_files_relative, gt_names[1]: neg_files_relative}
         for i, gt_type_folders in enumerate([pos_files_relative, neg_files_relative]):
             metrics = [None]*len(gt_type_folders)
+            lengths = [None]*len(gt_type_folders)
+            oovs = [None]*len(gt_type_folders)
+            polarities = [None]*len(gt_type_folders)
+            sentiments = [None]*len(gt_type_folders)
             for j, fp in enumerate(gt_type_folders):
                 print(j)
                 comment = load_imdb_comment(join(Path(__file__).parent.parent.parent, fp))
+                standard_comment = standartize(comment)
+                blob = TextBlob(standard_comment)
+                polarity = blob.polarity
+                sentiment = blob.sentiment
+                tokenized_comment = tokenizer.texts_to_sequences([standard_comment])[0]
+                comment_length = len(tokenized_comment)
+                lengths[j] = comment_length
+                oov = get_oov_count(tokenized_comment)
                 metadata_names, metadata = compute_metadata(comment)
                 metrics[j] = metadata
+                oovs[j] = oov
+                polarities[j] = polarity
+                sentiments[j] = sentiment
             files_dict[folder][gt_names[i] + "_metrics"] = metrics
+            files_dict[folder][gt_names[i] + "_oov"] = oovs
+            files_dict[folder][gt_names[i] + "_length"] = lengths
+            files_dict[folder][gt_names[i] + "_sentiment"] = sentiment
+            files_dict[folder][gt_names[i] + "_polarity"] = polarity
     train_dict = files_dict[SUBFOLDERS[0]]
     train_dict['metrics_titles'] = metadata_names
     test_dict = files_dict[SUBFOLDERS[1]]
     test_dict['metrics_titles'] = metadata_names
-    with open("train_dict.json", 'w') as f:
+    with open("train_dict_v4.json", 'w') as f:
         json.dump(train_dict, f)
-    with open("test_dict.json", 'w') as f:
+    with open("test_dict_v4.json", 'w') as f:
         json.dump(test_dict, f)
 
 
@@ -99,3 +120,16 @@ def compute_metadata(comment: str) -> Tuple[List[str], Tuple[Any, ...]]:
                dale_chall_readability_score, difficult_words, linsear_write_formula, gunning_fog,
                fernandez_huerta, szigriszt_pazos, gutierrez_polini, crawford, gulpease_index, osman])
     return metric_names, metrics
+
+
+def get_oov_count(tokenized_comment: List[int]) -> int:
+    OOV_TOKEN = 1
+    oov_count = tokenized_comment.count(OOV_TOKEN)
+    return oov_count
+
+
+def load_tokanizer(tokanizer_path: str) -> TokenizerType:
+    with open(tokanizer_path, 'r') as f:
+        data = json.load(f)
+        tokenizer = tokenizer_from_json(data)
+    return tokenizer
