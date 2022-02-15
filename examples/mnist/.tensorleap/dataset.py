@@ -148,12 +148,12 @@ def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
 """ here we extract some metadata we want for our data """
 
 
-def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:  # TODO can I remove subset input?
+def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
     """ save the sample index number """
     return idx
 
 
-def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> int:  # TODO can I remove subset input?
+def metadata_label(idx: int, subset: Union[SubsetResponse, list]) -> int:
     """ save the sample index number """
     label = gt_encoder(idx, subset)
     idx = label.argmax()
