@@ -49,7 +49,7 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
     return avg_images_dict
 
 
-def calc_most_similar_class_and_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
+def calc_most_similar_class_not_gd_label_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
     """ find the most similar class average image (which isn't the ground truth)
     based on euclidean distance from the sample"""
     sample_input = subset.data['images'][idx]
@@ -65,7 +65,7 @@ def calc_most_similar_class_and_euclidean_diff(idx: int, subset: SubsetResponse)
         distance = np.linalg.norm(class_average_image - sample_input)
         if distance < min_distance:
             min_distance = distance
-            min_distance_class_label = label
+            min_distance_class_label = label_i
     return [min_distance, min_distance_class_label]
 
 
@@ -175,13 +175,13 @@ def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetRe
     return np.linalg.norm(class_average_image - sample_input)
 
 
-def metadata_most_similar_class_label(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
-    _, min_distance_class_label = calc_most_similar_class_and_euclidean_diff(idx, subset)
+def metadata_most_similar_class_not_gd(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+    _, min_distance_class_label = calc_most_similar_class_not_gd_label_euclidean_diff(idx, subset)
     return min_distance_class_label
 
 
-def metadata_most_similar_class_diff(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
-    min_distance, _ = calc_most_similar_class_and_euclidean_diff(idx, subset)
+def metadata_most_similar_class_not_gd_diff(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
+    min_distance, _ = calc_most_similar_class_not_gd_label_euclidean_diff(idx, subset)
     return min_distance
 
 
