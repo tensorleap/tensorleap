@@ -10,14 +10,6 @@ python-versions = "*"
 six = "*"
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "astunparse"
 version = "1.6.3"
 description = "An AST unparser for Python"
@@ -76,7 +68,7 @@ python-versions = "*"
 
 [[package]]
 name = "charset-normalizer"
-version = "2.0.11"
+version = "2.0.12"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "main"
 optional = false
@@ -185,7 +177,7 @@ typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.10\"
 
 [[package]]
 name = "google-api-core"
-version = "2.4.0"
+version = "2.5.0"
 description = "Google API client core library"
 category = "main"
 optional = false
@@ -291,7 +283,7 @@ six = "*"
 
 [[package]]
 name = "google-resumable-media"
-version = "2.1.0"
+version = "2.2.1"
 description = "Utilities for Google Media Downloads and Resumable Uploads"
 category = "main"
 optional = false
@@ -420,7 +412,7 @@ pytools = ">=2014.1"
 
 [[package]]
 name = "leapcli"
-version = "0.2.5"
+version = "0.2.9"
 description = "Tensorleap CLI"
 category = "main"
 optional = false
@@ -435,7 +427,7 @@ pytest-mock = ">=3.6.1,<4.0.0"
 python-json-logger = ">=2.0.2,<3.0.0"
 requests = ">=2.26.0,<3.0.0"
 semver = ">=2.13.0,<3.0.0"
-tensorleap-openapi-client = "1.1.6"
+tensorleap-openapi-client = "1.1.9"
 toml = ">=0.10.2,<0.11.0"
 
 [[package]]
@@ -543,6 +535,18 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+
+[[package]]
+name = "platformdirs"
+version = "2.4.0"
+description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+docs = ["Sphinx (>=4)", "furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)"]
+test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
 
 [[package]]
 name = "pluggy"
@@ -674,15 +678,15 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "pytools"
-version = "2021.2.9"
+version = "2022.1"
 description = "A collection of tools for Python"
 category = "main"
 optional = false
 python-versions = "~=3.6"
 
 [package.dependencies]
-appdirs = ">=1.4.0"
 numpy = ">=1.6.0"
+platformdirs = ">=2.2.0"
 
 [[package]]
 name = "requests"
@@ -870,7 +874,7 @@ python-versions = "*"
 
 [[package]]
 name = "tensorleap-openapi-client"
-version = "1.1.6"
+version = "1.1.9"
 description = "server"
 category = "main"
 optional = false
@@ -935,7 +939,7 @@ python-versions = "*"
 
 [[package]]
 name = "werkzeug"
-version = "2.0.2"
+version = "2.0.3"
 description = "The comprehensive WSGI web application library."
 category = "main"
 optional = false
@@ -970,16 +974,12 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1, < 3.7"
-content-hash = "06f088b33eb09640f3980746023ff6465f32f57ad685a3275c86e04ea41504dd"
+content-hash = "476c2043d8a6fdc74e41ac03e8e93276a1b7df665a32238901843fcc74ddc28f"
 
 [metadata.files]
 absl-py = [
     {file = "absl-py-0.15.0.tar.gz", hash = "sha256:72d782fbeafba66ba3e525d46bccac949b9a174dbf66233e50ece09ee688dc81"},
     {file = "absl_py-0.15.0-py3-none-any.whl", hash = "sha256:ea907384af023a7e681368bedb896159ab100c7db593efbbd5cde22af11270cd"},
-]
-appdirs = [
-    {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
-    {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
 ]
 astunparse = [
     {file = "astunparse-1.6.3-py2.py3-none-any.whl", hash = "sha256:c2652417f2c8b5bb325c885ae329bdf3f86424075c4fd1a128674bc6fba4b8e8"},
@@ -1006,8 +1006,8 @@ certifi = [
     {file = "certifi-2021.10.8.tar.gz", hash = "sha256:78884e7c1d4b00ce3cea67b44566851c4343c120abd683433ce934a68ea58872"},
 ]
 charset-normalizer = [
-    {file = "charset-normalizer-2.0.11.tar.gz", hash = "sha256:98398a9d69ee80548c762ba991a4728bfc3836768ed226b3945908d1a688371c"},
-    {file = "charset_normalizer-2.0.11-py3-none-any.whl", hash = "sha256:2842d8f5e82a1f6aa437380934d5e1cd4fcf2003b06fed6940769c164a480a45"},
+    {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
+    {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
 ]
 clang = [
     {file = "clang-5.0-py2-none-any.whl", hash = "sha256:b9301dff507041b5019b30ae710b78b0552c1ca1d4441b8dfa93c2e85078a5f8"},
@@ -1048,8 +1048,8 @@ gitpython = [
     {file = "GitPython-3.1.20.tar.gz", hash = "sha256:df0e072a200703a65387b0cfdf0466e3bab729c0458cf6b7349d0e9877636519"},
 ]
 google-api-core = [
-    {file = "google-api-core-2.4.0.tar.gz", hash = "sha256:ba8787b7c61632cd0340f095e1c036bef9426b2594f10afb290ba311ae8cb2cb"},
-    {file = "google_api_core-2.4.0-py2.py3-none-any.whl", hash = "sha256:58e2c1171a3d51778bf4e428fbb4bf79cbd05007b4b44deaa80cf73c80eebc0f"},
+    {file = "google-api-core-2.5.0.tar.gz", hash = "sha256:f33863a6709651703b8b18b67093514838c79f2b04d02aa501203079f24b8018"},
+    {file = "google_api_core-2.5.0-py2.py3-none-any.whl", hash = "sha256:7d030edbd3a0e994d796e62716022752684e863a6df9864b6ca82a1616c2a5a6"},
 ]
 google-auth = [
     {file = "google-auth-2.6.0.tar.gz", hash = "sha256:ad160fc1ea8f19e331a16a14a79f3d643d813a69534ba9611d2c80dc10439dad"},
@@ -1118,8 +1118,8 @@ google-pasta = [
     {file = "google_pasta-0.2.0-py3-none-any.whl", hash = "sha256:b32482794a366b5366a32c92a9a9201b107821889935a02b3e51f6b432ea84ed"},
 ]
 google-resumable-media = [
-    {file = "google-resumable-media-2.1.0.tar.gz", hash = "sha256:725b989e0dd387ef2703d1cc8e86217474217f4549593c477fd94f4024a0f911"},
-    {file = "google_resumable_media-2.1.0-py2.py3-none-any.whl", hash = "sha256:cdc75ea0361e39704dc7df7da59fbd419e73c8bc92eac94d8a020d36baa9944b"},
+    {file = "google-resumable-media-2.2.1.tar.gz", hash = "sha256:b1edfb98867c9fa25aa7af12d6468665b83c532b7349effab805a027ea8bbee5"},
+    {file = "google_resumable_media-2.2.1-py2.py3-none-any.whl", hash = "sha256:fd616af31b83d48da040c8c09b6994606e1734efb8af9acc97cf5d6070e9ba72"},
 ]
 googleapis-common-protos = [
     {file = "googleapis-common-protos-1.54.0.tar.gz", hash = "sha256:a4031d6ec6c2b1b6dc3e0be7e10a1bd72fb0b18b07ef9be7b51f2c1004ce2437"},
@@ -1209,8 +1209,8 @@ leap = [
     {file = "leap-2021.1.tar.gz", hash = "sha256:a786b615b7eb5298b78f91896156c132e3e809807aa3c2ab58cc2b0f2b8f4cb8"},
 ]
 leapcli = [
-    {file = "leapcli-0.2.5-py3-none-any.whl", hash = "sha256:aee501a68731cbc500c7f57d7fd1b8813540382bcd6af1906105165191e3c3f6"},
-    {file = "leapcli-0.2.5.tar.gz", hash = "sha256:c03bd74c944839717e36bf2b1460916f75453cfb0fc7a940bcc89734039cbd61"},
+    {file = "leapcli-0.2.9-py3-none-any.whl", hash = "sha256:8953b438c292ee4265bdb16470b1b9b577417892e33f556fa7fe8a5b294e1b42"},
+    {file = "leapcli-0.2.9.tar.gz", hash = "sha256:ad67740fa8f6375de6611252f575479121de35151a4df1cb2b2a295864336387"},
 ]
 luddite = [
     {file = "luddite-1.0.2-py2.py3-none-any.whl", hash = "sha256:5d4cd45c91e7876465330b84e18e6994d44b77ee8f723fdc384d5fd7ff160c04"},
@@ -1347,6 +1347,10 @@ packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
 ]
+platformdirs = [
+    {file = "platformdirs-2.4.0-py3-none-any.whl", hash = "sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d"},
+    {file = "platformdirs-2.4.0.tar.gz", hash = "sha256:367a5e80b3d04d2428ffa76d33f124cf11e8fff2acdaa9b43d545f5c7d661ef2"},
+]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
@@ -1437,7 +1441,7 @@ python-json-logger = [
     {file = "python_json_logger-2.0.2-py3-none-any.whl", hash = "sha256:99310d148f054e858cd5f4258794ed6777e7ad2c3fd7e1c1b527f1cba4d08420"},
 ]
 pytools = [
-    {file = "pytools-2021.2.9.tar.gz", hash = "sha256:db6cf83c9ba0a165d545029e2301621486d1e9ef295684072e5cd75316a13755"},
+    {file = "pytools-2022.1.tar.gz", hash = "sha256:197aacf6e1f5d60c715b92438792acb7702aed59ebbfb147fa84eda780e54fee"},
 ]
 requests = [
     {file = "requests-2.27.1-py2.py3-none-any.whl", hash = "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"},
@@ -1557,7 +1561,7 @@ tensorflow-estimator = [
     {file = "tensorflow_estimator-2.8.0-py2.py3-none-any.whl", hash = "sha256:bee8e0520c60ae7eaf6ca8cb46c5a9f4b45725531380db8fbe38fcb48478b6bb"},
 ]
 tensorleap-openapi-client = [
-    {file = "tensorleap-openapi-client-1.1.6.tar.gz", hash = "sha256:df4cbbccfe32423ac38718954ba92fa34213cb822c94bbc434142390e17617b7"},
+    {file = "tensorleap-openapi-client-1.1.9.tar.gz", hash = "sha256:6e1e2e4c3232466678fe4b725a255d52ada976f3d9ec5bc769eaa3c659b11a5d"},
 ]
 termcolor = [
     {file = "termcolor-1.1.0.tar.gz", hash = "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"},
@@ -1584,8 +1588,8 @@ wcwidth = [
     {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
 werkzeug = [
-    {file = "Werkzeug-2.0.2-py3-none-any.whl", hash = "sha256:63d3dc1cf60e7b7e35e97fa9861f7397283b75d765afcaefd993d6046899de8f"},
-    {file = "Werkzeug-2.0.2.tar.gz", hash = "sha256:aa2bb6fc8dee8d6c504c0ac1e7f5f7dc5810a9903e793b6f715a9f015bdadb9a"},
+    {file = "Werkzeug-2.0.3-py3-none-any.whl", hash = "sha256:1421ebfc7648a39a5c58c601b154165d05cf47a3cd0ccb70857cbdacf6c8f2b8"},
+    {file = "Werkzeug-2.0.3.tar.gz", hash = "sha256:b863f8ff057c522164b6067c9e28b041161b4be5ba4d0daceeaa50a163822d3c"},
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
