@@ -11,7 +11,7 @@ keras = "2.6"
 sklearn = "^0.0"
 google-cloud-storage = "^2.0.0"
 leap = "^2021.1"
-leapcli = "^0.2.5"
+leapcli = "^0.2.9"
 
 
 [tool.poetry.dev-dependencies]
