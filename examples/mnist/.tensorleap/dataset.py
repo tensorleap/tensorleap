@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List, Union, Tuple, Any
+from typing import Optional, List, Union, Tuple
 from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 from code_loader.contract.datasetclasses import SubsetResponse
 from code_loader import dataset_binder
@@ -21,9 +21,9 @@ IMAGE_SIZE = 128
 LABELS = np.arange(10).astype(str).tolist()
 
 
-#################################
-########## Utils Funcs ##########
-#################################
+###########################
+########## Utils ##########
+###########################
 
 
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
@@ -36,15 +36,14 @@ def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
 
 
 def calc_classes_centroid(subset: SubsetResponse) -> dict:
-    """ per each class we calculate average image on the pixels.
-     returns dictionary key: class, values: images 28x28  """
+    """ calculate average image on the pixels.
+     returns a dictionary: key: class, values: images 28x28 """
     avg_images_dict = {}
     data_X = subset.data['images']
     data_Y = subset.data['labels']
     for label in LABELS:
         inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
         avg_images_dict[label] = np.mean(inputs_label, axis=0)
-
     return avg_images_dict
 
 
@@ -68,6 +67,11 @@ def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: Subset
     return [min_distance, min_distance_class_label]
 
 
+####################################
+########## TL Integration ##########
+####################################
+
+
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
     gcs_client = storage.Client(project=PROJECT_ID, credentials=AnonymousCredentials())
@@ -81,7 +85,7 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
         home_dir = os.getenv("HOME")
         local_file_path = os.path.join(home_dir, "Tensorleap_data", BUCKET_NAME, cloud_file_path)
 
-    # check if file already exists
+    # check if file is already exists
     if os.path.exists(local_file_path):
         return local_file_path
 
@@ -129,7 +133,6 @@ def subset_func() -> List[SubsetResponse]:
 
     avg_images_dict = calc_classes_centroid(train)
     dataset_binder.cache_container["classes_avg_images"] = avg_images_dict
-
     response = [train, val, test]
     return response
 
