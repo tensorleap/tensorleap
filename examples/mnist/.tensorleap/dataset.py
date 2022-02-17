@@ -17,7 +17,7 @@ PROJECT_ID = 'example-dev-project-nmrksf0o'
 BUCKET_NAME = 'example-datasets-47ml982d'
 
 
-IMAGE_SIZE = 128
+IMAGE_DIM = 28
 LABELS = np.arange(10).astype(str).tolist()
 
 
@@ -27,8 +27,9 @@ LABELS = np.arange(10).astype(str).tolist()
 
 
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
+    print('preprocessing the data')
     data_X = df.drop('label', axis=1).to_numpy()
-    data_X = np.reshape(data_X, (len(data_X), IMAGE_SIZE, IMAGE_SIZE, 1)) / 255.  # normalize to range 0-1
+    data_X = np.reshape(data_X, (len(data_X), IMAGE_DIM, IMAGE_DIM, 1)) / 255.  # normalize to range 0-1
     data_Y = df.label.to_numpy()
     # one hot encode the target values
     data_Y = to_categorical(data_Y)
@@ -79,7 +80,7 @@ def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
-    print("download")
+    print("download data from GC")
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
         home_dir = os.getenv("HOME")
@@ -107,14 +108,15 @@ def subset_func() -> List[SubsetResponse]:
     local_file_train_path = _download(cloud_file_train_path)
     local_file_test_path = _download(cloud_file_test_path)
 
+    print('Reading train data file')
     df = pd.read_csv(local_file_train_path)
     train_X, train_Y = preprocess(df)
-    print('check we normalize the data:', np.max(train_X))
 
+    print('Reading test data file')
     df = pd.read_csv(local_file_test_path)
     test_X, test_Y = preprocess(df)
-    print('check we normalize the data:', np.max(test_X))
 
+    print('Splitting into train-val sets')
     val_split = int(len(train_X) * 0.8)
     train_X, val_X = train_X[:val_split], train_X[val_split:]
     train_Y, val_Y = train_Y[:val_split], train_Y[val_split:]
