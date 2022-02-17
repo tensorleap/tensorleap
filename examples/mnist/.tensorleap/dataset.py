@@ -16,19 +16,19 @@ from tensorflow.keras.utils import to_categorical
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 BUCKET_NAME = 'example-datasets-47ml982d'
 
-image_size = 128
 
-labels = np.arange(10).astype(str).tolist()
+IMAGE_SIZE = 128
+LABELS = np.arange(10).astype(str).tolist()
 
 
-###########################
-########## Utils ##########
-###########################
+#################################
+########## Utils Funcs ##########
+#################################
 
 
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     data_X = df.drop('label', axis=1).to_numpy()
-    data_X = np.reshape(data_X, (len(data_X), 28, 28, 1)) / 255.  # normalize to range 0-1
+    data_X = np.reshape(data_X, (len(data_X), IMAGE_SIZE, IMAGE_SIZE, 1)) / 255.  # normalize to range 0-1
     data_Y = df.label.to_numpy()
     # one hot encode the target values
     data_Y = to_categorical(data_Y)
@@ -41,8 +41,7 @@ def calc_classes_centroid(subset: SubsetResponse) -> dict:
     avg_images_dict = {}
     data_X = subset.data['images']
     data_Y = subset.data['labels']
-    labels = np.arange(10).astype(str).tolist()
-    for label in labels:
+    for label in LABELS:
         inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
         avg_images_dict[label] = np.mean(inputs_label, axis=0)
 
@@ -58,7 +57,7 @@ def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: Subset
     distance = 0.
     min_distance = float('+inf')
     min_distance_class_label = None
-    for label_i in labels:
+    for label_i in LABELS:
         if label_i == label:
             continue
         class_average_image = dataset_binder.cache_container["classes_avg_images"][label_i]
@@ -196,7 +195,7 @@ dataset_binder.set_ground_truth(function=gt_encoder,
                                 subset='images',
                                 ground_truth_type=DatasetOutputType.Classes,
                                 name='classes',
-                                labels=labels,
+                                labels=LABELS,
                                 masked_input=None)
 
 # Set Metadata

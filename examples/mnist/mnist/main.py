@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 
 
-# example of loading the mnist dataset and building baseline cnn model
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     data_X = df.drop('label', axis=1).to_numpy()
     data_X = np.reshape(data_X, (len(data_X), 28, 28, 1)) / 255.  # normalize to range 0-1
@@ -17,7 +16,6 @@ def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     return [data_X, data_Y]
 
 
-# run the test harness for evaluating a model
 def run_test_harness() -> np.ndarray:
     train_file_path = Path("data", "mnist_train.csv").resolve()
     test_file_path = Path("data", "mnist_test.csv").resolve()
@@ -77,9 +75,8 @@ def check_funcs_to_metadata():
 
 # Some sanity checks
 if __name__ == "__main__":
-    # run the test harness
-    y = run_test_harness()
-    print(f"model raw output on one sample: {y}")
+    y_pred = run_test_harness()
+    print(f"Untrained model's raw output on one sample: {y_pred}")
     check_funcs_to_metadata()
     print(f"Done!")
 
