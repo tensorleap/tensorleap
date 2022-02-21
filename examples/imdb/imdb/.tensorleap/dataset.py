@@ -110,6 +110,7 @@ def subset_func() -> List[SubsetResponse]:
     # Building the dictionary for the Subset response - composed of "[POS/NEG]_METRICNAME"
     for in_key_pre, out_key in zip(input_keys_pre, output_keys):
         if in_key_pre != '':
+            # Accessing the [POS/NEG]_METRICNAME key in the preprocessed data
             in_key = [gt[j] + "_" + in_key_pre for j in range(len(gt))]
         else:
             in_key = gt
