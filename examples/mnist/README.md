@@ -37,12 +37,13 @@ For instance, samples in light blue are from class 1 and the peach colored are f
 # Error Analysis
 
 
-<img alt="img.png" height="400" src="images/img_13.png" width="600"/> <img alt="img.png" height="400" src="images/img_4.png" width="600"/>
-![img_2.png](img_2.png)
+<img alt="img.png" height="400" src="images/img_3.png" width="600"/> <img alt="img.png" height="400" src="images/img_4.png" width="600"/>
+
 
 **Sample 11701:** Prediction: 6, GT: 5
 
-- From metadata, the sample is closer to 6 class (8.83) than its GT - 5 (7.71). The loss on that sample is relatively higher than the other samples.
+- The loss on that sample is relatively higher than the other samples. From metadata, we get that the sample is closer to 6 class (6.83) than its GT - 5 (7.71). That is why the model predicted the sample to be 6. 
+
 
 
 
