@@ -81,6 +81,13 @@ Here, we've selected 5 informative features and plotted their hitogram vs. the l
 `score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.  
 `polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.  
 
+`subjectiveness` - the more subjective the review is the lower the loss.
+
+`score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.
+
+`polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.
+
+![img_1.png](images/img_20.png)
 
 Finally, we can see that the `Tensorleap's` system unsupervised clustering is able to group together meaningful
 examples.

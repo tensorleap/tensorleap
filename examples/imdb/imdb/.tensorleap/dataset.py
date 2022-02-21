@@ -104,26 +104,34 @@ def subset_func() -> List[SubsetResponse]:
     half_t_size = int(train_size/2)
     val_size = int(0.1*train_size)
     half_v_size = int(val_size/2)
-    input_keys_pre = ['', 'metrics', 'length', 'oov', 'polarity', 'subjectivity']
-    output_keys = ['paths', 'metrics', 'length', 'oov_count', 'polarity', 'subjectivity']
-    gt = ['pos', 'neg']
-    data_dict = {'train': {}, 'val': {}}
-    for in_key_pre, out_key in zip(input_keys_pre, output_keys):
-        if in_key_pre != '':
-            in_key = [gt[j] + "_" + in_key_pre for j in range(len(gt))]
-        else:
-            in_key = gt
-        data_dict['train'][out_key] = train_dict[in_key[0]][:half_t_size] + \
-                                            train_dict[in_key[1]][:half_t_size]
-        data_dict['val'][out_key] = train_dict[in_key[0]][half_t_size:half_t_size+half_v_size] +\
-                                      train_dict[in_key[1]][half_t_size:half_t_size+half_v_size]
-    data_dict['train']['gt'] = get_gt(data_dict['train']['paths'])
-    data_dict['val']['gt'] = get_gt(data_dict['val']['paths'])
-    data_dict['train']['tokenizer'] = tokenizer
-    data_dict['val']['tokenizer'] = tokenizer
-
-    train = SubsetResponse(length=2*half_t_size, data=data_dict['train'])
-    val = SubsetResponse(length=2*half_v_size, data=data_dict['val'])
+    train_paths = train_dict['pos'][:half_t_size]+train_dict['neg'][:half_t_size]
+    train_gt = get_gt(train_paths)
+    train_metrics = train_dict['pos_metrics'][:half_t_size]+train_dict['neg_metrics'][:half_t_size]
+    val_paths = train_dict['pos'][half_t_size:half_t_size+half_v_size] + \
+                train_dict['neg'][half_t_size:half_t_size+half_v_size]
+    val_gt = get_gt(val_paths)
+    val_metrics = train_dict['pos_metrics'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_metrics'][half_t_size:half_t_size+half_v_size]
+    train_lengths = train_dict['pos_length'][:half_t_size]+train_dict['neg_length'][:half_t_size]
+    val_lengths = train_dict['pos_length'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_length'][half_t_size:half_t_size+half_v_size]
+    train_oov = train_dict['pos_oov'][:half_t_size]+train_dict['neg_oov'][:half_t_size]
+    val_oov = train_dict['pos_oov'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_oov'][half_t_size:half_t_size+half_v_size]
+    train_polarity = train_dict['pos_polarity'][:half_t_size]+train_dict['neg_polarity'][:half_t_size]
+    val_polarity = train_dict['pos_polarity'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_polarity'][half_t_size:half_t_size+half_v_size]
+    train_subjectivity = train_dict['pos_subjectivity'][:half_t_size]+train_dict['neg_subjectivity'][:half_t_size]
+    val_subjectivity = train_dict['pos_subjectivity'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_subjectivity'][half_t_size:half_t_size+half_v_size]
+    train = SubsetResponse(length=2*half_t_size, data={'paths': train_paths, 'gt': train_gt, 'tokenizer': tokenizer,
+                                                       'metrics': train_metrics, 'length': train_lengths,
+                                                       'oov_count': train_oov, 'polarity': train_polarity,
+                                                       'subjectivity': train_subjectivity})
+    val = SubsetResponse(length=2*half_v_size, data={'paths': val_paths, 'gt': val_gt, 'tokenizer': tokenizer,
+                                                     'metrics': val_metrics, 'length': val_lengths,
+                                                     'oov_count': val_oov, 'polarity': val_polarity,
+                                                     'subjectivity': val_subjectivity})
     response = [train, val]
     return response
 
@@ -168,7 +176,7 @@ def score_metadata(idx, subset: SubsetResponse) -> int:
     return int(subset.data['paths'][idx].split("_")[1].split(".")[0])
 
 
-def score_confidence(idx, subset: SubsetResponse) -> int:
+def score_confidence_metadata(idx, subset: SubsetResponse) -> int:
     return abs(5 - int(subset.data['paths'][idx].split("_")[1].split(".")[0]))
 
 
@@ -206,7 +214,7 @@ dataset_binder.set_metadata(function=score_metadata, subset='IMDBComments',
                                 metadata_type=DatasetMetadataType.int,
                                 name='score')
 
-dataset_binder.set_metadata(function=score_confidence, subset='IMDBComments',
+dataset_binder.set_metadata(function=score_confidence_metadata, subset='IMDBComments',
                                 metadata_type=DatasetMetadataType.int,
                                 name='score_confidence')
 
