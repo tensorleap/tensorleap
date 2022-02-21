@@ -15,8 +15,6 @@ The model achieved accuracy of 0.98~.
 
 ## Population Exploration
 
-<img alt="img.png" height="400" src="images/img_11.png" width="800"/>
-
 This embedding space is a representation based on the network's extracted features. The samples from training set.
 There is a nice separation of the samples based on their classes. The samples are colored based on their GT class and the dot size is based on the network's error loss. 
 
@@ -54,7 +52,7 @@ For instance, samples in light blue are from class 1 and the peach colored are f
 
 - We see how when the euclidean difference of a sample from its class centroid, increases, the average loss increases. 
 
-- Euclidean Difference from the class centroid calculated as follows: 
+- Euclidean difference from the class centroid is calculated as follows: 
   - We extract the class centroid per class: we take all images in respect to their class and calculate an average per pixel. The output will be an image 28X28.     
   - Per sample, we calculate the euclidean difference from its class centroid. 
   
