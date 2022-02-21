@@ -24,7 +24,7 @@ The samples are colored based on their GT class and the dot size is based on the
 
 Now, we plot the validation set:
 
-<img alt="img.png" height="400" src="images/img_2.png" width="800"/>
+<img alt="img.png" height="400" src="images/img_2.png" width="700"/>
 
 We see that there is still a nice separation, however, with more high error loss samples. 
 Interesting, those false predictions (larger dot size) are located within clusters of classes which are different than their GT.  
