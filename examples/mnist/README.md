@@ -60,5 +60,5 @@ For instance, samples in light blue are from class 1 and the peach colored are f
 
 ### Results
 
-![img.png](images/img_15.png)
+![img.png](images/img_5.png)
 
