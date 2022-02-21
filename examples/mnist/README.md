@@ -15,8 +15,12 @@ The model achieved accuracy of 0.98~.
 
 ## Population Exploration
 
-This embedding space is a representation based on the network's extracted features. The samples from training set.
-There is a nice separation of the samples based on their classes. The samples are colored based on their GT class and the dot size is based on the network's error loss. 
+This embedding space is a representation based on the network's extracted features. The samples are from the training set.
+There is a nice separation of the samples based on their classes.
+
+<img alt="img.png" height="300" src="images/img_7.png" width="800"/>
+
+The samples are colored based on their GT class and the dot size is based on the network's error loss. 
 
 Now, we plot the validation set:
 
