@@ -18,7 +18,7 @@ The model achieved accuracy of 0.98~.
 This embedding space is a representation based on the network's extracted features. The samples are from the training set.
 There is a nice separation of the samples based on their classes.
 
-<img alt="img.png" height="300" src="images/img_7.png" width="800"/>
+<img alt="img.png" height="400" src="images/img_7.png" width="1000"/>
 
 The samples are colored based on their GT class and the dot size is based on the network's error loss. 
 
