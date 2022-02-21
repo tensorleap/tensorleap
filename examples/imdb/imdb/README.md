@@ -70,21 +70,17 @@ In fact, the bi-gram "entertaining mildly" is now an indicator of a negative sen
 
 #### Data exploration
 
-We can see how our data is distributed on various features of the input. Here, we present the `length` and
-`out-of-vocubulary` counts vs. training set loss. We see that on average, the shorter the review, and the more
-out-of-vocabulary words there are, the higher the loss. This is to be expected since both of these result in a less
-informative input to the network.
+Using Tensorleap's dashboard we can see how our data is distributed across various features.
+Here, we've selected 5 informative features and plotted their hitogram vs. the loss:
 
+![img_1.png](images/img.png)
 
-![img_1.png](images/img_19.png)
+`length` - the shorter the review, the higher the loss.  
+`out-of-vocabulary` - the more out-of-vocabulary words a review has, the higher its loss  
+`subjectiveness` - the more subjective the review is the lower the loss.  
+`score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.  
+`polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.  
 
-`subjectiveness` - the more subjective the review is the lower the loss.
-
-`score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.
-
-`polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.
-
-![img_1.png](images/img_20.png)
 
 Finally, we can see that the `Tensorleap's` system unsupervised clustering is able to group together meaningful
 examples.
