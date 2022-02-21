@@ -26,7 +26,7 @@ Now, we plot the validation set:
 
 <img alt="img.png" height="400" src="images/img_2.png" width="700"/>
 
-We see that there is still a nice separation, however, with more high error loss samples. 
+There is still a nice separation, however, with more high error loss samples. 
 Interesting, those false predictions (larger dot size) are located within clusters of classes which are different than their GT.  
 
 
@@ -53,7 +53,7 @@ to each other and there are some false prediction between the samples on the edg
 
 <img alt="img_16.png" src="images/img_6.png"/>
 
-- We see how when the euclidean difference of a sample from its class centroid, increases, the average loss increases. 
+- When the euclidean difference of a sample from its class centroid, increases, the average loss increases. 
 
 - Euclidean difference from the class centroid is calculated as follows: 
   - We extract the class centroid per class: we take all images in respect to their class and calculate an average per pixel. The output will be an image 28X28.     
