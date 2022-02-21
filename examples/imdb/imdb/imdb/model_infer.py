@@ -11,12 +11,13 @@ import json
 from imdb.utils import standartize
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from typing import List
+from tensorflow.python.keras.engine.functional import Functional
 max_features = 10000
 sequence_length = 250
 embedding_dim = 16
 
 
-def tensorleap_masked_conv_model(conv_sizes: List[int] = [28, 16, 8]):
+def tensorleap_masked_conv_model(conv_sizes: List[int] = [28, 16, 8]) -> Functional:
     vectorized_inputs = tf.keras.Input(shape=250, dtype="int64")
     x = layers.Masking(mask_value=0)(vectorized_inputs)
     x = layers.Embedding(max_features + 1, embedding_dim)(x)
@@ -32,7 +33,7 @@ def tensorleap_masked_conv_model(conv_sizes: List[int] = [28, 16, 8]):
     return tl_model
 
 
-def tensorleap_dense_model():
+def tensorleap_dense_model() -> Functional:
     vectorized_inputs = tf.keras.Input(shape=250, dtype="int64")
     x = layers.Embedding(max_features + 1, embedding_dim)(vectorized_inputs)
     x = layers.Dropout(0.2)(x)
@@ -44,7 +45,7 @@ def tensorleap_dense_model():
     return tl_model
 
 
-def tensorleap_conv_model(conv_sizes: List[int] = [28, 16, 8]):
+def tensorleap_conv_model(conv_sizes: List[int] = [28, 16, 8]) -> Functional:
     vectorized_inputs = tf.keras.Input(shape=250, dtype="int64")
     x = layers.Embedding(max_features + 1, embedding_dim)(vectorized_inputs)
     x = layers.Dropout(0.2)(x)
