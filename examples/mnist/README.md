@@ -20,7 +20,7 @@ There is a nice separation of the samples based on their classes. The samples ar
 
 Now, we plot the validation set:
 
-<img alt="img.png" height="400" src="images/img_12.png" width="800"/>
+<img alt="img.png" height="400" src="images/img_2.png" width="800"/>
 
 We see there is still a nice separation, however, with more high error loss samples. 
 Interesting, those false predictions (larger dot size) are located within clusters of classes which are different their GT.  
@@ -29,7 +29,7 @@ Interesting, those false predictions (larger dot size) are located within cluste
 In the digits image space there are some classes which are very close to each other. For example, class 1 and class 7 tends to look alike. We can see that from the population exploration plot that these samples are closer 
 to each other and there are some false prediction between the samples on the edge.
 
-<img alt="img_10.png" height="500" src="images/img_10.png" width="800"/>
+<img alt="img_10.png" height="500" src="images/img_1.png" width="800"/>
 
 For instance, samples in light blue are from class 1 and the peach colored are from 7.
 
@@ -37,7 +37,7 @@ For instance, samples in light blue are from class 1 and the peach colored are f
 # Error Analysis
 
 
-<img alt="img.png" height="400" src="images/img_13.png" width="600"/> <img alt="img.png" height="400" src="images/img_14.png" width="600"/>
+<img alt="img.png" height="400" src="images/img_13.png" width="600"/> <img alt="img.png" height="400" src="images/img_4.png" width="600"/>
 ![img_2.png](img_2.png)
 
 **Sample 11701:** Prediction: 6, GT: 5
@@ -48,7 +48,7 @@ For instance, samples in light blue are from class 1 and the peach colored are f
 
 ### Average Euclidean Difference Metadata and Average Loss
 
-<img alt="img_16.png" src="images/img_16.png"/>
+<img alt="img_16.png" src="images/img_6.png"/>
 
 - We see how when the euclidean difference of a sample from its class centroid, increases, the average loss increases. 
 
