@@ -29,7 +29,7 @@ Our final accuracy is 0.89 and our loss is 0.27.
 
 #### Error analysis 
 
-To explorer the model's performance we visualize the latent space represntation using  `Tensorleap's Analyzer`, 
+To explore the model's performance we visualize the latent space represntation using  `Tensorleap's Analyzer`, 
 which embedds the dataset sample's in a model-based 3D space. 
 
 ![Embedding space](images/img_7.png)
@@ -45,11 +45,11 @@ This example, of a specific false-positive sample, overlays a heatmap that score
 Since the dense model makes its prediction using a single word context, it considers single words, such as
 **entertaining** or **masterpiece** as an indication for a **positive** sentiment. However, it ignores their context,
 and therefore misses that its only **mildly entertaining** or a **masterpiece because of sympathy.**
-To improve upon this we'll evaluate a second, convulutional model.
+To improve upon this we'll evaluate a second, convolutional model.
 
 ### CNN
 
-Our new model aims to fix the missing context by replacing the dense layer with 3 convulutional blocks,
+Our new model aims to fix the missing context by replacing the dense layer with 3 convolutional blocks,
 which should help in capturing a wider context.
 
 ![Embedding space](images/img_11.png)
@@ -58,11 +58,11 @@ We first train the model for 3 epochs to get an accuracy of 0.89 and a loss of 0
 
 ![Embedding space](images/img_12.png)
 
-Following the same process, we can examine the same sample, which result in a much lower loss now:
+Following the same process, we can examine the same sample, which result in a 67% loss reduction:
 
 ![Embedding space](images/img_16.png)
 
-As expected, the convulutional model has a much wider context window, which results in the attention being
+As expected, the convolutional model has a much wider context window, which results in the attention being
 spread over longer phrases. One result of this change is that **entertaining** is no longer an indication of a positive sentiment.
 In fact, the bi-gram "entertaining mildly" is now an indicator of a negative sentiment:
 ![img.png](images/img_18.png)
@@ -73,7 +73,7 @@ In fact, the bi-gram "entertaining mildly" is now an indicator of a negative sen
 Using Tensorleap's dashboard we can see how our data is distributed across various features.
 Here, we've selected 5 informative features and plotted their hitogram vs. the loss:
 
-![img_1.png](images/img.png)
+![img_1.png](images/img_1.png)
 
 `length` - the shorter the review, the higher the loss.  
 `out-of-vocabulary` - the more out-of-vocabulary words a review has, the higher its loss  
@@ -81,15 +81,8 @@ Here, we've selected 5 informative features and plotted their hitogram vs. the l
 `score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.  
 `polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.  
 
-`subjectiveness` - the more subjective the review is the lower the loss.
 
-`score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.
-
-`polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.
-
-![img_1.png](images/img_20.png)
-
-Finally, we can see that the `Tensorleap's` system unsupervised clustering is able to group together meaningful
+Finally, we can see that `Tensorleap's` unsupervised clustering is able to group together meaningful
 examples.
 
 ![img_1.png](images/img_21.png)
