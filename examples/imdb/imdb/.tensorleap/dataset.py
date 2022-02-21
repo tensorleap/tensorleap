@@ -19,7 +19,6 @@ import re
 import string
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 NUMBER_OF_SAMPLES = 20000
-crop_size = 128
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 METRIC_NAMES = ["flesch_reading", "flesch_kincaid", "coleman_liau_index", "automated_readability_index",
@@ -99,43 +98,37 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 def subset_func() -> List[SubsetResponse]:
     tokenizer, train_dict = download_load_assets()
     dataset_binder.cache_container["word_to_index"]["tokens"] = tokenizer.word_index
-    max_size = 2*len(train_dict['pos'])
-    train_size = min(NUMBER_OF_SAMPLES, int(0.9*max_size))
-    half_t_size = int(train_size/2)
-    val_size = int(0.1*train_size)
-    half_v_size = int(val_size/2)
-    train_paths = train_dict['pos'][:half_t_size]+train_dict['neg'][:half_t_size]
-    train_gt = get_gt(train_paths)
-    train_metrics = train_dict['pos_metrics'][:half_t_size]+train_dict['neg_metrics'][:half_t_size]
-    val_paths = train_dict['pos'][half_t_size:half_t_size+half_v_size] + \
-                train_dict['neg'][half_t_size:half_t_size+half_v_size]
-    val_gt = get_gt(val_paths)
-    val_metrics = train_dict['pos_metrics'][half_t_size:half_t_size+half_v_size] + \
-                  train_dict['neg_metrics'][half_t_size:half_t_size+half_v_size]
-    train_lengths = train_dict['pos_length'][:half_t_size]+train_dict['neg_length'][:half_t_size]
-    val_lengths = train_dict['pos_length'][half_t_size:half_t_size+half_v_size] + \
-                  train_dict['neg_length'][half_t_size:half_t_size+half_v_size]
-    train_oov = train_dict['pos_oov'][:half_t_size]+train_dict['neg_oov'][:half_t_size]
-    val_oov = train_dict['pos_oov'][half_t_size:half_t_size+half_v_size] + \
-                  train_dict['neg_oov'][half_t_size:half_t_size+half_v_size]
-    train_polarity = train_dict['pos_polarity'][:half_t_size]+train_dict['neg_polarity'][:half_t_size]
-    val_polarity = train_dict['pos_polarity'][half_t_size:half_t_size+half_v_size] + \
-                  train_dict['neg_polarity'][half_t_size:half_t_size+half_v_size]
-    train_subjectivity = train_dict['pos_subjectivity'][:half_t_size]+train_dict['neg_subjectivity'][:half_t_size]
-    val_subjectivity = train_dict['pos_subjectivity'][half_t_size:half_t_size+half_v_size] + \
-                  train_dict['neg_subjectivity'][half_t_size:half_t_size+half_v_size]
-    train = SubsetResponse(length=2*half_t_size, data={'paths': train_paths, 'gt': train_gt, 'tokenizer': tokenizer,
-                                                       'metrics': train_metrics, 'length': train_lengths,
-                                                       'oov_count': train_oov, 'polarity': train_polarity,
-                                                       'subjectivity': train_subjectivity})
-    val = SubsetResponse(length=2*half_v_size, data={'paths': val_paths, 'gt': val_gt, 'tokenizer': tokenizer,
-                                                     'metrics': val_metrics, 'length': val_lengths,
-                                                     'oov_count': val_oov, 'polarity': val_polarity,
-                                                     'subjectivity': val_subjectivity})
+    combined_size = 2*len(train_dict['pos'])
+    truncated_size = min(NUMBER_OF_SAMPLES, int(0.9*combined_size))
+    train_label_size = int(truncated_size/2)
+    truncated_val_size = int(0.1*truncated_size)
+    val_label_size = int(truncated_val_size/2)
+    input_keys_pre = ['', 'metrics', 'length', 'oov', 'polarity', 'subjectivity']
+    output_keys = ['paths', 'metrics', 'length', 'oov_count', 'polarity', 'subjectivity']
+    gt = ['pos', 'neg']
+    data_dict = {'train': {}, 'val': {}}
+    # Building the dictionary for the Subset response - composed of "[POS/NEG]_METRICNAME"
+    for in_key_pre, out_key in zip(input_keys_pre, output_keys):
+        if in_key_pre != '':
+            in_key = [gt[j] + "_" + in_key_pre for j in range(len(gt))]
+        else:
+            in_key = gt
+        data_dict['train'][out_key] = train_dict[in_key[0]][:train_label_size] + \
+                                            train_dict[in_key[1]][:train_label_size]
+        data_dict['val'][out_key] = train_dict[in_key[0]][train_label_size:train_label_size+val_label_size] +\
+                                      train_dict[in_key[1]][train_label_size:train_label_size+val_label_size]
+    data_dict['train']['gt'] = get_gt(data_dict['train']['paths'])
+    data_dict['val']['gt'] = get_gt(data_dict['val']['paths'])
+    data_dict['train']['tokenizer'] = tokenizer
+    data_dict['val']['tokenizer'] = tokenizer
+    # Our train/val are composed of 50% negative and 50% positive samples
+    train = SubsetResponse(length=2*train_label_size, data=data_dict['train'])
+    val = SubsetResponse(length=2*val_label_size, data=data_dict['val'])
     response = [train, val]
     return response
 
 
+# Input Encoder
 def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
     comment_path = subset.data['paths'][idx]
     local_path = _download(comment_path)
@@ -146,6 +139,12 @@ def input_tokens(idx: int, subset: SubsetResponse) -> np.ndarray:
     return padded_input
 
 
+# GT Encoder
+def gt_sentiment(idx: int, subset: SubsetResponse) -> List[float]:
+    return subset.data['gt'][idx]
+
+
+# Metadata Encoders
 def gt_metadata(idx: int, subset: SubsetResponse) -> str:
     if subset.data['gt'][idx][0] == 1.0:
         return "positive"
@@ -158,10 +157,6 @@ def metadata_encoder(metric_idx: int) -> Callable[[int, SubsetResponse], float]:
         return subset.data['metrics'][idx][metric_idx]
     func.__name__ = METRIC_NAMES[metric_idx]
     return func
-
-
-def gt_sentiment(idx: int, subset: SubsetResponse) -> List[float]:
-    return subset.data['gt'][idx]
 
 
 def length_metadata(idx: int, subset: SubsetResponse) -> int:
@@ -188,6 +183,7 @@ def subjectivity_metadata(idx, subset: SubsetResponse) -> float:
     return subset.data['subjectivity'][idx]
 
 
+# Binders
 dataset_binder.set_subset(function=subset_func, name='IMDBComments')
 
 
