@@ -27,7 +27,7 @@ We train our model for 5 epochs and log the `CategoricalCrossEntropy` loss and t
 
 Our final accuracy is 0.89 and our loss is 0.27.
 
-#### Error analysis
+#### Error analysis 
 
 To explorer the model's performance we visualize the latent space represntation using  `Tensorleap's Analyzer`, 
 which embedds the dataset sample's in a model-based 3D space. 
@@ -78,6 +78,28 @@ informative input to the network.
 
 ![img_1.png](images/img_19.png)
 
-fd
+`subjectiveness` - the more subjective the review is the lower the loss.
 
+`score confindence` - the more confident a review is (i.e. highly negative or positive) the lower the loss.
+
+`polarity` - We use an external (TextBlob) polarity analysis, and show that sentences that have a neutral polarity, have a higher loss.
+
+![img_1.png](images/img_20.png)
+
+Finally, we can see that the `Tensorleap's` system unsupervised clustering is able to group together meaningful
+examples.
+
+![img_1.png](images/img_21.png)
+In this example colors represent Tensorleap's clustering, and size represent the amount of Out-of-vocabulary words.
+We see that the green cluster is mainly composed of examples with high Out-of-vocabulary (OOV) words.
+Other clusters, as the light blue, have fewer samples with high OOV count.
+
+![img_1.png](images/img_22.png)
+
+![img.png](images/img_23.png)
+
+###### Tensorleap models of the images:
+
+Dense: (dense_v5, short_train, dense_with_meta)  
+Conv: (10x_smaller_lr, updated_ds, normal_lr, arranged)
 

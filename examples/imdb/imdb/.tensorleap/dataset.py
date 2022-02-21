@@ -61,7 +61,7 @@ def load_tokanizer(tokanizer_path: str) -> TokenizerType:
 
 
 def download_load_assets() -> Tuple[TokenizerType, Dict[str, np.ndarray]]:
-    cloud_path = join("assets", "train_dict_v4.json")
+    cloud_path = join("assets", "train_dict_v5.json")
     local_path = _download(cloud_path)
     with open(local_path, 'r') as f:
         train_dict = json.load(f)
@@ -106,7 +106,6 @@ def subset_func() -> List[SubsetResponse]:
     half_v_size = int(val_size/2)
     train_paths = train_dict['pos'][:half_t_size]+train_dict['neg'][:half_t_size]
     train_gt = get_gt(train_paths)
-
     train_metrics = train_dict['pos_metrics'][:half_t_size]+train_dict['neg_metrics'][:half_t_size]
     val_paths = train_dict['pos'][half_t_size:half_t_size+half_v_size] + \
                 train_dict['neg'][half_t_size:half_t_size+half_v_size]
@@ -122,17 +121,17 @@ def subset_func() -> List[SubsetResponse]:
     train_polarity = train_dict['pos_polarity'][:half_t_size]+train_dict['neg_polarity'][:half_t_size]
     val_polarity = train_dict['pos_polarity'][half_t_size:half_t_size+half_v_size] + \
                   train_dict['neg_polarity'][half_t_size:half_t_size+half_v_size]
-    train_sentiment = train_dict['pos__sentiment'][:half_t_size]+train_dict['neg__sentiment'][:half_t_size]
-    val_sentiment = train_dict['pos__sentiment'][half_t_size:half_t_size+half_v_size] + \
-                  train_dict['neg__sentiment'][half_t_size:half_t_size+half_v_size]
+    train_subjectivity = train_dict['pos_subjectivity'][:half_t_size]+train_dict['neg_subjectivity'][:half_t_size]
+    val_subjectivity = train_dict['pos_subjectivity'][half_t_size:half_t_size+half_v_size] + \
+                  train_dict['neg_subjectivity'][half_t_size:half_t_size+half_v_size]
     train = SubsetResponse(length=2*half_t_size, data={'paths': train_paths, 'gt': train_gt, 'tokenizer': tokenizer,
                                                        'metrics': train_metrics, 'length': train_lengths,
                                                        'oov_count': train_oov, 'polarity': train_polarity,
-                                                       'sentiment': train_sentiment})
+                                                       'subjectivity': train_subjectivity})
     val = SubsetResponse(length=2*half_v_size, data={'paths': val_paths, 'gt': val_gt, 'tokenizer': tokenizer,
                                                      'metrics': val_metrics, 'length': val_lengths,
                                                      'oov_count': val_oov, 'polarity': val_polarity,
-                                                     'sentiment': val_sentiment})
+                                                     'subjectivity': val_subjectivity})
     response = [train, val]
     return response
 
@@ -181,6 +180,14 @@ def score_confidence(idx, subset: SubsetResponse) -> int:
     return abs(5 - int(subset.data['paths'][idx].split("_")[1].split(".")[0]))
 
 
+def polarity_metadata(idx, subset: SubsetResponse) -> float:
+    return subset.data['polarity'][idx]
+
+
+def subjectivity_metadata(idx, subset: SubsetResponse) -> float:
+    return subset.data['subjectivity'][idx]
+
+
 dataset_binder.set_subset(function=subset_func, name='IMDBComments')
 
 
@@ -211,8 +218,13 @@ dataset_binder.set_metadata(function=score_confidence, subset='IMDBComments',
                                 metadata_type=DatasetMetadataType.int,
                                 name='score_confidence')
 
-dataset_binder.set_metadata()
+dataset_binder.set_metadata(function=polarity_metadata, subset='IMDBComments',
+                                metadata_type=DatasetMetadataType.float,
+                                name='polarity')
 
+dataset_binder.set_metadata(function=subjectivity_metadata, subset='IMDBComments',
+                                metadata_type=DatasetMetadataType.float,
+                                name='subjectivity')
 
 for i in range(len(METRIC_NAMES)):
     dataset_binder.set_metadata(function=metadata_encoder(i), subset='IMDBComments',

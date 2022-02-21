@@ -35,14 +35,14 @@ def create_json_for_imdb(imdb_folder_path: str) -> None:
             lengths = [None]*len(gt_type_folders)
             oovs = [None]*len(gt_type_folders)
             polarities = [None]*len(gt_type_folders)
-            sentiments = [None]*len(gt_type_folders)
+            all_subject = [None]*len(gt_type_folders)
             for j, fp in enumerate(gt_type_folders):
                 print(j)
                 comment = load_imdb_comment(join(Path(__file__).parent.parent.parent, fp))
                 standard_comment = standartize(comment)
                 blob = TextBlob(standard_comment)
                 polarity = blob.polarity
-                sentiment = blob.sentiment
+                subjectivity = blob.subjectivity
                 tokenized_comment = tokenizer.texts_to_sequences([standard_comment])[0]
                 comment_length = len(tokenized_comment)
                 lengths[j] = comment_length
@@ -51,12 +51,12 @@ def create_json_for_imdb(imdb_folder_path: str) -> None:
                 metrics[j] = metadata
                 oovs[j] = oov
                 polarities[j] = polarity
-                sentiments[j] = sentiment
+                all_subject[j] = subjectivity
             files_dict[folder][gt_names[i] + "_metrics"] = metrics
             files_dict[folder][gt_names[i] + "_oov"] = oovs
             files_dict[folder][gt_names[i] + "_length"] = lengths
-            files_dict[folder][gt_names[i] + "_sentiment"] = sentiment
-            files_dict[folder][gt_names[i] + "_polarity"] = polarity
+            files_dict[folder][gt_names[i] + "_subjectivity"] = all_subject
+            files_dict[folder][gt_names[i] + "_polarity"] = polarities
     train_dict = files_dict[SUBFOLDERS[0]]
     train_dict['metrics_titles'] = metadata_names
     test_dict = files_dict[SUBFOLDERS[1]]
@@ -133,3 +133,6 @@ def load_tokanizer(tokanizer_path: str) -> TokenizerType:
         data = json.load(f)
         tokenizer = tokenizer_from_json(data)
     return tokenizer
+
+
+# create_json_for_imdb(join(Path(__file__).parent.parent.parent, "aclImdb"))
