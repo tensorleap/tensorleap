@@ -1,7 +1,7 @@
 projectName = "imdb"
 organization = "tom"
 framework = "tensorflow"
-datasetName = "imdb"
+datasetName = "imdb_v4"
 bucketName = "bucket"
 
 
