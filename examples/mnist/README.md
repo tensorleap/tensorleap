@@ -16,26 +16,24 @@ The model achieved accuracy of 0.98~.
 ## Population Exploration
 
 This embedding space is a representation based on the network's extracted features. The samples are from the training set.
-There is a nice separation of the samples based on their classes.
 
 <img alt="img.png" height="400" src="images/img_7.png" width="1000"/>
 
+We can see that there is a nice separation of the samples based on their classes.
 The samples are colored based on their GT class and the dot size is based on the network's error loss. 
 
 Now, we plot the validation set:
 
 <img alt="img.png" height="400" src="images/img_2.png" width="800"/>
 
-We see there is still a nice separation, however, with more high error loss samples. 
-Interesting, those false predictions (larger dot size) are located within clusters of classes which are different their GT.  
+We see that there is still a nice separation, however, with more high error loss samples. 
+Interesting, those false predictions (larger dot size) are located within clusters of classes which are different than their GT.  
 
 
-In the digits image space there are some classes which are very close to each other. For example, class 1 and class 7 tends to look alike. We can see that from the population exploration plot that these samples are closer 
-to each other and there are some false prediction between the samples on the edge.
+In the digits image space there are some classes which are close to each other. For example, class 1 and class 7 tends to look alike. We can see that from the population exploration plot below, these classes samples are closer 
+to each other and there are some false prediction between the samples on the edge. Samples in light blue are from class 1 and the peach colored are from 7.
 
 <img alt="img_10.png" height="500" src="images/img_1.png" width="800"/>
-
-For instance, samples in light blue are from class 1 and the peach colored are from 7.
 
 
 # Error Analysis
