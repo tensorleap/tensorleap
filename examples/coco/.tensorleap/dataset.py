@@ -24,7 +24,6 @@ image_size = 128
 categories = ['person', 'bicycle', 'car']
 
 
-
 def get_length(data):
     if data is None:
         length = None
@@ -88,10 +87,11 @@ def subset_images() -> List[SubsetResponse]:
     # initialize COCO api for instance annotations
     valcoco = COCO(fpath)
     x_test_raw = load_set(coco=valcoco)
-    train_size = min(len(x_train_raw), 1000)
+    train_size = min(len(x_train_raw), 6000)
+    val_size = min(len(x_test_raw), 2800)
     return [
         SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size], 'subdir': 'train2014'}),
-        SubsetResponse(length=100, data={'cocofile': valcoco, 'samples': x_test_raw[:100], 'subdir': 'val2014'})]
+        SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size], 'subdir': 'val2014'})]
 
 
 def input_image(idx, data):
@@ -177,31 +177,6 @@ def metadata_person_percent(idx, data):
     return percent_obj
 
 
-def metadata_bicycle_percent(idx, data):
-    print("metadata")
-    data = data.data
-    catIds = data['cocofile'].getCatIds(catNms=categories)
-    x = data['samples'][idx]
-    batch_masks = []
-    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
-    anns = data['cocofile'].loadAnns(annIds)
-    mask = np.zeros([x['height'], x['width']])
-    for ann in anns:
-        _mask = data['cocofile'].annToMask(ann)
-        mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
-    mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
-    mask = mask.astype(np.float)
-
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(2.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
-
-
 def metadata_car_percent(idx, data):
     print("car")
     data = data.data
@@ -219,7 +194,7 @@ def metadata_car_percent(idx, data):
 
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(3.0)
+    count_obj = unique_per_obj.get(2.0)
     if count_obj is not None:
         percent_obj = count_obj / mask.size
     else:
