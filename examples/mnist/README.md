@@ -60,7 +60,11 @@ to each other and there are some false prediction between the samples on the edg
 
 ### Results
 
+We plot the model Loss Accuracy for training and validation sets during training iterations:
+
 ![img.png](images/img_5.png)
+
+We see a nice convergence of the model, achieving accuracy of ~0.98 on validation set.  
 
 
 
