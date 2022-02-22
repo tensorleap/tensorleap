@@ -68,9 +68,10 @@ def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: Subset
     return [min_distance, min_distance_class_label]
 
 
-####################################
-########## TL Integration ##########
-####################################
+
+#############################
+########## Helpers ##########
+#############################
 
 
 @lru_cache()
@@ -96,6 +97,11 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
     blob = bucket.blob(cloud_file_path)
     blob.download_to_filename(local_file_path)
     return local_file_path
+
+
+####################################
+########## TL Integration ##########
+####################################
 
 
 def subset_func() -> List[SubsetResponse]:
@@ -140,16 +146,16 @@ def subset_func() -> List[SubsetResponse]:
 
 
 def input_encoder(idx: int, subset: SubsetResponse) -> np.ndarray:
-    """ preprocess the input sample """
     return subset.data['images'][idx].astype('float32')
 
 
 def gt_encoder(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
-    """" preprocess the ground truth """
     return subset.data['labels'][idx].astype('float32')
 
 
-""" here we extract some metadata we want for our data """
+#############################################
+########## Bind metadata Functions ##########
+#############################################
 
 
 def metadata_sample_index(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
@@ -203,7 +209,6 @@ dataset_binder.set_ground_truth(function=gt_encoder,
                                 labels=LABELS,
                                 masked_input=None)
 
-# Set Metadata
 
 dataset_binder.set_metadata(function=metadata_sample_index,
                             subset='images',
