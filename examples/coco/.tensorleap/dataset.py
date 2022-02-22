@@ -1,15 +1,12 @@
-import json
 import os
 from functools import lru_cache
 from typing import List, Optional
-
 import cv2
 import numpy as np
 from code_loader import dataset_binder
 from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 from google.cloud import storage
 from google.cloud.storage import Bucket
-from google.oauth2 import service_account
 from pycocotools.coco import COCO
 from skimage.color import gray2rgb
 from skimage.io import imread
@@ -20,8 +17,7 @@ BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 
 image_size = 128
-
-categories = ['person', 'bicycle', 'car']
+categories = ['person', 'car']
 
 
 def get_length(data):
@@ -39,13 +35,13 @@ def get_length(data):
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
-    print("connect")
+    print("connect to GCS")
     gcs_client = storage.Client(project=PROJECT_ID, credentials=AnonymousCredentials())
     return gcs_client.bucket(bucket_name)
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
-    print("download")
+    print("download data")
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
         home_dir = os.getenv("HOME")
@@ -65,11 +61,11 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 
 def subset_images() -> List[SubsetResponse]:
     print("subset")
+
     def load_set(coco):
-        # get all images containing given categories, select one at random
-        catIds = coco.getCatIds(categories)
-        imgIds = coco.getImgIds(catIds=catIds)
-        # imgIds = coco.getImgIds(imgIds = [324158])
+        # get all images containing given categories
+        catIds = coco.getCatIds(categories)     # Fetch class IDs only corresponding to the filterClasses
+        imgIds = coco.getImgIds(catIds=catIds)  # Get all images containing the Category IDs
         imgs = coco.loadImgs(imgIds)
         return imgs
 
@@ -93,6 +89,7 @@ def subset_images() -> List[SubsetResponse]:
         SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size], 'subdir': 'train2014'}),
         SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size], 'subdir': 'val2014'})]
 
+subset_images()
 
 def input_image(idx, data):
     print("subset")
@@ -102,7 +99,7 @@ def input_image(idx, data):
     fpath = _download(filepath)
     img = imread(fpath)
     if len(img.shape) == 2:
-        # grascale -> expand to rgb
+        # grey scale -> expand to rgb
         img = gray2rgb(img)
     img = cv2.resize(img, (image_size, image_size), interpolation=cv2.INTER_LINEAR)
 
@@ -128,7 +125,7 @@ def ground_truth_mask(idx, data):
 
 
 def metadata_background_percent(idx, data):
-    print("BG")
+    print("extracting metadata BG percent")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -153,7 +150,7 @@ def metadata_background_percent(idx, data):
 
 
 def metadata_person_percent(idx, data):
-    print("person")
+    print("extracting metadata person percent")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -178,7 +175,7 @@ def metadata_person_percent(idx, data):
 
 
 def metadata_car_percent(idx, data):
-    print("car")
+    print("extracting metadata car percent")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -203,7 +200,7 @@ def metadata_car_percent(idx, data):
 
 
 def metadata_brightness(idx, data):
-    print("bright")
+    print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -224,7 +221,7 @@ dataset_binder.set_subset(subset_images, 'images')
 dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
 
 dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=DatasetOutputType.Mask, name='mask',
-                                labels=['background', 'person', 'bicycle', 'car'], masked_input="image")
+                                labels=categories, masked_input="image")
 
 dataset_binder.set_metadata(metadata_background_percent, 'images', DatasetMetadataType.float, 'background_percent')
 
