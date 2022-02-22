@@ -65,3 +65,8 @@ to each other and there are some false prediction between the samples on the edg
 
 ![img.png](images/img_5.png)
 
+
+### Fetch Similars 
+
+![img.png](images/img_8.png)
+
