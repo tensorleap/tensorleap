@@ -233,5 +233,3 @@ dataset_binder.set_metadata(metadata_person_percent, 'images', DatasetMetadataTy
 dataset_binder.set_metadata(metadata_car_percent, 'images', DatasetMetadataType.float, 'car_percent')
 
 dataset_binder.set_metadata(metadata_brightness, 'images', DatasetMetadataType.float, 'brightness')
-
-dataset_binder.set_metadata(metadata_bicycle_percent, 'images', DatasetMetadataType.float, 'bicycle_percent')
