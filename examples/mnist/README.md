@@ -54,7 +54,8 @@ Additionally, we can see which features of the data contribute to each of the ou
 
 ### Fetch Similars
 
-This allows us to find samples that the model considers as similar to one another, as they "activate" similar learnt features within the model.
+Using 'Fetch Similars' functionality, we can find cluster of samples that the model considers as similar to one another, as they "activate" similar learnt features within the model.
+
 
 ![img.png](images/img_9.png)
 
