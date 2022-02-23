@@ -43,26 +43,27 @@ to each other and there are some false prediction between the samples on the edg
 
 - The loss on that sample is relatively higher than the other samples. From metadata, we get that the sample is closer to 6 class (6.83) than its GT - 5 (7.71). That is why the model predicted the sample to be 6. 
 
-### Sample Analysis 
+## Sample Analysis 
 
 TL allow us to further explore the model's response to a specific sample. 
 For example, from the results below, we can see that the model's prediction was 9 while the ground truth is 8.  
-Additionally, we can see which features of the data contribute to each of the output classes using the Heat Map option.  
+Additionally, we can see which features of the data contribute to each of the output classes using the Heat Map option.
 
-![Watch the video](https://1081945985-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F9UXeOlFqlw8pl79U2HGU%2Fuploads%2FGyA3pV9MZcFQgfbifJf6%2Fanalysis-prediction-heatmap-small.gif?alt=media&token=9c629d9b-6e0a-405c-8c01-e79e41acb505)
+<img alt="Watch the video" height="350" src="https://1081945985-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F9UXeOlFqlw8pl79U2HGU%2Fuploads%2FGyA3pV9MZcFQgfbifJf6%2Fanalysis-prediction-heatmap-small.gif?alt=media&amp;token=9c629d9b-6e0a-405c-8c01-e79e41acb505" width="750"/>
 
 
-### Fetch Similars
+## Fetch Similars
 
 Using 'Fetch Similars' functionality, we can find cluster of samples that the model considers as similar to one another, as they "activate" similar learnt features within the model.
 
+<img alt="img.png" height="550" src="images/img_9.png" class="center" width="900"/>
 
-![img.png](images/img_9.png)
+**Fetch Similar Results**
+
+<img alt="img.png" height="350" src="images/img_10.png" width="550"/> <img alt="img_1.png" height="350" src="images/img_11.png" width="350"/>
 
 
-
-
-### Results Analysis
+# Results Analysis
 
 By using TL Dashboard functionality, we can plot the training progress, visualize the metadata vs performance to find correlations and trends.  
 
