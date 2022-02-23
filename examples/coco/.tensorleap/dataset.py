@@ -89,7 +89,7 @@ def subset_images() -> List[SubsetResponse]:
         SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size], 'subdir': 'train2014'}),
         SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size], 'subdir': 'val2014'})]
 
-subset_images()
+subset_images() # TODO remove
 
 def input_image(idx, data):
     print("subset")
@@ -109,7 +109,7 @@ def input_image(idx, data):
 
 
 def ground_truth_mask(idx, data):
-    print("GT")
+    print("GT mask")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
     x = data['samples'][idx]
@@ -216,6 +216,18 @@ def metadata_brightness(idx, data):
     return np.mean(img)
 
 
+def metadata_is_colored(idx, data):
+    print("extracting metadata image brightness")
+    data = data.data
+    x = data['samples'][idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    fpath = _download(filepath)
+    img = imread(fpath)
+    is_colored = len(img.shape) > 2
+    return is_colored
+
+
+
 dataset_binder.set_subset(subset_images, 'images')
 
 dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
@@ -230,3 +242,5 @@ dataset_binder.set_metadata(metadata_person_percent, 'images', DatasetMetadataTy
 dataset_binder.set_metadata(metadata_car_percent, 'images', DatasetMetadataType.float, 'car_percent')
 
 dataset_binder.set_metadata(metadata_brightness, 'images', DatasetMetadataType.float, 'brightness')
+
+dataset_binder.set_metadata(metadata_is_colored, 'images', DatasetMetadataType.boolean, 'is_colored')
