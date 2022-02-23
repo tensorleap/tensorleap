@@ -70,5 +70,5 @@ We plot the model Loss Accuracy for training and validation sets during training
 
 There is a nice convergence of the model, achieving accuracy of ~0.98 on validation set.  
 
-
+We have shown a few examples of the model analysis and insights we can gain using TL. Nevertheless, we only begin to scratch the surface with the potential capabilities and wisdom we can achieve using the platform. For further examples, please refer to our additional examples and tutorials. 
 
