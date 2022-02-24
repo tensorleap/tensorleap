@@ -7,21 +7,24 @@ from os.path import isfile, join, splitext, basename, dirname
 import json
 import re
 import string
+import pandas as pd
 from tensorflow.keras.preprocessing.text import Tokenizer, tokenizer_from_json
 from keras_preprocessing.text import Tokenizer as TokenizerType
 import textstat
 from pathlib import Path
 from typing import Tuple, Any, List
 from textblob import TextBlob
+from pandas import DataFrame
+import numpy as np
 
 
-def create_json_for_imdb(imdb_folder_path: str) -> None:
+def create_csv_for_imdb(imdb_folder_path: str) -> None:
     POS_NAME = "pos"
     NEG_NAME = "neg"
     SUBFOLDERS = ["train", "test"]
-    files_dict = {}
     gt_names = [POS_NAME, NEG_NAME]
-    tokenizer = load_tokanizer("tokenizer.json")
+    tokenizer = load_tokanizer("tokenizer_v2.json")
+    df = DataFrame()
     for folder in SUBFOLDERS:
         curr_path = join(imdb_folder_path, folder)
         relative_path = join(basename(imdb_folder_path), folder)
@@ -29,8 +32,8 @@ def create_json_for_imdb(imdb_folder_path: str) -> None:
         files = [[f for f in listdir(foldr) if isfile(join(foldr, f)) and splitext(f)[-1] == ".txt"] for foldr in folders]
         pos_files_relative = [join(relative_path, POS_NAME, f) for f in files[0]]
         neg_files_relative = [join(relative_path, NEG_NAME, f) for f in files[1]]
-        files_dict[folder] = {gt_names[0]: pos_files_relative, gt_names[1]: neg_files_relative}
-        for i, gt_type_folders in enumerate([pos_files_relative, neg_files_relative]):
+        paths = [pos_files_relative, neg_files_relative]
+        for i, gt_type_folders in enumerate(paths):
             metrics = [None]*len(gt_type_folders)
             lengths = [None]*len(gt_type_folders)
             oovs = [None]*len(gt_type_folders)
@@ -52,19 +55,14 @@ def create_json_for_imdb(imdb_folder_path: str) -> None:
                 oovs[j] = oov
                 polarities[j] = polarity
                 all_subject[j] = subjectivity
-            files_dict[folder][gt_names[i] + "_metrics"] = metrics
-            files_dict[folder][gt_names[i] + "_oov"] = oovs
-            files_dict[folder][gt_names[i] + "_length"] = lengths
-            files_dict[folder][gt_names[i] + "_subjectivity"] = all_subject
-            files_dict[folder][gt_names[i] + "_polarity"] = polarities
-    train_dict = files_dict[SUBFOLDERS[0]]
-    train_dict['metrics_titles'] = metadata_names
-    test_dict = files_dict[SUBFOLDERS[1]]
-    test_dict['metrics_titles'] = metadata_names
-    with open("train_dict_v4.json", 'w') as f:
-        json.dump(train_dict, f)
-    with open("test_dict_v4.json", 'w') as f:
-        json.dump(test_dict, f)
+            curr_dict = {"oov_count": oovs, "length": lengths, "subjectivity": all_subject, "polarity": polarities,
+                         "paths": paths[i]}
+            curr_dict.update(dict(zip(metadata_names, np.array(metrics).transpose())))
+            cur_dataframe = pd.DataFrame(curr_dict)
+            cur_dataframe['gt'] = gt_names[i]
+            cur_dataframe['subset'] = folder
+            df = pd.concat([df, cur_dataframe], ignore_index=True)
+    df.to_csv("imdb.csv")
 
 
 def load_imdb_comment(file: str) -> str:
@@ -133,6 +131,3 @@ def load_tokanizer(tokanizer_path: str) -> TokenizerType:
         data = json.load(f)
         tokenizer = tokenizer_from_json(data)
     return tokenizer
-
-
-# create_json_for_imdb(join(Path(__file__).parent.parent.parent, "aclImdb"))
