@@ -67,9 +67,12 @@ class COCOGenerator(Sequence):
         for i, ann in enumerate(anns):
             _mask = self.coco_file.annToMask(ann)
             mask[_mask > 0] = _mask[_mask > 0] * (self.catids.index(ann['category_id']) + 1)
-            if self.append_vehicle_label:
-                other_anns = self.coco_file.getAnnIds(imgIds=x['id'], catIds=self.catids, i)
-
+        if self.append_vehicle_label:
+            other_anns_ids = self.coco_file.getAnnIds(imgIds=x['id'], catIds=self.vehicle_categories, iscrowd=None)
+            other_anns = self.coco_file.loadAnns(other_anns_ids)
+            for j, ot_ann in enumerate(other_anns):
+                _mask = self.coco_file.annToMask(ot_ann)
+                mask[_mask > 0] = _mask[_mask > 0] * (self.catids.index(self.catids[-1]) + 1)
         mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
         return mask.astype(np.float)
 
