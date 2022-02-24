@@ -11,7 +11,7 @@ from os.path import basename, join
 class COCOGenerator(Sequence):
 
     def __init__(self, coco_path: str, categories: list, image_size: int = 128,
-                 batch_size: int = 10, max_size: int = 1000):
+                 batch_size: int = 10, max_size: int = 1000, append_vehicle_label: bool = False):
         """
         A generator to train the coco model
         :param coco_path: a path to the coco_annotation file
@@ -20,12 +20,15 @@ class COCOGenerator(Sequence):
         :param batch_size: what batch size to use for training
         :param max_size: what is the maximial size of the dataset
         """
+
         self.image_size = image_size
         self.path = coco_path
         self.cat = categories
         self.coco_file = COCO(coco_path)
         self.paths = self.load_set(self.coco_file)
         self.catids = self.coco_file.getCatIds(catNms=self.cat)
+        self.append_vehicle_label = append_vehicle_label
+        self.vehicle_categories = self.coco_file.getCatIds(catNms=["bus", "truck", "train"])
         self.paths = self.paths[:max_size]
         self.order = np.random.permutation(len(self.paths))
         self.batch_size = batch_size
@@ -61,9 +64,12 @@ class COCOGenerator(Sequence):
         annIds = self.coco_file.getAnnIds(imgIds=x['id'], catIds=self.catids, iscrowd=None)
         anns = self.coco_file.loadAnns(annIds)
         mask = np.zeros([x['height'], x['width']])
-        for ann in anns:
+        for i, ann in enumerate(anns):
             _mask = self.coco_file.annToMask(ann)
             mask[_mask > 0] = _mask[_mask > 0] * (self.catids.index(ann['category_id']) + 1)
+            if self.append_vehicle_label:
+                other_anns = self.coco_file.getAnnIds(imgIds=x['id'], catIds=self.catids, i)
+
         mask = cv2.resize(mask, (self.image_size, self.image_size), interpolation=cv2.INTER_NEAREST)
         return mask.astype(np.float)
 

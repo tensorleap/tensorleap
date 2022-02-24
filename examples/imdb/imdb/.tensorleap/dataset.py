@@ -17,6 +17,7 @@ from keras_preprocessing.text import Tokenizer as TokenizerType
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import tokenizer_from_json
 from pandas.core.frame import DataFrame as DataFrameType
+
 NUMBER_OF_SAMPLES = 20000
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
