@@ -36,12 +36,12 @@ def infer_model():
     CATEGORIES = ['person', 'car']
     output_channels = len(CATEGORIES) + 1
     base_path = "/home/tomtensor/Work/Projects/examples/tensorleap/examples/coco/coco/coco_data/ms-coco/annotations/"
-    load = tf.keras.models.load_model("car_person_train_iou.h5", compile=False)
-    model = unet_model(output_channels)
+    # load = tf.keras.models.load_model("car_person_train_iou.h5", compile=False)
+    # model = unet_model(output_channels)
     train_gen = COCOGenerator(join(base_path, "instances_train2014.json"),
-                      categories=CATEGORIES, max_size=6000)
-    val_gen = COCOGenerator(join(base_path, "instances_val2014.json"),
-                      categories=CATEGORIES, max_size=6000)
+                      categories=CATEGORIES, max_size=6000, append_vehicle_label=True)
+    # val_gen = COCOGenerator(join(base_path, "instances_val2014.json"),categories=CATEGORIES, max_size=6000)
+    a = train_gen[0]
     print(1)
 
 
@@ -52,26 +52,26 @@ def train_model():
     TEST_SIZE = 2800
     BATCH = 10
     EPOCHS = 25
-    SAVE_EPOCH = 5
-    train_steps = TRAIN_SIZE // BATCH
+    # SAVE_EPOCH = 5
+    # train_steps = TRAIN_SIZE // BATCH
     output_channels = len(CATEGORIES) + 1
     model = unet_model(output_channels)
     base_path = "/home/tomtensor/Work/Projects/examples/tensorleap/examples/coco/coco/coco_data/ms-coco/annotations/"
     train_gen = COCOGenerator(join(base_path, "instances_train2014.json"), batch_size=BATCH,
-                      categories=CATEGORIES, max_size=TRAIN_SIZE)
+                      categories=CATEGORIES, max_size=TRAIN_SIZE, append_vehicle_label=True)
     val_gen = COCOGenerator(join(base_path, "instances_val2014.json"), batch_size=BATCH,
-                      categories=CATEGORIES, max_size=TEST_SIZE)
+                      categories=CATEGORIES, max_size=TEST_SIZE, append_vehicle_label=True)
     model = unet_model(output_channels)
     model.compile(optimizer='adam',
                   loss=losses.SparseCategoricalCrossentropy(),
                   metrics=[UpdatedMeanIoU(num_classes=output_channels)])
     # define the checkpoint
-    filepath = "all_checkpoints_{epoch:02d}.h5"
-    checkpoint = ModelCheckpoint(filepath, save_freq=SAVE_EPOCH*train_steps, verbose=1)
+    filepath = "vehicle_supercategory_{epoch:02d}_{val_loss:.2f}.h5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_updated_mean_io_u', verbose=1, save_best_only=True, mode='max')
     callbacks_list = [checkpoint]
     model.fit(x=train_gen, validation_data=val_gen, epochs=EPOCHS, callbacks=callbacks_list)
 
 
 if __name__ == "__main__":
     # train_model()
-    save_without_compile()
+    train_model()
