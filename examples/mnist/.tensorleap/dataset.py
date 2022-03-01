@@ -29,7 +29,8 @@ LABELS = np.arange(10).astype(str).tolist()
 def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     print('preprocessing the data')
     data_X = df.drop('label', axis=1).to_numpy()
-    data_X = np.reshape(data_X, (len(data_X), IMAGE_DIM, IMAGE_DIM, 1)) / 255.  # normalize to range 0-1
+    data_X = np.expand_dims(data_X, axis=-1)  # Reshape :,28,28 -> :,28,28,1
+    data_X = data_X / 255  # Normalize to [0,1]
     data_Y = df.label.to_numpy()
     # one hot encode the target values
     data_Y = to_categorical(data_Y)
