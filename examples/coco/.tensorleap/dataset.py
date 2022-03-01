@@ -232,7 +232,7 @@ dataset_binder.set_subset(subset_images, 'images')
 dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
 
 dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=DatasetOutputType.Mask, name='mask',
-                                labels=categories, masked_input="image")
+                                labels=categories + ['background'], masked_input="image")
 
 dataset_binder.set_metadata(metadata_background_percent, 'images', DatasetMetadataType.float, 'background_percent')
 
