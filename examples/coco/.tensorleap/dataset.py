@@ -17,7 +17,7 @@ BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 
 image_size = 128
-categories = ['person', 'car', 'background']
+categories = ['person', 'car']
 
 
 def get_length(data):
