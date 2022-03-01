@@ -136,6 +136,34 @@ def ground_truth_mask(idx, data):
     return mask.astype(np.float)
 
 
+def get_counts_of_instances_per_label(idx: int, data: SubsetResponse, label: str = 'all') -> int:
+    data = data.data
+    x = data['samples'][idx]
+    catIds = data['cocofile'].getCatIds(catNms=categories)
+    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
+    anns_list = data['cocofile'].loadAnns(annIds)
+    if label == 'all':
+        return len(anns_list)
+    cat_name_to_id = dict(zip(categories, catIds))
+    cat_id = cat_name_to_id[label]
+    cat_id_counts = {cat_id: 0 for cat_id in catIds}
+    for ann in anns_list:
+        cat_id_counts[ann['category_id']] += 1
+    return cat_id_counts[cat_id]
+
+
+def metadata_person_instances_number(idx: int, data: SubsetResponse):
+    return get_counts_of_instances_per_label(idx, data, label='person')
+
+
+def metadata_car_instances_number(idx: int, data: SubsetResponse):
+    return get_counts_of_instances_per_label(idx, data, label='car')
+
+
+def metadata_total_instances_number(idx: int, data: SubsetResponse):
+    return get_counts_of_instances_per_label(idx, data, label='all')
+
+
 def metadata_background_percent(idx, data):
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
@@ -172,7 +200,7 @@ def metadata_car_percent(idx, data):
     return percent_obj
 
 
-def metadata_brightness(idx, data):
+def metadata_brightness(idx: int, data: SubsetResponse):
     print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
@@ -217,3 +245,4 @@ dataset_binder.set_metadata(metadata_car_percent, 'images', DatasetMetadataType.
 dataset_binder.set_metadata(metadata_brightness, 'images', DatasetMetadataType.float, 'brightness')
 
 dataset_binder.set_metadata(metadata_is_colored, 'images', DatasetMetadataType.boolean, 'is_colored')
+

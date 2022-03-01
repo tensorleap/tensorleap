@@ -45,6 +45,9 @@ def infer_model():
     print(1)
 
 
+
+
+
 def train_model():
     #TODO try to train a model without background prediction (i.e. only person + car)
     CATEGORIES = ['person', 'car']
