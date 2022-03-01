@@ -12,12 +12,15 @@ from skimage.color import gray2rgb
 from skimage.io import imread
 from google.auth.credentials import AnonymousCredentials
 from code_loader.contract.datasetclasses import SubsetResponse
+from typing import Callable, Union
 
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
-
 image_size = 128
 categories = ['person', 'car']
+SUPERCATEGORY_GROUNDTRUTH = True
+SUPERCATEGORY_CLASSES = ["bus", "truck", "train"]
+APPLY_AUGMENTATION = True
 
 def get_length(data):
     if data is None:
@@ -84,9 +87,12 @@ def subset_images() -> List[SubsetResponse]:
     x_test_raw = load_set(coco=valcoco)
     train_size = min(len(x_train_raw), 6000)
     val_size = min(len(x_test_raw), 2800)
+    supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
     return [
-        SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size], 'subdir': 'train2014'}),
-        SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size], 'subdir': 'val2014'})]
+        SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size],
+                                                'subdir': 'train2014', 'supercategory_ids': supercategory_ids}),
+        SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size],
+                                              'subdir': 'val2014', 'supercategory_ids': supercategory_ids})]
 
 
 def input_image(idx, data):
@@ -118,25 +124,20 @@ def ground_truth_mask(idx, data):
     for ann in anns:
         _mask = data['cocofile'].annToMask(ann)
         mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
+    # here we add other vehicles (truck, bus) to the car mask to create a vehicle mask
+    if SUPERCATEGORY_GROUNDTRUTH:
+        car_id = catIds[-1]
+        other_anns_ids = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=data['supercategory_ids'], iscrowd=None)
+        other_anns = data['cocofile'].loadAnns(other_anns_ids)
+        for j, ot_ann in enumerate(other_anns):
+            _mask = data['cocofile'].annToMask(ot_ann)
+            mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(car_id) + 1)
     mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
     return mask.astype(np.float)
 
 
 def metadata_background_percent(idx, data):
-    print("extracting metadata BG percent")
-    data = data.data
-    catIds = data['cocofile'].getCatIds(catNms=categories)
-    x = data['samples'][idx]
-    batch_masks = []
-    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
-    anns = data['cocofile'].loadAnns(annIds)
-    mask = np.zeros([x['height'], x['width']])
-    for ann in anns:
-        _mask = data['cocofile'].annToMask(ann)
-        mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
-    mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
-    mask = mask.astype(np.float)
-
+    mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
     count_obj = unique_per_obj.get(0.0)
@@ -148,20 +149,7 @@ def metadata_background_percent(idx, data):
 
 
 def metadata_person_percent(idx, data):
-    print("extracting metadata person percent")
-    data = data.data
-    catIds = data['cocofile'].getCatIds(catNms=categories)
-    x = data['samples'][idx]
-    batch_masks = []
-    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
-    anns = data['cocofile'].loadAnns(annIds)
-    mask = np.zeros([x['height'], x['width']])
-    for ann in anns:
-        _mask = data['cocofile'].annToMask(ann)
-        mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
-    mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
-    mask = mask.astype(np.float)
-
+    mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
     count_obj = unique_per_obj.get(1.0)
@@ -173,20 +161,7 @@ def metadata_person_percent(idx, data):
 
 
 def metadata_car_percent(idx, data):
-    print("extracting metadata car percent")
-    data = data.data
-    catIds = data['cocofile'].getCatIds(catNms=categories)
-    x = data['samples'][idx]
-    batch_masks = []
-    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
-    anns = data['cocofile'].loadAnns(annIds)
-    mask = np.zeros([x['height'], x['width']])
-    for ann in anns:
-        _mask = data['cocofile'].annToMask(ann)
-        mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
-    mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
-    mask = mask.astype(np.float)
-
+    mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
     count_obj = unique_per_obj.get(2.0)
@@ -231,7 +206,7 @@ dataset_binder.set_subset(subset_images, 'images')
 dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
 
 dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=DatasetOutputType.Mask, name='mask',
-                                labels=categories + ['background'], masked_input="image")
+                                labels=['background'] + categories, masked_input="image")
 
 dataset_binder.set_metadata(metadata_background_percent, 'images', DatasetMetadataType.float, 'background_percent')
 

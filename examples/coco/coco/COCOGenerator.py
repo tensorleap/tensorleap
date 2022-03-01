@@ -11,7 +11,8 @@ from os.path import basename, join
 class COCOGenerator(Sequence):
 
     def __init__(self, coco_path: str, categories: list, image_size: int = 128,
-                 batch_size: int = 10, max_size: int = 1000, append_vehicle_label: bool = False):
+                 batch_size: int = 10, max_size: int = 1000, append_vehicle_label: bool = False,
+                 force_contain_all_classes=True):
         """
         A generator to train the coco model
         :param coco_path: a path to the coco_annotation file
@@ -25,7 +26,7 @@ class COCOGenerator(Sequence):
         self.path = coco_path
         self.cat = categories
         self.coco_file = COCO(coco_path)
-        self.paths = self.load_set(self.coco_file)
+        self.paths = self.load_set(self.coco_file, force_contain_all_classes)
         self.catids = self.coco_file.getCatIds(catNms=self.cat)
         self.append_vehicle_label = append_vehicle_label
         self.vehicle_categories = self.coco_file.getCatIds(catNms=["bus", "truck", "train"])
@@ -40,10 +41,17 @@ class COCOGenerator(Sequence):
         else:
             raise NotImplementedError
 
-    def load_set(self, cocofile):
+    def load_set(self, cocofile, contain_all_classes: bool):
         # get all images containing given categories, select one at random
         catIds = cocofile.getCatIds(self.cat)
-        imgIds = cocofile.getImgIds(catIds=catIds)
+        if contain_all_classes:
+            imgIds = cocofile.getImgIds(catIds=catIds)
+        else:
+            imgIds = set()
+            for cat in catIds:
+                ids = cocofile.getImgIds(catIds=[cat])
+                imgIds.update(ids)
+            imgIds = list(imgIds)
         imgs = cocofile.loadImgs(imgIds)
         return imgs
 
