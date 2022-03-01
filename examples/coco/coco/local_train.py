@@ -23,13 +23,13 @@ class UpdatedMeanIoU(tf.keras.metrics.MeanIoU):
 
 
 def save_without_compile():
-    ending = ["", "_05", "_10", "_15", "_20", "_25"]
-    # model = unet_model(output_channels)
-    for j in range(len(ending)):
-        model_string = "all_checkpoints" + ending[j] + ".h5"
-        saved_model_string = "epoch" + ending[j] + "_trained.h5"
-        load = tf.keras.models.load_model(model_string, compile=False)
-        load.save(saved_model_string)
+
+    model_string = "vehicle_supercategory_04_0.26.h5"
+    load = tf.keras.models.load_model(model_string, compile=False)
+    load.save("lowest_val_loss_sc.h5")
+    model_string = "vehicle_supercategory_08_0.28.h5"
+    load = tf.keras.models.load_model(model_string, compile=False)
+    load.save("highest_val_meaniou_sc.h5")
 
 
 def infer_model():
@@ -48,7 +48,7 @@ def infer_model():
 def train_model():
     #TODO try to train a model without background prediction (i.e. only person + car)
     CATEGORIES = ['person', 'car']
-    TRAIN_SIZE = 6000
+    TRAIN_SIZE = 47500
     TEST_SIZE = 2800
     BATCH = 10
     EPOCHS = 25
@@ -58,7 +58,8 @@ def train_model():
     model = unet_model(output_channels)
     base_path = "/home/tomtensor/Work/Projects/examples/tensorleap/examples/coco/coco/coco_data/ms-coco/annotations/"
     train_gen = COCOGenerator(join(base_path, "instances_train2014.json"), batch_size=BATCH,
-                      categories=CATEGORIES, max_size=TRAIN_SIZE, append_vehicle_label=True)
+                      categories=CATEGORIES, max_size=TRAIN_SIZE, append_vehicle_label=True,
+                              force_contain_all_classes=False)
     val_gen = COCOGenerator(join(base_path, "instances_val2014.json"), batch_size=BATCH,
                       categories=CATEGORIES, max_size=TEST_SIZE, append_vehicle_label=True)
     model = unet_model(output_channels)
@@ -66,10 +67,11 @@ def train_model():
                   loss=losses.SparseCategoricalCrossentropy(),
                   metrics=[UpdatedMeanIoU(num_classes=output_channels)])
     # define the checkpoint
-    filepath = "vehicle_supercategory_{epoch:02d}_{val_loss:.2f}.h5"
-    checkpoint = ModelCheckpoint(filepath, monitor='val_updated_mean_io_u', verbose=1, save_best_only=True, mode='max')
+    filepath = "vehicle_supercategory_all_val_{epoch:02d}_{val_loss:.2f}.h5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
     callbacks_list = [checkpoint]
-    model.fit(x=train_gen, validation_data=val_gen, epochs=EPOCHS, callbacks=callbacks_list)
+    history = model.fit(x=train_gen, validation_data=val_gen, epochs=EPOCHS, callbacks=callbacks_list)
+    print(1)
 
 
 if __name__ == "__main__":
