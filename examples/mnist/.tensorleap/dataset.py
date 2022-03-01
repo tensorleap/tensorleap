@@ -35,26 +35,6 @@ def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     return [data_X, data_Y]
 
 
-def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
-    """ find the most similar class average image (which isn't the ground truth)
-    based on euclidean distance from the sample"""
-    sample_input = subset.data['images'][idx]
-    label = subset.data['labels'][idx]
-    label = str(np.argmax(label))
-    distance = 0.
-    min_distance = float('+inf')
-    min_distance_class_label = None
-    for label_i in LABELS:
-        if label_i == label:
-            continue
-        class_average_image = dataset_binder.cache_container["classes_avg_images"][label_i]
-        distance = np.linalg.norm(class_average_image - sample_input)
-        if distance < min_distance:
-            min_distance = distance
-            min_distance_class_label = label_i
-    return [min_distance, min_distance_class_label]
-
-
 #############################
 ########## Helpers ##########
 #############################
@@ -126,19 +106,14 @@ def subset_func() -> List[SubsetResponse]:
                                                     })
 
     def calc_classes_centroid(subset: SubsetResponse) -> dict:
-        """ per each class we calculate average image on the pixels.
-         returns dictionary key: class, values: images 28x28  """
         """ calculate average image on the pixels.
          returns a dictionary: key: class, values: images 28x28 """
         avg_images_dict = {}
         data_X = subset.data['images']
         data_Y = subset.data['labels']
-        labels = np.arange(10).astype(str).tolist()
-        for label in labels:
-            for label in LABELS:
-                inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
-                avg_images_dict[label] = np.mean(inputs_label, axis=0)
-
+        for label in LABELS:
+            inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
+            avg_images_dict[label] = np.mean(inputs_label, axis=0)
         return avg_images_dict
 
     avg_images_dict = calc_classes_centroid(train)
@@ -185,6 +160,26 @@ def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[SubsetRe
     label = str(np.argmax(label))
     class_average_image = dataset_binder.cache_container["classes_avg_images"][label]
     return np.linalg.norm(class_average_image - sample_input)
+
+
+def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
+    """ find the most similar class average image (which isn't the ground truth)
+    based on euclidean distance from the sample"""
+    sample_input = subset.data['images'][idx]
+    label = subset.data['labels'][idx]
+    label = str(np.argmax(label))
+    distance = 0.
+    min_distance = float('+inf')
+    min_distance_class_label = None
+    for label_i in LABELS:
+        if label_i == label:
+            continue
+        class_average_image = dataset_binder.cache_container["classes_avg_images"][label_i]
+        distance = np.linalg.norm(class_average_image - sample_input)
+        if distance < min_distance:
+            min_distance = distance
+            min_distance_class_label = label_i
+    return [min_distance, min_distance_class_label]
 
 
 def metadata_most_similar_class_not_gt(idx: int, subset: Union[SubsetResponse, list]) -> np.ndarray:
