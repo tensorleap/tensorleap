@@ -19,7 +19,6 @@ PROJECT_ID = 'example-dev-project-nmrksf0o'
 image_size = 128
 categories = ['person', 'car']
 
-
 def get_length(data):
     if data is None:
         length = None
