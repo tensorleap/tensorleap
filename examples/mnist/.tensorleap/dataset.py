@@ -16,10 +16,8 @@ from tensorflow.keras.utils import to_categorical
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 BUCKET_NAME = 'example-datasets-47ml982d'
 
-
 IMAGE_DIM = 28
 LABELS = np.arange(10).astype(str).tolist()
-
 
 ###########################
 ########## Utils ##########
@@ -35,18 +33,6 @@ def preprocess(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     # one hot encode the target values
     data_Y = to_categorical(data_Y)
     return [data_X, data_Y]
-
-
-def calc_classes_centroid(subset: SubsetResponse) -> dict:
-    """ calculate average image on the pixels.
-     returns a dictionary: key: class, values: images 28x28 """
-    avg_images_dict = {}
-    data_X = subset.data['images']
-    data_Y = subset.data['labels']
-    for label in LABELS:
-        inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
-        avg_images_dict[label] = np.mean(inputs_label, axis=0)
-    return avg_images_dict
 
 
 def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: SubsetResponse) -> Tuple[float, str]:
@@ -67,7 +53,6 @@ def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: Subset
             min_distance = distance
             min_distance_class_label = label_i
     return [min_distance, min_distance_class_label]
-
 
 
 #############################
@@ -139,6 +124,22 @@ def subset_func() -> List[SubsetResponse]:
     test = SubsetResponse(length=len(test_X), data={'images': test_X,
                                                     'labels': test_Y
                                                     })
+
+    def calc_classes_centroid(subset: SubsetResponse) -> dict:
+        """ per each class we calculate average image on the pixels.
+         returns dictionary key: class, values: images 28x28  """
+        """ calculate average image on the pixels.
+         returns a dictionary: key: class, values: images 28x28 """
+        avg_images_dict = {}
+        data_X = subset.data['images']
+        data_Y = subset.data['labels']
+        labels = np.arange(10).astype(str).tolist()
+        for label in labels:
+            for label in LABELS:
+                inputs_label = data_X[np.equal(np.argmax(data_Y, axis=1), int(label))]
+                avg_images_dict[label] = np.mean(inputs_label, axis=0)
+
+        return avg_images_dict
 
     avg_images_dict = calc_classes_centroid(train)
     dataset_binder.cache_container["classes_avg_images"] = avg_images_dict
