@@ -5,8 +5,13 @@ We show an example of building a cnn network trained on MNIST dataset.
 
 The MNIST database (Modified National Institute of Standards and Technology database) is a database of handwritten digits often used for training various image processing systems. 
 
+<<<<<<< HEAD
 In this example, we integrate the MNIST dataset into Tensorleap (TL) and build a simple classification model. 
 We demonstrate how we can analyze the model predictions using TL.
+=======
+In this example, we integrate the MNIST dataset into Tensorleap and build a simple classification model. 
+We demonstrate how we can analyze the model predictions using Tensorleap.
+>>>>>>> fix english grammer and typos
 
 The model achieved accuracy of 0.98~. 
 
@@ -45,7 +50,7 @@ to each other and there are some false prediction between the samples on the edg
 
 ## Sample Analysis 
 
-TL allow us to further explore the model's response to a specific sample. 
+Tensorleap allows us to further explore the model's response to a specific sample. 
 For example, from the results below, we can see that the model's prediction was 9 while the ground truth is 8.  
 Additionally, we can see which features of the data contribute to each of the output classes using the Heat Map option.
 
@@ -65,15 +70,15 @@ Using 'Fetch Similars' functionality, we can find cluster of samples that the mo
 
 # Results Analysis
 
-By using TL Dashboard functionality, we can plot the training progress, visualize the metadata vs performance to find correlations and trends.  
+By using Tensorleap Dashboard functionality, we can plot the training progress as well as visualize how key performance metrics distributed over various metadata to find correlations and trends. 
 
 **Average Euclidean Difference Metadata and Average Loss**
 
-We plot the samples' average loss vs the samples' Euclidean difference metadata (per class). We expect that for samples that are further than their class average examplar, the loss will be higher. Consequently, the network will be less capable of generalizing on these deviated samples.
+We plot how the samples' loss distributed over the samples' Euclidean difference metadata (per class). We expect that for samples that are further than their class average exemplar, the loss will be higher. Consequently, the network will be less capable of generalizing on these deviated samples.
 
 <img alt="img_16.png" src="images/img_6.png"/>
 
-- We see the trend in line with our expectations, as the Euclidean difference increases, the average loss increases. 
+- We see the trend in line with our expectations, as the Euclidean difference increases, the loss increases. 
 
 
 - The Euclidean difference from the class examplar is calculated as follows: 
@@ -89,7 +94,7 @@ We plot the model Loss Accuracy for training and validation sets during training
 
 There is a nice convergence of the model, achieving accuracy of ~0.98 on validation set.  
 
-We have shown a few examples of the model analysis and insights we can gain using TL. Nevertheless, we only begin to scratch the surface with the potential capabilities and wisdom we can achieve using the platform. For further examples, please refer to our additional examples and tutorials. 
+We have shown a few examples of the model analysis and insights we can gain using Tensorleap. Nevertheless, we have only begun to scratch the surface with the potential capabilities and wisdom we can achieve using the platform. For further examples, please refer to our additional examples and tutorials. 
 
 
 
