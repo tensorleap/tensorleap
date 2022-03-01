@@ -6,7 +6,7 @@ We show an example of building a cnn network trained on MNIST dataset.
 The MNIST database (Modified National Institute of Standards and Technology database) is a database of handwritten digits often used for training various image processing systems. 
 
 In this example, we integrate the MNIST dataset into Tensorleap (TL) and build a simple classification model. 
-We demonstrate how we can analysis the model predictions using TL.
+We demonstrate how we can analyze the model predictions using TL.
 
 The model achieved accuracy of 0.98~. 
 
