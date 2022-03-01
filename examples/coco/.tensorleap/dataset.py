@@ -89,7 +89,6 @@ def subset_images() -> List[SubsetResponse]:
         SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size], 'subdir': 'train2014'}),
         SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size], 'subdir': 'val2014'})]
 
-subset_images() # TODO remove
 
 def input_image(idx, data):
     print("subset")
