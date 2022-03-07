@@ -139,3 +139,4 @@ dmypy.json
 cython_debug/
 
 !/.tensorleap/config.toml
+!/coco/local_data.py
