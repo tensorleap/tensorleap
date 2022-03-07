@@ -20,7 +20,7 @@ PROJECT_ID = 'example-dev-project-nmrksf0o'
 image_size = 128
 categories = ['person', 'car']
 SUPERCATEGORY_GROUNDTRUTH = True
-SUPERCATEGORY_CLASSES = ["bus", "truck", "train"]
+SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
 APPLY_AUGMENTATION = True
 
 def get_length(data):
@@ -96,7 +96,7 @@ def subset_images() -> List[SubsetResponse]:
                                               'subdir': 'val2014', 'supercategory_ids': supercategory_ids})]
 
 
-def input_image(idx: int, data: SubsetResponse):
+def input_image(idx: int, data: SubsetResponse) -> ndarray:
     print("subset")
     data = data.data
     x = data['samples'][idx]
@@ -125,7 +125,7 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
     for ann in anns:
         _mask = data['cocofile'].annToMask(ann)
         mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
-    # here we add other vehicles (truck, bus) to the car mask to create a vehicle mask
+    # here we add other vehicles (truck, bus, train) to the car mask to create a vehicle mask
     if SUPERCATEGORY_GROUNDTRUTH:
         car_id = catIds[-1]
         other_anns_ids = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=data['supercategory_ids'], iscrowd=None)
@@ -138,6 +138,7 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
 
 
 def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
+    print("extracting background percent metadata")
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -149,7 +150,8 @@ def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
     return percent_obj
 
 
-def metadata_person_percent(idx: int, data: SubsetResponse) -> float:
+def metadata_person_category_percent(idx: int, data: SubsetResponse) -> float:
+    print("extracting person percent metadata")
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -161,7 +163,9 @@ def metadata_person_percent(idx: int, data: SubsetResponse) -> float:
     return percent_obj
 
 
-def metadata_car_percent(idx: int, data: SubsetResponse) -> float:
+def metadata_car_vehicle_category_percent(idx: int, data: SubsetResponse) -> float:
+    print("extracting car vehicle percent metadata")
+    # When Super Category mode includes: car, truck, bus, train. For Category mode: only car.
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -201,44 +205,67 @@ def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     return is_colored
 
 
-def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label: str = 'all') -> int:
+def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag: str = 'all') -> int:
     data = data.data
     x = data['samples'][idx]
-    catIds = data['cocofile'].getCatIds(catNms=categories)
+    all_labels = SUPERCATEGORY_CLASSES + categories
+    vehicle_labels = 'car' + SUPERCATEGORY_CLASSES
+    catIds = data['cocofile'].getCatIds(catNms=all_labels)
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
     anns_list = data['cocofile'].loadAnns(annIds)
-    if label == 'all':
-        return len(anns_list)
-    cat_name_to_id = dict(zip(categories, catIds))
-    cat_id = cat_name_to_id[label]
-    cat_id_counts = {cat_id: 0 for cat_id in catIds}
+    if label_flag == 'all':
+        return len(anns_list)   # all instances within labels
+    cat_name_to_id = dict(zip(all_labels, catIds))  # map label name to its ID
+    cat_id = cat_name_to_id[label_flag]
+    cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
     for ann in anns_list:
         cat_id_counts[ann['category_id']] += 1
+    if label_flag == 'vehicle':  # count super category vehicle
+        return np.sum([cat_id_counts[cat_id] for cat_id in vehicle_labels])
     return cat_id_counts[cat_id]
 
 
 def metadata_total_instances_count(idx: int, data: SubsetResponse) -> int:
-    return get_counts_of_instances_per_class(idx, data, label='all')
+    return get_counts_of_instances_per_class(idx, data, label_flag='all')
 
 
 def metadata_person_instances_count(idx: int, data: SubsetResponse) -> int:
-    return get_counts_of_instances_per_class(idx, data, label='person')
+    return get_counts_of_instances_per_class(idx, data, label_flag='person')
 
 
 def metadata_car_instances_count(idx: int, data: SubsetResponse) -> int:
-    return get_counts_of_instances_per_class(idx, data, label='car')
+    return get_counts_of_instances_per_class(idx, data, label_flag='car')
 
 
-def metadata_person_avg_size(idx: int, data: SubsetResponse) -> float:
-    percent_val = metadata_person_percent(idx, data)
-    instances_cont = metadata_person_instances_count(idx, data)
-    return np.round(percent_val/instances_cont, 3)
+def metadata_bus_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label_flag='bus')
 
 
-def metadata_car_avg_size(idx: int, data: SubsetResponse) -> float:
-    percent_val = metadata_car_percent(idx, data)
-    instances_cont = metadata_car_instances_count(idx, data)
-    return np.round(percent_val/instances_cont, 3)
+def metadata_truck_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label_flag='truck')
+
+
+def metadata_train_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label_flag='train')
+
+
+def metadata_vehicle_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label_flag='vehicle')
+
+
+def metadata_person_category_avg_size(idx: int, data: SubsetResponse) -> float:
+    percent_val = metadata_person_category_percent(idx, data)
+    instances_cnt = metadata_person_instances_count(idx, data)
+    return np.round(percent_val/instances_cnt, 3)
+
+
+def metadata_car_vehicle_category_avg_size(idx: int, data: SubsetResponse) -> float:
+    percent_val = metadata_car_vehicle_category_percent(idx, data)
+    if SUPERCATEGORY_GROUNDTRUTH:
+        instances_cnt = metadata_vehicle_instances_count(idx, data)
+    else:
+        instances_cnt = metadata_car_instances_count(idx, data)
+    return np.round(percent_val/instances_cnt, 3)
 
 
 dataset_binder.set_subset(subset_images, 'images')
@@ -250,9 +277,9 @@ dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=D
 
 dataset_binder.set_metadata(metadata_background_percent, 'images', DatasetMetadataType.float, 'background_percent')
 
-dataset_binder.set_metadata(metadata_person_percent, 'images', DatasetMetadataType.float, 'person_percent')
+dataset_binder.set_metadata(metadata_person_category_percent, 'images', DatasetMetadataType.float, 'person_percent')
 
-dataset_binder.set_metadata(metadata_car_percent, 'images', DatasetMetadataType.float, 'car_percent')
+dataset_binder.set_metadata(metadata_car_vehicle_category_percent, 'images', DatasetMetadataType.float, 'car_percent')
 
 dataset_binder.set_metadata(metadata_brightness, 'images', DatasetMetadataType.float, 'brightness')
 
@@ -264,8 +291,16 @@ dataset_binder.set_metadata(metadata_person_instances_count, 'images', DatasetMe
 
 dataset_binder.set_metadata(metadata_car_instances_count, 'images', DatasetMetadataType.int, 'car_instances_count')
 
-dataset_binder.set_metadata(metadata_person_avg_size, 'images', DatasetMetadataType.float, 'person_avg_size')
+dataset_binder.set_metadata(metadata_bus_instances_count, 'images', DatasetMetadataType.int, 'bus_instances_count')
 
-dataset_binder.set_metadata(metadata_car_avg_size, 'images', DatasetMetadataType.float, 'car_avg_size')
+dataset_binder.set_metadata(metadata_truck_instances_count, 'images', DatasetMetadataType.int, 'truck_instances_count')
+
+dataset_binder.set_metadata(metadata_train_instances_count, 'images', DatasetMetadataType.int, 'train_instances_count')
+
+dataset_binder.set_metadata(metadata_vehicle_instances_count, 'images', DatasetMetadataType.int, 'vehicle_instances_count')
+
+dataset_binder.set_metadata(metadata_person_category_avg_size, 'images', DatasetMetadataType.float, 'person_avg_size')
+
+dataset_binder.set_metadata(metadata_car_vehicle_category_avg_size, 'images', DatasetMetadataType.float, 'car_vehicle_avg_size')
 
 
