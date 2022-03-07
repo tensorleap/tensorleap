@@ -173,7 +173,7 @@ def metadata_car_percent(idx, data):
     return percent_obj
 
 
-def metadata_brightness(idx: int, data: SubsetResponse):
+def metadata_brightness(idx: int, data: SubsetResponse) -> float:
     print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
@@ -190,7 +190,7 @@ def metadata_brightness(idx: int, data: SubsetResponse):
     return np.mean(img)
 
 
-def metadata_is_colored(idx, data):
+def metadata_is_colored(idx, data) -> bool:
     print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
@@ -201,7 +201,7 @@ def metadata_is_colored(idx, data):
     return is_colored
 
 
-def get_counts_of_instances_per_label(idx: int, data: SubsetResponse, label: str = 'all') -> int:
+def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label: str = 'all') -> int:
     data = data.data
     x = data['samples'][idx]
     catIds = data['cocofile'].getCatIds(catNms=categories)
@@ -217,16 +217,28 @@ def get_counts_of_instances_per_label(idx: int, data: SubsetResponse, label: str
     return cat_id_counts[cat_id]
 
 
-def metadata_total_instances_count(idx: int, data: SubsetResponse):
-    return get_counts_of_instances_per_label(idx, data, label='all')
+def metadata_total_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label='all')
 
 
-def metadata_person_instances_count(idx: int, data: SubsetResponse):
-    return get_counts_of_instances_per_label(idx, data, label='person')
+def metadata_person_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label='person')
 
 
-def metadata_car_instances_count(idx: int, data: SubsetResponse):
-    return get_counts_of_instances_per_label(idx, data, label='car')
+def metadata_car_instances_count(idx: int, data: SubsetResponse) -> int:
+    return get_counts_of_instances_per_class(idx, data, label='car')
+
+
+def metadata_person_avg_size(idx: int, data: SubsetResponse) -> float:
+    percent_val = metadata_person_percent(idx, data)
+    instances_cont = metadata_person_instances_count(idx, data)
+    return np.round(percent_val/instances_cont, 3)
+
+
+def metadata_car_avg_size(idx: int, data: SubsetResponse) -> float:
+    percent_val = metadata_car_percent(idx, data)
+    instances_cont = metadata_car_instances_count(idx, data)
+    return np.round(percent_val/instances_cont, 3)
 
 
 dataset_binder.set_subset(subset_images, 'images')
@@ -251,5 +263,9 @@ dataset_binder.set_metadata(metadata_total_instances_count, 'images', DatasetMet
 dataset_binder.set_metadata(metadata_person_instances_count, 'images', DatasetMetadataType.int, 'person_instances_count')
 
 dataset_binder.set_metadata(metadata_car_instances_count, 'images', DatasetMetadataType.int, 'car_instances_count')
+
+dataset_binder.set_metadata(metadata_person_avg_size, 'images', DatasetMetadataType.float, 'person_avg_size')
+
+dataset_binder.set_metadata(metadata_car_avg_size, 'images', DatasetMetadataType.float, 'car_avg_size')
 
 
