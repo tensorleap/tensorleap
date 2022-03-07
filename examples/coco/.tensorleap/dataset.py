@@ -152,15 +152,15 @@ def get_counts_of_instances_per_label(idx: int, data: SubsetResponse, label: str
     return cat_id_counts[cat_id]
 
 
-def metadata_person_instances_number(idx: int, data: SubsetResponse):
+def metadata_person_instances_count(idx: int, data: SubsetResponse):
     return get_counts_of_instances_per_label(idx, data, label='person')
 
 
-def metadata_car_instances_number(idx: int, data: SubsetResponse):
+def metadata_car_instances_count(idx: int, data: SubsetResponse):
     return get_counts_of_instances_per_label(idx, data, label='car')
 
 
-def metadata_total_instances_number(idx: int, data: SubsetResponse):
+def metadata_total_instances_count(idx: int, data: SubsetResponse):
     return get_counts_of_instances_per_label(idx, data, label='all')
 
 
@@ -245,4 +245,11 @@ dataset_binder.set_metadata(metadata_car_percent, 'images', DatasetMetadataType.
 dataset_binder.set_metadata(metadata_brightness, 'images', DatasetMetadataType.float, 'brightness')
 
 dataset_binder.set_metadata(metadata_is_colored, 'images', DatasetMetadataType.boolean, 'is_colored')
+
+dataset_binder.set_metadata(metadata_total_instances_count, 'images', DatasetMetadataType.int, 'total_instances_count')
+
+dataset_binder.set_metadata(metadata_person_instances_count, 'images', DatasetMetadataType.int, 'person_instances_count')
+
+dataset_binder.set_metadata(metadata_car_instances_count, 'images', DatasetMetadataType.int, 'car_instances_count')
+
 
