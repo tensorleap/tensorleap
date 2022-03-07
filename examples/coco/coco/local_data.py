@@ -68,6 +68,5 @@ def subset_images():
     val_size = min(len(x_test_raw), 2800)
     supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
 
-
 subset_images()
 
