@@ -7,6 +7,7 @@ from code_loader import dataset_binder
 from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 from google.cloud import storage
 from google.cloud.storage import Bucket
+from numpy import ndarray
 from pycocotools.coco import COCO
 from skimage.color import gray2rgb
 from skimage.io import imread
@@ -96,7 +97,7 @@ def subset_images() -> List[SubsetResponse]:
                                               'subdir': 'val2014', 'supercategory_ids': supercategory_ids})]
 
 
-def input_image(idx, data):
+def input_image(idx: int, data: SubsetResponse):
     print("subset")
     data = data.data
     x = data['samples'][idx]
@@ -113,7 +114,7 @@ def input_image(idx, data):
     return img.astype(np.float)
 
 
-def ground_truth_mask(idx, data):
+def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
     print("GT mask")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=categories)
@@ -137,7 +138,7 @@ def ground_truth_mask(idx, data):
     return mask.astype(np.float)
 
 
-def metadata_background_percent(idx, data):
+def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -149,7 +150,7 @@ def metadata_background_percent(idx, data):
     return percent_obj
 
 
-def metadata_person_percent(idx, data):
+def metadata_person_percent(idx: int, data: SubsetResponse) -> float:
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -161,7 +162,7 @@ def metadata_person_percent(idx, data):
     return percent_obj
 
 
-def metadata_car_percent(idx, data):
+def metadata_car_percent(idx: int, data: SubsetResponse) -> float:
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -190,7 +191,7 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> float:
     return np.mean(img)
 
 
-def metadata_is_colored(idx, data) -> bool:
+def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
