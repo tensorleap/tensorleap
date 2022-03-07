@@ -195,7 +195,7 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> float:
 
 
 def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
-    print("extracting metadata image brightness")
+    print("extracting metadata is colored image")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -226,40 +226,49 @@ def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag
 
 
 def metadata_total_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting total instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='all')
 
 
 def metadata_person_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting person instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='person')
 
 
 def metadata_car_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting car instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='car')
 
 
 def metadata_bus_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting bus instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='bus')
 
 
 def metadata_truck_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting truck instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='truck')
 
 
 def metadata_train_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting train instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='train')
 
 
 def metadata_vehicle_instances_count(idx: int, data: SubsetResponse) -> int:
+    print("extracting vehicle instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='vehicle')
 
 
 def metadata_person_category_avg_size(idx: int, data: SubsetResponse) -> float:
+    print("extracting person average size metadata")
     percent_val = metadata_person_category_percent(idx, data)
     instances_cnt = metadata_person_instances_count(idx, data)
     return np.round(percent_val/instances_cnt, 3)
 
 
 def metadata_car_vehicle_category_avg_size(idx: int, data: SubsetResponse) -> float:
+    print("extracting car or vehicle average size metadata")
     percent_val = metadata_car_vehicle_category_percent(idx, data)
     if SUPERCATEGORY_GROUNDTRUTH:
         instances_cnt = metadata_vehicle_instances_count(idx, data)
