@@ -68,10 +68,6 @@ def subset_images():
     val_size = min(len(x_test_raw), 2800)
     supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
 
-    # ubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size],
-    #                                        'subdir': 'train2014', 'supercategory_ids': supercategory_ids}),
-    # SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size],
-    #                                       'subdir': 'val2014', 'supercategory_ids': supercategory_ids})]
 
 subset_images()
 
