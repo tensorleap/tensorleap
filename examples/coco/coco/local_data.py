@@ -5,6 +5,7 @@ from google.cloud import storage
 from google.cloud.storage import Bucket
 from google.auth.credentials import AnonymousCredentials
 from pycocotools.coco import COCO
+import numpy as np
 
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
@@ -67,6 +68,30 @@ def subset_images():
     train_size = min(len(x_train_raw), 6000)
     val_size = min(len(x_test_raw), 2800)
     supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
+    return valcoco
 
-subset_images()
+
+def get_counts_of_instances_per_class(idx, cocodataset, label_flag):
+    data = cocodataset.dataset['images']
+    x = data[idx]
+    all_labels = SUPERCATEGORY_CLASSES + categories
+    vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
+    catIds = cocodataset.getCatIds(catNms=all_labels)
+    annIds = cocodataset.getAnnIds(imgIds=x['id'], catIds=catIds)
+    anns_list = cocodataset.loadAnns(annIds)
+    if label_flag == 'all':
+        return len(anns_list)   # all instances within labels
+    cat_name_to_id = dict(zip(all_labels, catIds))  # map label name to its ID
+    cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
+    for ann in anns_list:
+        cat_id_counts[ann['category_id']] += 1
+    if label_flag == 'vehicle':  # count super category vehicle
+        vehicle_ids = [cat_name_to_id[cat_name] for cat_name in vehicle_labels]
+        return np.sum([cat_id_counts[cat_id] for cat_id in vehicle_ids])
+    cat_id = cat_name_to_id[label_flag]
+    return cat_id_counts[cat_id]
+
+
+valcoco = subset_images()
+get_counts_of_instances_per_class(0, valcoco, 'vehicle')
 

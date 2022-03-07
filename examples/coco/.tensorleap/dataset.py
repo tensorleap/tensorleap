@@ -209,19 +209,20 @@ def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag
     data = data.data
     x = data['samples'][idx]
     all_labels = SUPERCATEGORY_CLASSES + categories
-    vehicle_labels = 'car' + SUPERCATEGORY_CLASSES
+    vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
     catIds = data['cocofile'].getCatIds(catNms=all_labels)
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
     anns_list = data['cocofile'].loadAnns(annIds)
     if label_flag == 'all':
         return len(anns_list)   # all instances within labels
     cat_name_to_id = dict(zip(all_labels, catIds))  # map label name to its ID
-    cat_id = cat_name_to_id[label_flag]
     cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
     for ann in anns_list:
         cat_id_counts[ann['category_id']] += 1
     if label_flag == 'vehicle':  # count super category vehicle
-        return np.sum([cat_id_counts[cat_id] for cat_id in vehicle_labels])
+        vehicle_ids = [cat_name_to_id[cat_name] for cat_name in vehicle_labels]
+        return np.sum([cat_id_counts[cat_id] for cat_id in vehicle_ids])
+    cat_id = cat_name_to_id[label_flag]
     return cat_id_counts[cat_id]
 
 
