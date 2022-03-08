@@ -265,7 +265,7 @@ def metadata_person_category_avg_size(idx: int, data: SubsetResponse) -> float:
     print("extracting person average size metadata")
     percent_val = metadata_person_category_percent(idx, data)
     instances_cnt = metadata_person_instances_count(idx, data)
-    return np.round(percent_val/instances_cnt, 3)
+    return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 
 def metadata_car_vehicle_category_avg_size(idx: int, data: SubsetResponse) -> float:
@@ -275,7 +275,7 @@ def metadata_car_vehicle_category_avg_size(idx: int, data: SubsetResponse) -> fl
         instances_cnt = metadata_vehicle_instances_count(idx, data)
     else:
         instances_cnt = metadata_car_instances_count(idx, data)
-    return np.round(percent_val/instances_cnt, 3)
+    return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 
 dataset_binder.set_subset(subset_images, 'images')
