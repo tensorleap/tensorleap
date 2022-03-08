@@ -19,7 +19,7 @@ BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 image_size = 128
 categories = ['person', 'car']
-SUPERCATEGORY_GROUNDTRUTH = True
+SUPERCATEGORY_GROUNDTRUTH = False
 SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
 APPLY_AUGMENTATION = True
 
@@ -206,12 +206,34 @@ def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     return is_colored
 
 
+# def get_rgb_std(idx: int, data: SubsetResponse, color: str) -> float:
+#     print("extracting metadata rgb std")
+#     data = data.data
+#     x = data['samples'][idx]
+#     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+#     fpath = _download(filepath)
+#     img = imread(fpath)
+#
+#     if color == 'red':
+#         return
+
+def metadata_red_std(idx: int, data: SubsetResponse) -> bool:
+    print("extracting metadata rgb std")
+    data = data.data
+    x = data['samples'][idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    fpath = _download(filepath)
+    img = imread(fpath)
+    is_colored = len(img.shape) > 2
+    return is_colored
+
+
 def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag: str = 'all') -> int:
     data = data.data
     x = data['samples'][idx]
     all_labels = SUPERCATEGORY_CLASSES + categories
     vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
-    catIds = data['cocofile'].getCatIds(catNms=all_labels)
+    catIds = [data['cocofile'].getCatIds(catNms=label)[0] for label in all_labels]  # keep same labels order
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
     anns_list = data['cocofile'].loadAnns(annIds)
     if label_flag == 'all':

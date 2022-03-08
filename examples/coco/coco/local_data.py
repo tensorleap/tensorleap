@@ -76,7 +76,7 @@ def get_counts_of_instances_per_class(idx, cocodataset, label_flag):
     x = data[idx]
     all_labels = SUPERCATEGORY_CLASSES + categories
     vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
-    catIds = cocodataset.getCatIds(catNms=all_labels)
+    catIds = [cocodataset.getCatIds(catNms=label)[0] for label in all_labels]
     annIds = cocodataset.getAnnIds(imgIds=x['id'], catIds=catIds)
     anns_list = cocodataset.loadAnns(annIds)
     if label_flag == 'all':
@@ -92,6 +92,15 @@ def get_counts_of_instances_per_class(idx, cocodataset, label_flag):
     return cat_id_counts[cat_id]
 
 
+def get_rgb_std(idx: int, cocodataset) -> float:
+    print("extracting metadata rgb std")
+    data = cocodataset.dataset['images']
+    x = data[idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    fpath = _download(filepath)
+
+
+
 valcoco = subset_images()
-get_counts_of_instances_per_class(0, valcoco, 'vehicle')
+count = get_counts_of_instances_per_class(100, valcoco, 'person')
 
