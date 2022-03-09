@@ -19,8 +19,9 @@ BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 image_size = 128
 categories = ['person', 'car']
-SUPERCATEGORY_GROUNDTRUTH = False
+SUPERCATEGORY_GROUNDTRUTH = True
 SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
+LOAD_UNION_CATEGORIES_IMAGES = False
 APPLY_AUGMENTATION = True
 
 
@@ -66,12 +67,20 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 def subset_images() -> List[SubsetResponse]:
     print("subset")
 
-    def load_set(coco):
+    def load_set(coco, load_union=False):
         # get all images containing given categories
         catIds = coco.getCatIds(categories)     # Fetch class IDs only corresponding to the filterClasses
-        imgIds = coco.getImgIds(catIds=catIds)  # Get all images containing the Category IDs
+        if not load_union:
+            imgIds = coco.getImgIds(catIds=catIds)  # Get all images containing the Category IDs together
+        else:
+            imgIds = set()
+            for cat_id in catIds:
+                image_ids = coco.getImgIds(catIds=[cat_id])
+                imgIds.update(image_ids)
+            imgIds = list(imgIds)
         imgs = coco.loadImgs(imgIds)
         return imgs
+
 
     dataType = 'train2014'
     annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
@@ -80,13 +89,13 @@ def subset_images() -> List[SubsetResponse]:
     print(fpath)
     traincoco = COCO(fpath)
     print(traincoco)
-    x_train_raw = load_set(coco=traincoco)
+    x_train_raw = load_set(coco=traincoco, load_union=LOAD_UNION_CATEGORIES_IMAGES)
     dataType = 'val2014'
     annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
     fpath = _download(annFile)
     # initialize COCO api for instance annotations
     valcoco = COCO(fpath)
-    x_test_raw = load_set(coco=valcoco)
+    x_test_raw = load_set(coco=valcoco, load_union=LOAD_UNION_CATEGORIES_IMAGES)
     train_size = min(len(x_train_raw), 6000)
     val_size = min(len(x_test_raw), 2800)
     supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
