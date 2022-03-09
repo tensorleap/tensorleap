@@ -1,7 +1,7 @@
 projectName = "coco"
 organization = "dani"
 framework = "tensorflow"
-datasetName = "coco"
+datasetName = "coco_SC"
 bucketName = "example-datasets-47ml982d"
 
 
