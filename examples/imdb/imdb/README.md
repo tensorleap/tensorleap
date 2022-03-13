@@ -71,7 +71,7 @@ In fact, the bi-gram "entertaining mildly" is now an indicator of a negative sen
 #### Data exploration
 
 Using Tensorleap's dashboard we can see how our data is distributed across various features.
-Here, we've selected 5 informative features and plotted their hitogram vs. the loss:
+Here, we've selected 5 informative features and plotted their histogram vs. the loss:
 
 ![img_1.png](images/img_1.png)
 
