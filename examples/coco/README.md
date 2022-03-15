@@ -142,14 +142,12 @@ Inaccurate GT:
 ![](./coco/images/inaccurate_gt.png)
 
 Ambiguous label image: toy car as a car :)
-![](./coco/images/toy_car.png)
+![](./coco/images/toy_car_3.png)
 
 Challenging image: low light
-![](./coco/images/low_light.png)
-
+![](./coco/images/low_light_2.png)
 Challenging image: crowds with small people
-![](./coco/images/crowds.png)
-
+![](./coco/images/crowds_2.png)
 
 #### Performance and Metadata Analysis
 
