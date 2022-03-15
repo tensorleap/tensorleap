@@ -97,11 +97,11 @@ Our new model is now able to find strong, discriminative, features to this clust
 Reviewing the attention map reveals a possible confusion: round objects could be categorized as cars due to their similarity to wheels. We analyze one of the samples in this cluster to exemplify this issue.<br>
  In the following figure we show a sample of a person holding a camera. While the GT is that of a person (bottom right) the actual prediction is that of a car (top right). <br>
 This is due to the camera lens that provided features that supported a car class (top left) and accoicated the sample with the cluster (bottom left).
-![img.png](./coco/images/round_object.png)
-
+![img.png](./coco/images/round_object_3.png)
 #### Effect on the person class
 
 Using Tensorleap's population exploration we can compare the embedding of images with a high percent of car pixels to a high percent of people pixels, in the original model (top figures) and the new model (bottom figures):
+
 ![img.png](./coco/images/comparing_cluster_location.png)
 
 Since our new model is now able to use a wider collection of features to describe the vehicle category its latent
