@@ -40,6 +40,7 @@ First, we evaluate our model on a dataset subset containing cars and person inst
 | Category Model     | 0.309
 
 
+
 #### Cluster Analysis
 
 To qualitatively analyze the model's predictions on the different classes we utilize Tesnorleap's latent space. We select samples from different areas of the embedding space and use `fetch similar` to create unique clusters of similar samples.
@@ -100,13 +101,18 @@ This is due to the camera lens that provided features that supported a car class
 
 #### Effect on the person class
 
-By allowing our model to learn a combined representation of all vehicles we have also improved our IOU on the person class:
+Using Tensorleap's population exploration we can compare the embedding of images with a high percent of car pixels to a high percent of people pixels, in the original model (top figures) and the new model (bottom figures):
+![img.png](./coco/images/comparing_cluster_location.png)
+
+Since our new model is now able to use a wider collection of features to describe the vehicle category its latent
+space provide better seperability between humans and vehicles, and is able to more accurately capture these two categories.
+
+Thus, for example, when we examine the IOU on the person class we see that our SC model is more accurate than the original one:
 
 | Dataset | Mean IoU Person |
 | -------- |  -------- |
 | Category Model     | 0.309
 | Super Category Model |  0.319 |
-
 #### Additional cluster: Sport cluster
 
 ![img.png](./coco/images/sports_cluster.png)
@@ -152,7 +158,7 @@ We can plot using Tensorleap the metadata we extract to identify trends and fact
 ![](./coco/images/person_vs_loss.png)
 <span style="color:yellow">TODO rephrase</span>.
 
-We can see that when the number of person instances per image increases the Cross-Entropy Loss increases and the mean IoU decreases. The net's predictions are less accurate when the image is denser with objects. [rephrase](/3vnw7Z7GSPGBR7R-qITpQQ) 
+We can see that when the number of person instances per image increases the Cross-Entropy Loss increases and the mean IoU decreases. The net's predictions are less accurate when the image is denser with objects.
 
 For the vehicle category, we can see that model performance decreases when the vehicle average size increases. 
 ![](./coco/images/vehicle_vs_loss.png)
