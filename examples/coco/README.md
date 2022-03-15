@@ -52,138 +52,110 @@ We fetch a group of similar images that are mostly greyscale images as seen belo
 
 ![BWcluster](./coco/images/b_w_cluster.png)
 
-Upon further look, most of the samples are structured with 3 rgb channels as colored images (most of the samples are colored red from 'is_colored' metadata): 
-![](https://hackmd.io/_uploads/SyOlVbLbc.png)
+This cluster not only captures the single channel B&W images, but also those images with a small variation in
+[hue](https://en.wikipedia.org/wiki/HSL_and_HSV).
 
-However, most of their red green blue components have equal intensity in RGB space.
+![BWclusterpoints](./coco/images/b_w_cluster_points.png)
 
-We see that the loss is lower on colored images that holds more information than the greyscale images:  
+In fact, viewing the cluster in Tensorleap's `cluster analysis` shows that the vast majority of images (colored red) 3-channel RGB imagees.
 
-![](https://hackmd.io/_uploads/BJQ39eTWc.png)
+If we compare B&W images to RGB images we see that, on average, our loss on RGB images is lower:
+
+![](./coco/images/b_w_loss.png)
 
 
 #### 'Vehicle-like' clusters
-Tom's sugggestion:
-**Due to the pre-trained feature extractor our model is able to extract multiple semantically meaningful clusters:**
-?
-The system was able to extract clusters characterized by categories that the net didn't train on as further seen. A reasonable explanation is that the pre-trained encoder we use was trained on these classes and that is why it is extracting those feature classes.  
-
+Our model latent space have multiple semantically meaningful vehicle clusters
 #### Bicycle cluster 
- ![](https://hackmd.io/_uploads/rkZpLcfxq.png)
+ ![](./coco/images/Bicycle_cluster.png)
 
 #### Bus cluster 
-![](https://hackmd.io/_uploads/HJ_N-2Qb9.png)
-Tom's suggestion:
+![](./coco/images/Bus_cluster.png)
 
-**In addition to the high concentration of buses and cars, we also see buildings and poles as part of the same cluster.**
-?
-Examining the attention map on the features that make this cluster similar, we see features that are not directly related to vehicles (towers, etc.):
+Suprisingly, the attention map that highlights the features that defines this custer contain not only bus feature, bus also buildings, towers, and similar constructs:
 
-![](https://hackmd.io/_uploads/SyFIDsNbc.png)
+![](./coco/images/Bus_cluster_attention.png)
 
 
 ## Vehicle Supercategory Model
-Tom's suggestion:
 
-**Our previous model tries to segment cars as a seperate class from truck & bus (which are labeled background). Often, we need to segment the entire vehicle SuperCategory (SC) together. Here, we train a SC model that tries to segment vehicles, person, and background.**
-?
-From the vehicle-like clusters we found, we can conclude that giving the model to segment other vehicles (which aren't car) as background might negatively affect the performance. That leads us trying to redefine our categories classes to a more generic definition: `vehicle` with `person`. 
+Our previous model tries to segment cars as a seperate class from truck & bus (which are labeled background). Often, we need to segment the entire vehicle SuperCategory (SC) together. Here, we train a SC model that tries to segment vehicles, person, and background.
 
-Evaluating the new model on a Super Category (SC) labeled dataset we get:
+To see how this new model latent space is effected we could examine its latent space by using cluster analysis. 
+
+#### Cluster Analysis
+
+`Fetching similars` to one of the vehicles as expected result in a more homogenous cluster (composed of cars + buses).
+
+![](./coco/images/sc_cluster.jpg)
+
+Our new model is now able to find strong, discriminative, features to this cluster - such as wheels:
+
+![](./coco/images/sc_cluster_attention.jpg)
+
+Reviewing the attention map reveals a possible confusion: round objects could be categorized as cars due to their similarity to wheels. We analyze one of the samples in this cluster to exemplify this issue.<br>
+ In the following figure we show a sample of a person holding a camera. While the GT is that of a person (bottom right) the actual prediction is that of a car (top right). <br>
+This is due to the camera lens that provided features that supported a car class (top left) and accoicated the sample with the cluster (bottom left).
+![img.png](./coco/images/round_object.png)
+
+#### Effect on the person class
+
+By allowing our model to learn a combined representation of all vehicles we have also improved our IOU on the person class:
 
 | Dataset | Mean IoU Person |
 | -------- |  -------- |
 | Category Model     | 0.309
 | Super Category Model |  0.319 |
 
-We slightly improve the performance on person mean IoU.
-
-
-
-The top chart is of the `car` category model and the bottom is the `vehicle` super-category model. For the `car` category model the average loss decreases when the number of busses in an image increases, for the train set and the validation set. When there are more bus objects within the image the model is less likely to mistake on the `car` category.
-As for the `vehicle` super-category model, the loss on the `vehicle` category increases when the number of bus objects increases.
-
-
-<span style="color:blue">TODO explain why we improved (hopefully) prediction on buses category? explain the plot?</span>.
-
-
-#### Cluster Analysis
-
-Fetching similars to one of the vehicles as expected result in a more homogenous cluster (composed of cars + buses).
-
-<span style="color:blue">Todo: add images of cluster</span>
-
-One of the strongest shared features in this cluster are the wheels:
-![](https://hackmd.io/_uploads/BJhkzm5xq.png)
-
-Reviewing the attention map reveals a possible confusion: round objects (camera lens) could be categorized as cars due to their similarity to wheels:
-![](https://hackmd.io/_uploads/rkGf-X5l5.png)
-![](https://hackmd.io/_uploads/SJEV-7cxq.png)
-![](https://hackmd.io/_uploads/H1B_Zm9l5.png)
-![](https://hackmd.io/_uploads/ryA5WXqxc.png)
-![](https://hackmd.io/_uploads/rJF3bQ5eq.png)
-
-
 #### Additional cluster: Sport cluster
 
-![](https://hackmd.io/_uploads/HyX4YwU-9.png)
-![](https://hackmd.io/_uploads/ByXm6Sjb9.png)
-![](https://hackmd.io/_uploads/BkUuaHi-q.png)
+![img.png](./coco/images/sports_cluster.png)
 
-These clusters show that the model was able to learn the context of the image or at least in case of sport activites the images are charachterized with similar featurs.
+Our model is also able to use context to group images, as shown by this cluster containing sport activities.
 
 #### False and Ambiguous Labels
 
 <span style="color:blue">TODO using cluster + dashboard to highlight COCO/Semantic-seg issues</span>.
 
-With the help of the Sample Analysis feature, we can find some ambiguous labels and false labeling images that we can choose to exclude from our train dataset to improve the performance.
+With the help of the `Sample Analysis` feature, we can find some ambiguous labels and false labeling images that we can choose to exclude from our train dataset to improve the performance.
 
 GT: Mislabeled Image: two missing people:
-![](https://hackmd.io/_uploads/By630p3b5.png)
+![img.png](./coco/images/two_person_gt.png)
 
 
 - The driver and the woman from the left are segmented as the car.
 
 Prediction: When the model correctly segments all three people.
-![](https://hackmd.io/_uploads/Bylo0T3Z9.png)
+
+![](./coco/images/two_person_prediction.png)
 
 
 - Sample error analysis revealed that it wasn't the model's false prediction on that sample but rather false labeling.
 
 Inaccurate GT:
-![](https://hackmd.io/_uploads/H1WhQvjbq.png)
+![](./coco/images/inaccurate_gt.png)
 
 Ambiguous label image: toy car as a car :)
-![](https://hackmd.io/_uploads/rJuxnD9e5.png)
+![](./coco/images/toy_car.png)
 
 Challenging image: low light
-![](https://hackmd.io/_uploads/B1BT5vqgc.png)
+![](./coco/images/low_light.png)
 
 Challenging image: crowds with small people
-![](https://hackmd.io/_uploads/ry_IoP5x5.png)
+![](./coco/images/crowds.png)
 
 
 #### Performance and Metadata Analysis
 
 We can plot using Tensorleap the metadata we extract to identify trends and factors that are correlated to the performance. 
 
-![](https://hackmd.io/_uploads/H12-h1rWc.png)
+![](./coco/images/person_vs_loss.png)
+<span style="color:yellow">TODO rephrase</span>.
 
 We can see that when the number of person instances per image increases the Cross-Entropy Loss increases and the mean IoU decreases. The net's predictions are less accurate when the image is denser with objects. [rephrase](/3vnw7Z7GSPGBR7R-qITpQQ) 
 
 For the vehicle category, we can see that model performance decreases when the vehicle average size increases. 
-![](https://hackmd.io/_uploads/r1R7RkHb5.png)
-
-For all categories: total instances count: [remove](/kMuTbQYySvuV_nOgp0gDSQ)
-![](https://hackmd.io/_uploads/rJElUv8b9.png)
-
-
-Object Average size:
-
-
-![](https://hackmd.io/_uploads/r1Azdw8Z9.png)
-When the average person size per image increase the mean IoU on a person decreases. The segmentation is less accurate.
-
+![](./coco/images/vehicle_vs_loss.png)
 
 #### Summary and Conclusion
 
