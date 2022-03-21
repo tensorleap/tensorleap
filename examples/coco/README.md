@@ -35,11 +35,9 @@ The model's task is to segment images consisting of two categories: `person` and
 
 First, we evaluate our model on a dataset subset containing cars and person instances:
 
-| Dataset | Mean IoU Person |
-| -------- |  -------- |
-| Category Model     | 0.309
-
-
+| Dataset        | Mean IoU Person |
+|----------------|-----------------|
+| Category Model | 0.309           |
 
 #### Cluster Analysis
 
@@ -109,10 +107,11 @@ space provide better seperability between humans and vehicles, and is able to mo
 
 Thus, for example, when we examine the IOU on the person class we see that our SC model is more accurate than the original one:
 
-| Dataset | Mean IoU Person |
-| -------- |  -------- |
-| Category Model     | 0.309
-| Super Category Model |  0.319 |
+| Dataset              | Mean IoU Person |
+|----------------------|-----------------|
+| Category Model       | 0.309           |
+| Super Category Model | 0.319           |
+
 #### Additional cluster: Sport cluster
 
 ![img.png](./coco/images/sports_cluster.png)
