@@ -2,11 +2,9 @@
 
 import tensorflow as tf
 from model import unet_model
-from PIL import Image
 import numpy as np
 from skimage import transform
 from skimage.io import imread
-import matplotlib.pyplot as plt
 
 
 def create_mask(pred_mask):
@@ -31,6 +29,7 @@ def infer_model():
     img = load_image("./test_image/COCO_train2014_000000362499.jpg")
     res = model.predict(img)
     print("inferred succesfuly on a single coco image")
+
 
 if __name__ == "__main__":
     infer_model()

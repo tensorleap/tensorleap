@@ -15,6 +15,7 @@
 # ==============================================================================
 
 # This was adapted to the TF platform by changing the TransposeConv2D to upsmaple + conv
+
 """Pix2pix.
 """
 
@@ -22,34 +23,34 @@ import tensorflow as tf
 
 
 class InstanceNormalization(tf.keras.layers.Layer):
-  """Instance Normalization Layer (https://arxiv.org/abs/1607.08022)."""
+    """Instance Normalization Layer (https://arxiv.org/abs/1607.08022)."""
 
-  def __init__(self, epsilon=1e-5):
-    super(InstanceNormalization, self).__init__()
-    self.epsilon = epsilon
+    def __init__(self, epsilon=1e-5):
+        super(InstanceNormalization, self).__init__()
+        self.epsilon = epsilon
 
-  def build(self, input_shape):
-    self.scale = self.add_weight(
-        name='scale',
-        shape=input_shape[-1:],
-        initializer=tf.random_normal_initializer(1., 0.02),
-        trainable=True)
+    def build(self, input_shape):
+        self.scale = self.add_weight(
+            name='scale',
+            shape=input_shape[-1:],
+            initializer=tf.random_normal_initializer(1., 0.02),
+            trainable=True)
 
-    self.offset = self.add_weight(
-        name='offset',
-        shape=input_shape[-1:],
-        initializer='zeros',
-        trainable=True)
+        self.offset = self.add_weight(
+            name='offset',
+            shape=input_shape[-1:],
+            initializer='zeros',
+            trainable=True)
 
-  def call(self, x):
-    mean, variance = tf.nn.moments(x, axes=[1, 2], keepdims=True)
-    inv = tf.math.rsqrt(variance + self.epsilon)
-    normalized = (x - mean) * inv
-    return self.scale * normalized + self.offset
+    def call(self, x):
+        mean, variance = tf.nn.moments(x, axes=[1, 2], keepdims=True)
+        inv = tf.math.rsqrt(variance + self.epsilon)
+        normalized = (x - mean) * inv
+        return self.scale * normalized + self.offset
 
 
 def upsample(filters, size, norm_type='batchnorm', apply_dropout=False):
-  """Upsamples an input.
+    """Upsamples an input.
   Conv2DTranspose => Batchnorm => Dropout => Relu
   Args:
     filters: number of filters
@@ -60,20 +61,20 @@ def upsample(filters, size, norm_type='batchnorm', apply_dropout=False):
     Upsample Sequential Model
   """
 
-  initializer = tf.random_normal_initializer(0., 0.02)
+    initializer = tf.random_normal_initializer(0., 0.02)
 
-  result = tf.keras.Sequential()
-  result.add(tf.keras.layers.UpSampling2D(size=(2,2)))
-  result.add(tf.keras.layers.Conv2D(filters, size, strides=1, padding='same',
-                                    kernel_initializer=initializer, use_bias=False))
-  if norm_type.lower() == 'batchnorm':
-    result.add(tf.keras.layers.BatchNormalization())
-  elif norm_type.lower() == 'instancenorm':
-    result.add(InstanceNormalization())
+    result = tf.keras.Sequential()
+    result.add(tf.keras.layers.UpSampling2D(size=(2, 2)))
+    result.add(tf.keras.layers.Conv2D(filters, size, strides=1, padding='same',
+                                      kernel_initializer=initializer, use_bias=False))
+    if norm_type.lower() == 'batchnorm':
+        result.add(tf.keras.layers.BatchNormalization())
+    elif norm_type.lower() == 'instancenorm':
+        result.add(InstanceNormalization())
 
-  if apply_dropout:
-    result.add(tf.keras.layers.Dropout(0.5))
+    if apply_dropout:
+        result.add(tf.keras.layers.Dropout(0.5))
 
-  result.add(tf.keras.layers.ReLU())
+    result.add(tf.keras.layers.ReLU())
 
-  return result
+    return result
