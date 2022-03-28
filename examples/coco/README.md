@@ -141,14 +141,6 @@ Our model is also able to use context to group images, as shown by this cluster 
 
 With the help of the `Sample Analysis` feature, we can find some ambiguous labels and false labeling images that we can choose to exclude from our train dataset to improve the performance.
 
-GT mislabeling:
-![img.png](./coco/images/two_person_gt.png)
-
-
-- The driver and the woman from the left are segmented as the car.
-
-Prediction: When the model correctly segments all three people.
-
 <img alt="img.png" height="300" title="Van Gogh, Self-portrait." src="./coco/images/two_person_gt.png" width="500"/>       <img height="300" src="./coco/images/two_person_prediction.png" width="500"/>
 <figcaption> GT: Mislabeled Image: two missing people: - The driver and the woman from the left are segmented as the car. (from left). Prediction: the model correctly segments all three people (from right).
 </figcaption>
@@ -168,13 +160,15 @@ We can plot using Tensorleap the metadata we extract to identify trends and fact
 
 <img height="350" src="./coco/images/person_vs_loss.png" width="550"/> <img height="350" src="./coco/images/vehicle_vs_loss.png" width="500"/>
 
-From the figure from left, we can see that when the number of person instances per image increases the Cross-Entropy Loss increases and the mean IoU decreases. The net's predictions are less accurate when the image is denser with objects.
+From the figure from left, we can see that when the number of person instances per image increases the Cross-Entropy Loss
+increases and the mean IoU decreases. The models's predictions are less accurate when the image is denser with objects.
 
 For the vehicle category, we can see that model performance decreases when the vehicle average size increases (right figure).
 
 
 #### Summary and Conclusion
 
-We have shown how Tensorleap features can reveal mislabeled samples that may confuse the model during training, and metadata factors that affect the performance. All these insights can improve and significantly decrease the model optimization process.
+We have used Tensorleap to compare different models, detect miss-labeling, and consider metadata that reflects the model's performance.
+This, in turn, helps us with model optimization and shortening the development cycle.
 
 
