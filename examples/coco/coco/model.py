@@ -9,7 +9,7 @@ def unet_model(output_channels: int) -> TFModel:
     base_model = MobileNetV2(
         input_shape=[128, 128, 3],
         include_top=False
-    )  #Download on first run
+    )  # Download on first run
 
     # Use the activations of these layers
     layer_names = [
@@ -47,10 +47,10 @@ def unet_model(output_channels: int) -> TFModel:
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
       filters=output_channels, kernel_size=3, strides=2,
-      padding='same')  #64x64 -> 128x128
+      padding='same')  # 64x64 -> 128x128
     x = last(x)
     softmax = tf.keras.layers.Softmax(axis=-1)
     x = softmax(x)
     return tf.keras.Model(inputs=inputs, outputs=x)
-    # return down_stack
+
 

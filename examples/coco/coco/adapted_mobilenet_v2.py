@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 # pylint: disable=invalid-name
+
 """MobileNet v2 models for Keras.
 
 MobileNetV2 is a general architecture and can be used for multiple use cases.
@@ -74,6 +75,7 @@ MACs stands for Multiply Adds
       https://arxiv.org/abs/1801.04381) (CVPR 2018)
 """
 # Adapted MobileNet to tensorleap's platform
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -356,6 +358,7 @@ def MobileNetV2(input_shape=None,
   # no alpha applied to last conv as stated in the paper:
   # if the width multiplier is greater than 1 we
   # increase the number of output channels
+
   if alpha > 1.0:
     last_block_filters = _make_divisible(1280 * alpha, 8)
   else:
