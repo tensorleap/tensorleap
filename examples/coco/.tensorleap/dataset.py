@@ -35,13 +35,11 @@ LOAD_UNION_CATEGORIES_IMAGES = False
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
-    print("connect to GCS")
     gcs_client = storage.Client(project=PROJECT_ID, credentials=AnonymousCredentials())
     return gcs_client.bucket(bucket_name)
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
-    print("download data")
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
         home_dir = os.getenv("HOME")
@@ -61,7 +59,6 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 
 # Preprocessing Function
 def subset_images() -> List[SubsetResponse]:
-    print("subset data")
 
     def load_set(coco: COCO, load_union: bool = False) -> List:
         # get all images containing given categories
@@ -101,7 +98,6 @@ def subset_images() -> List[SubsetResponse]:
 
 # Input Encoder
 def input_image(idx: int, data: SubsetResponse) -> ndarray:
-    print("subset")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -118,7 +114,6 @@ def input_image(idx: int, data: SubsetResponse) -> ndarray:
 
 # Ground Truth Encoder
 def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
-    print("GT mask")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=CATEGORIES)
     x = data['samples'][idx]
@@ -142,7 +137,6 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
 
 # Metadata functions
 def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
-    print("extracting background percent metadata")
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -155,7 +149,6 @@ def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
 
 
 def metadata_person_category_percent(idx: int, data: SubsetResponse) -> float:
-    print("extracting person percent metadata")
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
@@ -168,7 +161,6 @@ def metadata_person_category_percent(idx: int, data: SubsetResponse) -> float:
 
 
 def metadata_car_vehicle_category_percent(idx: int, data: SubsetResponse) -> float:
-    print("extracting car vehicle percent metadata")
     # When Super Category mode includes: car, truck, bus, train. For Category mode: only car.
     mask = ground_truth_mask(idx, data)
     unique, counts = np.unique(mask, return_counts=True)
@@ -182,7 +174,6 @@ def metadata_car_vehicle_category_percent(idx: int, data: SubsetResponse) -> flo
 
 
 def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
-    print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -199,7 +190,6 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
 
 
 def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
-    print("extracting metadata is colored image")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -231,49 +221,40 @@ def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag
 
 
 def metadata_total_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting total instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='all')
 
 
 def metadata_person_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting person instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='person')
 
 
 def metadata_car_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting car instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='car')
 
 
 def metadata_bus_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting bus instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='bus')
 
 
 def metadata_truck_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting truck instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='truck')
 
 
 def metadata_train_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting train instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='train')
 
 
 def metadata_vehicle_instances_count(idx: int, data: SubsetResponse) -> int:
-    print("extracting vehicle instances metadata")
     return get_counts_of_instances_per_class(idx, data, label_flag='vehicle')
 
 
 def metadata_person_category_avg_size(idx: int, data: SubsetResponse) -> float:
-    print("extracting person average size metadata")
     percent_val = metadata_person_category_percent(idx, data)
     instances_cnt = metadata_person_instances_count(idx, data)
     return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 
 def metadata_car_vehicle_category_avg_size(idx: int, data: SubsetResponse) -> float:
-    print("extracting car or vehicle average size metadata")
     percent_val = metadata_car_vehicle_category_percent(idx, data)
     if SUPERCATEGORY_GROUNDTRUTH:
         instances_cnt = metadata_vehicle_instances_count(idx, data)
