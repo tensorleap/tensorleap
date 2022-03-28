@@ -24,18 +24,6 @@ SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
 LOAD_UNION_CATEGORIES_IMAGES = False
 APPLY_AUGMENTATION = True
 
-def get_length(data):
-    if data is None:
-        length = None
-    elif type(data) is dict and 'length' in data:
-        length = data['length']
-    elif type(data) is not dict:
-        length = len(data)
-    else:
-        length = None
-
-    return length
-
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
@@ -205,17 +193,6 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> float:
 
 def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     print("extracting metadata is colored image")
-    data = data.data
-    x = data['samples'][idx]
-    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
-    fpath = _download(filepath)
-    img = imread(fpath)
-    is_colored = len(img.shape) > 2
-    return is_colored
-
-
-def metadata_red_std(idx: int, data: SubsetResponse) -> bool:
-    print("extracting metadata rgb std")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
