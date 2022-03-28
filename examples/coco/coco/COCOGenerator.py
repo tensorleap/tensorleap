@@ -1,4 +1,3 @@
-from os.path import join
 from pycocotools.coco import COCO
 from skimage.io import imread
 from skimage.color import gray2rgb
@@ -98,8 +97,3 @@ class COCOGenerator(Sequence):
 
     def on_epoch_end(self):
         self.order = np.random.permutation(len(self.paths))
-
-# a = COCOGenerator("/home/tomtensor/Work/Projects/examples/tensorleap/examples/coco/coco/coco_data/ms-coco/annotations/instances_train2014.json",
-#                   categories=['person', 'bicycle', 'car'])
-#
-# print(1)
