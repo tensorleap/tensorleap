@@ -22,6 +22,7 @@ BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
 IMAGE_SIZE = 128
 CATEGORIES = ['person', 'car']
+
 TRAIN_SIZE = 6000
 TEST_SIZE = 2800
 
@@ -29,7 +30,6 @@ SUPERCATEGORY_GROUNDTRUTH = True
 SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
 
 LOAD_UNION_CATEGORIES_IMAGES = False
-APPLY_AUGMENTATION = True
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
@@ -57,10 +57,11 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
     return local_file_path
 
 
+# Preprocessing Function
 def subset_images() -> List[SubsetResponse]:
-    print("subset")
+    print("subset data")
 
-    def load_set(coco, load_union=False):
+    def load_set(coco: COCO, load_union: bool = False) -> List:
         # get all images containing given categories
         catIds = coco.getCatIds(CATEGORIES)     # Fetch class IDs only corresponding to the filterClasses
         if not load_union:
@@ -96,6 +97,7 @@ def subset_images() -> List[SubsetResponse]:
                                               'subdir': 'val2014', 'supercategory_ids': supercategory_ids})]
 
 
+# Input Encoder
 def input_image(idx: int, data: SubsetResponse) -> ndarray:
     print("subset")
     data = data.data
@@ -112,7 +114,8 @@ def input_image(idx: int, data: SubsetResponse) -> ndarray:
     return img.astype(np.float)
 
 
-def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
+# Ground Truth Encoder
+def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
     print("GT mask")
     data = data.data
     catIds = data['cocofile'].getCatIds(catNms=CATEGORIES)
@@ -135,6 +138,7 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
     return mask.astype(np.float)
 
 
+# Metadata functions
 def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
     print("extracting background percent metadata")
     mask = ground_truth_mask(idx, data)
@@ -175,7 +179,7 @@ def metadata_car_vehicle_category_percent(idx: int, data: SubsetResponse) -> flo
     return percent_obj
 
 
-def metadata_brightness(idx: int, data: SubsetResponse) -> float:
+def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
     print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
@@ -219,7 +223,7 @@ def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag
         cat_id_counts[ann['category_id']] += 1
     if label_flag == 'vehicle':  # count super category vehicle
         vehicle_ids = [cat_name_to_id[cat_name] for cat_name in vehicle_labels]
-        return np.sum([cat_id_counts[cat_id] for cat_id in vehicle_ids])
+        return int(np.sum([cat_id_counts[cat_id] for cat_id in vehicle_ids]))
     cat_id = cat_name_to_id[label_flag]
     return cat_id_counts[cat_id]
 
@@ -276,6 +280,7 @@ def metadata_car_vehicle_category_avg_size(idx: int, data: SubsetResponse) -> fl
     return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 
+# Dataset binding functions
 dataset_binder.set_subset(subset_images, 'images')
 
 dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
