@@ -34,9 +34,9 @@ The model's task is to segment images consisting of two categories: `person` and
 
 First, we evaluate our model on a dataset subset containing cars and person instances:
 
-| Dataset        | Mean IoU Person |
-|----------------|-----------------|
-| Category Model | 0.309           |
+| Dataset            |Mean IoU Person   | Mean IOU car     |
+| --------           |  --------        | -------          |
+| Category Model     | 0.309            |    0.262         |
 
 #### Cluster Analysis
 
@@ -82,7 +82,13 @@ Suprisingly, the attention map that highlights the features that defines this cu
 Our previous model tries to segment cars as a seperate class from truck & bus (which are labeled background). Often, we need to segment the entire vehicle SuperCategory (SC) together. Here, we train a SC model that tries to segment vehicles, person, and background.
 
 To see how this new model latent space is effected we could examine its latent space by using cluster analysis. 
+#### model performance
+First, we provide the IOU of our model on a per-class basis
 
+
+| Dataset            |Mean IoU person   | Mean IOU vehicle     | Mean IOU |
+| --------           |  --------        | -------              |   -----  |
+| Category Model     | 0.319           |    0.312              |      |
 #### Cluster Analysis
 
 `Fetching Similars` to one of the vehicles as expected result in a more homogenous cluster (composed of cars + buses).
@@ -112,10 +118,9 @@ space provide better seperability between humans and vehicles, and is able to mo
 Thus, for example, when we examine the IOU on the person class we see that our SC model is more accurate than the original one:
 
 | Dataset              | Mean IoU Person |
-|----------------------|-----------------|
+| --------             |  --------       |
 | Category Model       | 0.309           |
-| Super Category Model | 0.319           |
-
+| Super Category Model |  0.319          |
 #### Additional cluster: Sport cluster
 
 <img alt="img.png" height="400" src="./coco/images/sports_cluster.png" width="400"/>
