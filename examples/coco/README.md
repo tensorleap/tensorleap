@@ -134,16 +134,16 @@ Our model is also able to use context to group images, as shown by this cluster 
 With the help of the `Sample Analysis` feature, we can find some ambiguous labels and false labeling images that we can choose to exclude from our train dataset to improve the performance.
 
 <img alt="img.png" height="300" title="Van Gogh, Self-portrait." src="./coco/images/two_person_gt.png" width="500"/>       <img height="300" src="./coco/images/two_person_prediction.png" width="500"/>
-<figcaption> GT: Mislabeled Image: two missing people: - The driver and the woman from the left are segmented as the car. (from left). Prediction: the model correctly segments all three people (from right).
+<figcaption> misslabeled GT - (left) The driver and the woman from the left are segmented as the car in GT. (right) Prediction: the model correctly segments all three people (from right).
 </figcaption>
 
 - Sample error analysis revealed that it wasn't the model's false prediction on that sample but rather false labeling.  
 
 <img height="300" src="./coco/images/inaccurate_gt.png" width="400"/>  <img height="300" src="./coco/images/toy_car_3.png" width="400"/> 
-<figcaption> Inaccurate GT (from left), and ambiguous label image: toy car as a car :) (from right). </figcaption> 
+<figcaption> (left) Inaccurate GT. (right) and ambiguous label image: toy car as a car :) . </figcaption> 
 
 <img height="300" src="./coco/images/crowds_2.png" width="400"/><img height="300" src="./coco/images/low_light_2.png" width="400"/>
-<figcaption> Challenging images: low light (from left), and crowds with small people (from right). </figcaption>
+<figcaption> Challenging images: (left) low light. (right) crowds with small people. </figcaption>
 
 
 ### Performance and Metadata Analysis
