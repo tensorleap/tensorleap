@@ -79,16 +79,17 @@ Suprisingly, the attention map that highlights the features that defines this cu
 
 ## Vehicle Supercategory Model
 
-Our previous model tries to segment cars as a seperate class from truck & bus (which are labeled background). Often, we need to segment the entire vehicle SuperCategory (SC) together. Here, we train a SC model that tries to segment vehicles, person, and background.
+Our previous model tries to segment cars as a seperate class from truck & bus (which are labeled background). 
+Often, in ADAS applications, we need to segment the entire vehicle SuperCategory (SC) together. Here, we train a SC model that tries to segment vehicles, person, and background.
 
 To see how this new model latent space is effected we could examine its latent space by using cluster analysis. 
 #### model performance
 First, we provide the IOU of our model on a per-class basis
 
 
-| Dataset            |Mean IoU person   | Mean IOU vehicle     | Mean IOU |
-| --------           |  --------        | -------              |   -----  |
-| Category Model     | 0.319           |    0.312              |      |
+| Dataset            |Mean IoU person   | Mean IOU vehicle     |
+| --------           |  --------        | -------              |
+| Category Model     | 0.319           |    0.312              |
 #### Cluster Analysis
 
 `Fetching Similars` to one of the vehicles as expected result in a more homogenous cluster (composed of cars + buses).
@@ -99,6 +100,7 @@ Our new model is now able to find strong, discriminative, features to this clust
 
 <img height="400" src="./coco/images/sc_cluster_attention.jpg" width="400"/>
 
+<<<<<<< HEAD
 Reviewing the attention map reveals a possible confusion: round objects could be categorized as cars due to their similarity to wheels. We analyze one of the samples in this cluster to exemplify this issue.<br>
  
 In the following figure we show a sample of a person holding a camera. While the GT is that of a person (bottom right) the actual prediction is that of a car (top right). <br>
@@ -106,6 +108,14 @@ This is due to the camera lens that provided features that supported a car class
 
 <img alt="img.png" height="600" src="./coco/images/round_object_3.png" width="600"/>
 
+=======
+Reviewing the attention map reveals a possible confusion: round objects could be categorized as cars due to their similarity to wheels.
+
+We analyze one of the samples in this cluster to exemplify this issue.<br>
+ In the following figure we show a sample of a person holding a camera. While the GT is that of a person (bottom right) the actual prediction is that of a car (top right). <br>
+This is due to the camera lens that provided features that supported a car class (top left) and accoicated the sample with the cluster (bottom left).
+![img.png](./coco/images/round_object_3.png)
+>>>>>>> wording fix WIP
 #### Effect on the person class
 
 Using Tensorleap's population exploration we can compare the embedding of images with a high percent of car pixels to a high percent of people pixels, in the original model (top figures) and the new model (bottom figures):
@@ -131,6 +141,13 @@ Our model is also able to use context to group images, as shown by this cluster 
 
 With the help of the `Sample Analysis` feature, we can find some ambiguous labels and false labeling images that we can choose to exclude from our train dataset to improve the performance.
 
+GT mislabeling:
+![img.png](./coco/images/two_person_gt.png)
+
+
+- The driver and the woman from the left are segmented as the car.
+
+Prediction: When the model correctly segments all three people.
 
 <img alt="img.png" height="300" title="Van Gogh, Self-portrait." src="./coco/images/two_person_gt.png" width="500"/>       <img height="300" src="./coco/images/two_person_prediction.png" width="500"/>
 <figcaption> GT: Mislabeled Image: two missing people: - The driver and the woman from the left are segmented as the car. (from left). Prediction: the model correctly segments all three people (from right).
