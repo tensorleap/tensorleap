@@ -1,26 +1,33 @@
 import os
 from functools import lru_cache
 from typing import List, Optional
+
 import cv2
 import numpy as np
-from code_loader import dataset_binder
-from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
+from numpy import ndarray
 from google.cloud import storage
 from google.cloud.storage import Bucket
-from numpy import ndarray
+from google.auth.credentials import AnonymousCredentials
 from pycocotools.coco import COCO
 from skimage.color import gray2rgb
 from skimage.io import imread
-from google.auth.credentials import AnonymousCredentials
+
+# Tensorleap Imports
+from code_loader import dataset_binder
 from code_loader.contract.datasetclasses import SubsetResponse
+from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 
 
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
-image_size = 128
-categories = ['person', 'car']
+IMAGE_SIZE = 128
+CATEGORIES = ['person', 'car']
+TRAIN_SIZE = 6000
+TEST_SIZE = 2800
+
 SUPERCATEGORY_GROUNDTRUTH = True
 SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
+
 LOAD_UNION_CATEGORIES_IMAGES = False
 APPLY_AUGMENTATION = True
 
@@ -56,7 +63,7 @@ def subset_images() -> List[SubsetResponse]:
 
     def load_set(coco, load_union=False):
         # get all images containing given categories
-        catIds = coco.getCatIds(categories)     # Fetch class IDs only corresponding to the filterClasses
+        catIds = coco.getCatIds(CATEGORIES)     # Fetch class IDs only corresponding to the filterClasses
         if not load_union:
             imgIds = coco.getImgIds(catIds=catIds)  # Get all images containing the Category IDs together
         else:
@@ -68,14 +75,11 @@ def subset_images() -> List[SubsetResponse]:
         imgs = coco.loadImgs(imgIds)
         return imgs
 
-
     dataType = 'train2014'
     annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
     fpath = _download(annFile)
     # initialize COCO api for instance annotations
-    print(fpath)
     traincoco = COCO(fpath)
-    print(traincoco)
     x_train_raw = load_set(coco=traincoco, load_union=LOAD_UNION_CATEGORIES_IMAGES)
     dataType = 'val2014'
     annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
@@ -83,8 +87,8 @@ def subset_images() -> List[SubsetResponse]:
     # initialize COCO api for instance annotations
     valcoco = COCO(fpath)
     x_test_raw = load_set(coco=valcoco, load_union=LOAD_UNION_CATEGORIES_IMAGES)
-    train_size = min(len(x_train_raw), 6000)
-    val_size = min(len(x_test_raw), 2800)
+    train_size = min(len(x_train_raw), TRAIN_SIZE)
+    val_size = min(len(x_test_raw), TEST_SIZE)
     supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
     return [
         SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size],
@@ -103,8 +107,7 @@ def input_image(idx: int, data: SubsetResponse) -> ndarray:
     if len(img.shape) == 2:
         # grey scale -> expand to rgb
         img = gray2rgb(img)
-    img = cv2.resize(img, (image_size, image_size), interpolation=cv2.INTER_LINEAR)
-
+    img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_LINEAR)
     # rescale
     img = img / 255
     return img.astype(np.float)
@@ -113,9 +116,8 @@ def input_image(idx: int, data: SubsetResponse) -> ndarray:
 def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
     print("GT mask")
     data = data.data
-    catIds = data['cocofile'].getCatIds(catNms=categories)
+    catIds = data['cocofile'].getCatIds(catNms=CATEGORIES)
     x = data['samples'][idx]
-    batch_masks = []
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
     anns = data['cocofile'].loadAnns(annIds)
     mask = np.zeros([x['height'], x['width']])
@@ -130,7 +132,7 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> float:
         for j, ot_ann in enumerate(other_anns):
             _mask = data['cocofile'].annToMask(ot_ann)
             mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(car_id) + 1)
-    mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
+    mask = cv2.resize(mask, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
     return mask.astype(np.float)
 
 
@@ -184,7 +186,7 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> float:
     if len(img.shape) == 2:
         # grascale -> expand to rgb
         img = gray2rgb(img)
-    img = cv2.resize(img, (image_size, image_size), interpolation=cv2.INTER_LINEAR)
+    img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_LINEAR)
 
     # rescale
     img = img.astype(np.float)
@@ -205,7 +207,7 @@ def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
 def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_flag: str = 'all') -> int:
     data = data.data
     x = data['samples'][idx]
-    all_labels = SUPERCATEGORY_CLASSES + categories
+    all_labels = SUPERCATEGORY_CLASSES + CATEGORIES
     vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
     catIds = [data['cocofile'].getCatIds(catNms=label)[0] for label in all_labels]  # keep same labels order
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
@@ -280,7 +282,7 @@ dataset_binder.set_subset(subset_images, 'images')
 dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
 
 dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=DatasetOutputType.Mask, name='mask',
-                                labels=['background'] + categories, masked_input="image")
+                                labels=['background'] + CATEGORIES, masked_input="image")
 
 dataset_binder.set_metadata(metadata_background_percent, 'images', DatasetMetadataType.float, 'background_percent')
 
