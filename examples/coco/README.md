@@ -150,7 +150,7 @@ With the help of the `Sample Analysis` feature, we can find some ambiguous label
 
 We can plot using Tensorleap the metadata we extract to identify trends and factors that are correlated to the performance. 
 
-<img height="350" src="./coco/images/metadata.png" width="1450"/> 
+<img height="350" src="./coco/images/metadata.png" width="1410"/> 
 From the figure from left, we can see that when the number of person instances per image increases the Cross-Entropy Loss
 increases and the mean IoU decreases. The models's predictions are less accurate when the image is denser with objects.
 
