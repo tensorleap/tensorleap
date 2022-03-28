@@ -13,7 +13,7 @@ from skimage.color import gray2rgb
 from skimage.io import imread
 from google.auth.credentials import AnonymousCredentials
 from code_loader.contract.datasetclasses import SubsetResponse
-from typing import Callable, Union
+
 
 BUCKET_NAME = 'example-datasets-47ml982d'
 PROJECT_ID = 'example-dev-project-nmrksf0o'
@@ -214,17 +214,6 @@ def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     is_colored = len(img.shape) > 2
     return is_colored
 
-
-# def get_rgb_std(idx: int, data: SubsetResponse, color: str) -> float:
-#     print("extracting metadata rgb std")
-#     data = data.data
-#     x = data['samples'][idx]
-#     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
-#     fpath = _download(filepath)
-#     img = imread(fpath)
-#
-#     if color == 'red':
-#         return
 
 def metadata_red_std(idx: int, data: SubsetResponse) -> bool:
     print("extracting metadata rgb std")
