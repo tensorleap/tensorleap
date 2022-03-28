@@ -26,9 +26,11 @@ CATEGORIES = ['person', 'car']
 TRAIN_SIZE = 6000
 TEST_SIZE = 2800
 
+# for second experiment
 SUPERCATEGORY_GROUNDTRUTH = True
 SUPERCATEGORY_CLASSES = ['bus', 'truck', 'train']
 
+# if to fetch images tha have both categories or the union of images that can include at least one category
 LOAD_UNION_CATEGORIES_IMAGES = False
 
 @lru_cache()
