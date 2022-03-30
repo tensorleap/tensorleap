@@ -136,41 +136,28 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
 
 
 # Metadata functions
-def metadata_background_percent(idx: int, data: SubsetResponse) -> float:
+def get_image_percent_per_category(idx: int, data: SubsetResponse, label_flag: str) -> float:
+    category_id_dict = {'background': 0, 'person': 1, 'car_vehicle': 2}
+    assert label_flag in category_id_dict.keys()
     mask = ground_truth_mask(idx, data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(0.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
+    categories, counts = np.unique(mask, return_counts=True)
+    cat_value_counts = dict(zip(categories, counts))
+    cat_counts = cat_value_counts.get(category_id_dict[label_flag])
+    return cat_counts/mask.size if cat_counts is not None else 0.0
+
+
+
+def metadata_background_category_percent(idx: int, data: SubsetResponse) -> float:
+    return get_image_percent_per_category(idx, data, label_flag='background')
 
 
 def metadata_person_category_percent(idx: int, data: SubsetResponse) -> float:
-    mask = ground_truth_mask(idx, data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(1.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
+    return get_image_percent_per_category(idx, data, label_flag='person')
 
 
 def metadata_car_vehicle_category_percent(idx: int, data: SubsetResponse) -> float:
     # When Super Category mode includes: car, truck, bus, train. For Category mode: only car.
-    mask = ground_truth_mask(idx, data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(2.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
+    return get_image_percent_per_category(idx, data, label_flag='car_vehicle')
 
 
 def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
@@ -271,7 +258,7 @@ dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
 dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=DatasetOutputType.Mask, name='mask',
                                 labels=['background'] + CATEGORIES, masked_input="image")
 
-dataset_binder.set_metadata(metadata_background_percent, 'images', DatasetMetadataType.float, 'background_percent')
+dataset_binder.set_metadata(metadata_background_category_percent, 'images', DatasetMetadataType.float, 'background_percent')
 
 dataset_binder.set_metadata(metadata_person_category_percent, 'images', DatasetMetadataType.float, 'person_percent')
 

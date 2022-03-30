@@ -74,6 +74,7 @@ MACs stands for Multiply Adds
   - [MobileNetV2: Inverted Residuals and Linear Bottlenecks](
       https://arxiv.org/abs/1801.04381) (CVPR 2018)
 """
+
 # Adapted MobileNet to tensorleap's platform
 
 from __future__ import absolute_import
