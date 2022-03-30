@@ -4,7 +4,6 @@ import tensorflow as tf
 
 OUTPUT_CLASSES = 4
 
-
 def leap_save_model(target_file_path: Path):
     # Load your model
     # Save it to the path supplied as an argument (has a .h5 suffix)
