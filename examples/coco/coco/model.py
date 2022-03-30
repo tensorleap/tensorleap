@@ -1,12 +1,11 @@
 # Adapted from https://www.tensorflow.org/tutorials/images/segmentation
 import tensorflow as tf
 import coco.pix2pix_upsample as pix2pix
-from coco.adapted_mobilenet_v2 import MobileNetV2
 from tensorflow.python.keras.engine.training import Model as TFModel
 
 
 def unet_model(output_channels: int) -> TFModel:
-    base_model = MobileNetV2(
+    base_model = tf.keras.applications.MobileNetV2(
         input_shape=[128, 128, 3],
         include_top=False
     )  # Download on first run
