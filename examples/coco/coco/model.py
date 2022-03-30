@@ -23,7 +23,9 @@ def unet_model(output_channels: int) -> TFModel:
 
     # Create the feature extraction model
     down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
-    down_stack.trainable = False
+
+    # down_stack.trainable = False
+
     up_stack = [
         pix2pix.upsample(512, 3),  # 4x4 -> 8x8
         pix2pix.upsample(256, 3),  # 8x8 -> 16x16
@@ -34,7 +36,7 @@ def unet_model(output_channels: int) -> TFModel:
     inputs = tf.keras.layers.Input(shape=[128, 128, 3])
 
     # Downsampling through the model
-    skips = down_stack.call(inputs)
+    skips = down_stack(inputs)
     x = skips[-1]
     skips = reversed(skips[:-1])
 
@@ -48,9 +50,9 @@ def unet_model(output_channels: int) -> TFModel:
     last = tf.keras.layers.Conv2DTranspose(
       filters=output_channels, kernel_size=3, strides=2,
       padding='same')  # 64x64 -> 128x128
+
     x = last(x)
-    softmax = tf.keras.layers.Softmax(axis=-1)
-    x = softmax(x)
+    x = tf.keras.layers.Softmax(axis=-1)(x)
     return tf.keras.Model(inputs=inputs, outputs=x)
 
 
