@@ -225,13 +225,18 @@ def metadata_category_instances_count(label_key: str) -> Callable[[int, SubsetRe
 def metadata_category_avg_size(label_key: str) -> Callable[[int, SubsetResponse], float]:
     def func(idx: int, data: SubsetResponse) -> float:
         percent_val = metadata_category_percent(label_key=label_key)(idx, data)
-        if label_key == 'car_vehicle':
-            label_key = 'vehicle' if SUPERCATEGORY_GROUNDTRUTH else 'car'
         instances_cnt = metadata_category_instances_count(label_key)(idx, data)
         return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
     func.__name__ = f'metadata_{label_key}_avg_size'
     return func
+
+
+def metadata_car_vehicle_avg_size(idx: int, data: SubsetResponse) -> float:
+    percent_val = metadata_category_percent(label_key='car_vehicle')(idx, data)
+    label_key = 'vehicle' if SUPERCATEGORY_GROUNDTRUTH else 'car'
+    instances_cnt = metadata_category_instances_count(label_key)(idx, data)
+    return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 
 # Dataset binding functions
@@ -256,8 +261,11 @@ for cat in METADATA_CATEGORY_INSTANCES_COUNT:
     dataset_binder.set_metadata(function=metadata_category_instances_count(cat), subset='images',
                                 metadata_type=DatasetMetadataType.int, name=f'{cat}_instances_count')
 
-METADATA_CATEGORY_AVG_SIZE = ['person', 'car_vehicle']  # For Super Category mode includes: car, truck, bus, train.
+METADATA_CATEGORY_AVG_SIZE = ['person']
 for cat in METADATA_CATEGORY_INSTANCES_COUNT:
     dataset_binder.set_metadata(function=metadata_category_avg_size(cat), subset='images',
                                 metadata_type=DatasetMetadataType.float, name=f'{cat}_avg_size')
+
+# For Super Category mode includes: car, truck, bus, train. For Category mode: only car.
+dataset_binder.set_metadata(function=metadata_car_vehicle_avg_size, subset='images', metadata_type=DatasetMetadataType.float, name=f'car_category_avg_size')
 
