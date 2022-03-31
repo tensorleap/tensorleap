@@ -146,19 +146,6 @@ def get_image_percent_per_category(idx: int, data: SubsetResponse, label_key: st
     return cat_counts/mask.size if cat_counts is not None else 0.0
 
 
-def metadata_background_category_percent(idx: int, data: SubsetResponse) -> float:
-    return get_image_percent_per_category(idx, data, label_key='background')
-
-
-def metadata_person_category_percent(idx: int, data: SubsetResponse) -> float:
-    return get_image_percent_per_category(idx, data, label_key='person')
-
-
-def metadata_car_vehicle_category_percent(idx: int, data: SubsetResponse) -> float:
-
-    return get_image_percent_per_category(idx, data, label_key='car_vehicle')
-
-
 def metadata_category_percent(label_key: str) -> Callable[[int, SubsetResponse], float]:
     def func(idx: int, data: SubsetResponse) -> float:
         return get_image_percent_per_category(idx, data, label_key=label_key)
@@ -262,7 +249,7 @@ for cat in METADATA_CATEGORY_INSTANCES_COUNT:
                                 metadata_type=DatasetMetadataType.int, name=f'{cat}_instances_count')
 
 METADATA_CATEGORY_AVG_SIZE = ['person']
-for cat in METADATA_CATEGORY_INSTANCES_COUNT:
+for cat in METADATA_CATEGORY_AVG_SIZE:
     dataset_binder.set_metadata(function=metadata_category_avg_size(cat), subset='images',
                                 metadata_type=DatasetMetadataType.float, name=f'{cat}_avg_size')
 
