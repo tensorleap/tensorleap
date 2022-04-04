@@ -1,7 +1,8 @@
 
 # README
 
-## Semantic Segmantation - COCO 
+## Semantic Segmantation - COCO
+
 In this example, we show the use of Tensorleap on a Computer Vision task - Semantic Segmentation on COCO data. We use `coco 14` training and validation data files combined with a `mobilenet_v2` backbone and a `pix2pix` based decoder. 
 
 ### The Task
@@ -38,7 +39,8 @@ First, we evaluate our model on a dataset subset containing cars and person inst
 
 #### Cluster Analysis
 
-To qualitatively analyze the model's predictions on the different classes we utilize Tesnorleap's latent space. We select samples from different areas of the embedding space and use `fetch similar` to create unique clusters of similar samples.
+To qualitatively analyze the model's predictions on the different classes we utilize Tesnorleap's Population Exploration algorithm.
+We select samples from different areas of the embedding space and use `fetch similar` to create unique clusters of similar samples.
 
 Among the clusters we got are:
 
@@ -48,20 +50,21 @@ We fetch a group of similar images that are mostly greyscale images as seen belo
 
 <img alt="BWcluster" height="300" src="./coco/images/b_w_cluster.png" width="400"/>
 
-This cluster not only captures the single channel B&W images, but also those images with a small variation in
+This cluster not only captures grayscale images, but also RGB images with a small variation in
 [hue](https://en.wikipedia.org/wiki/HSL_and_HSV).
 
 <img alt="BWclusterpoints" height="400" src="./coco/images/b_w_cluster_points.png" width="700"/>
 
-In fact, viewing the cluster in Tensorleap's `cluster analysis` shows that the vast majority of images (colored red) 3-channel RGB imagees.
+In fact, viewing the cluster in Tensorleap's `cluster analysis` shows that the vast majority of images are RGB image,
+and not grayscale (plotted as red dots above)
 
-If we compare B&W images to RGB images we see that, on average, our loss on RGB images is lower:
+If we compare grayscale to RGB images we see that, on average, our loss on RGB images is lower:
 
 <img height="550" src="./coco/images/b_w_loss.png" width="700"/>
 
 
 #### 'Vehicle-like' clusters
-Our model latent space have multiple semantically meaningful vehicle clusters
+Our model latent's space have multiple semantically meaningful vehicle clusters
 #### Bicycle cluster 
 
 <img height="400" src="./coco/images/Bicycle_cluster.png" width="400"/>
@@ -70,24 +73,28 @@ Our model latent space have multiple semantically meaningful vehicle clusters
 
 <img height="400" src="./coco/images/Bus_cluster.png" width="400"/>
 
-Suprisingly, the attention map that highlights the features that defines this custer contain not only bus feature, bus also buildings, towers, and similar constructs:
+Suprisingly, the attention map that highlights cluster defining features contains not only bus features,
+bus also buildings and towers.
 
 <img height="400" src="./coco/images/Bus_cluster_attention.png" width="400"/>
 
 
 ## Vehicle Supercategory Model
 
-Our previous model tries to segment cars as a seperate class from truck & bus (which are labeled background). 
-Often, in ADAS applications, we need to segment the entire vehicle SuperCategory (SC) together. Here, we train a SC model that tries to segment vehicles, person, and background.
+Using Tensorleap's analysis, we noticed the issues in our previous model that tries to segment cars as a separate class from truck & bus (which are labeled background).
+One possible solution could be to segment the entire vehicle SuperCategory (SC) together.
+Here, we train a Super Category model that tries to segment vehicles, person, and background.
 
 To see how this new model latent space is effected we could examine its latent space by using cluster analysis. 
 #### model performance
 First, we provide the IOU of our model on a per-class basis
 
 
-| Dataset            |Mean IoU person   | Mean IOU vehicle     |
-| --------           |  --------        | -------              |
-| Category Model     | 0.319           |    0.312              |
+| Dataset                  |Mean IoU person  | Mean IOU vehicle      |
+| --------                 |  --------       | -------               |
+| Super Category Model     | 0.319           |    0.312              |
+
+
 #### Cluster Analysis
 
 `Fetching Similars` to one of the vehicles as expected result in a more homogenous cluster (composed of cars + buses).
@@ -115,7 +122,7 @@ Using Tensorleap's population exploration we can compare the embedding of images
 Since our new model is now able to use a wider collection of features to describe the vehicle category its latent
 space provide better seperability between humans and vehicles, and is able to more accurately capture these two categories.
 
-Thus, for example, when we examine the IOU on the person class we see that our SC model is more accurate than the original one:
+Thus, for example, when we examine the IOU on the person class we see that our Super Category model is more accurate than the original one:
 
 | Dataset              | Mean IoU Person |
 | --------             |  --------       |
@@ -149,7 +156,7 @@ With the help of the `Sample Analysis` feature, we can find some ambiguous label
 We can plot using Tensorleap the metadata we extract to identify trends and factors that are correlated to the performance. 
 
 <img height="350" src="./coco/images/metadata.png" width="1410"/> 
-From the figure from left, we can see that when the number of person instances per image increases the Cross-Entropy Loss
+From the left figure, we can see that when the number of person instances per image increases the Cross-Entropy Loss
 increases and the mean IoU decreases. The models's predictions are less accurate when the image is denser with objects.
 
 For the vehicle category, we can see that model performance decreases when the vehicle average size increases (right figure).
