@@ -62,27 +62,27 @@ def subset_images() -> List[SubsetResponse]:
 
     def load_set(coco: COCO, load_union: bool = False) -> List:
         # get all images containing given categories
-        catIds = coco.getCatIds(CATEGORIES)     # Fetch class IDs only corresponding to the filterClasses
+        cat_ids = coco.getCatIds(CATEGORIES)     # Fetch class IDs only corresponding to the filterClasses
         if not load_union:
-            imgIds = coco.getImgIds(catIds=catIds)  # Get all images containing the Category IDs together
+            img_ids = coco.getimg_ids(catIds=cat_ids)  # Get all images containing the Category IDs together
         else:
-            imgIds = set()
-            for cat_id in catIds:
+            img_ids = set()
+            for cat_id in cat_ids:
                 image_ids = coco.getImgIds(catIds=[cat_id])
-                imgIds.update(image_ids)
-            imgIds = list(imgIds)
-        imgs = coco.loadImgs(imgIds)
+                img_ids.update(image_ids)
+            img_ids = list(img_ids)
+        imgs = coco.loadImgs(img_ids)
         return imgs
 
-    dataType = 'train2014'
-    annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
-    fpath = _download(annFile)
+    data_type = 'train2014'
+    ann_file = '{}annotations/instances_{}.json'.format("coco/ms-coco/", data_type)
+    fpath = _download(ann_file)
     # initialize COCO api for instance annotations
     traincoco = COCO(fpath)
     x_train_raw = load_set(coco=traincoco, load_union=LOAD_UNION_CATEGORIES_IMAGES)
-    dataType = 'val2014'
-    annFile = '{}annotations/instances_{}.json'.format("coco/ms-coco/", dataType)
-    fpath = _download(annFile)
+    data_type = 'val2014'
+    ann_file = '{}annotations/instances_{}.json'.format("coco/ms-coco/", data_type)
+    fpath = _download(ann_file)
     # initialize COCO api for instance annotations
     valcoco = COCO(fpath)
     x_test_raw = load_set(coco=valcoco, load_union=LOAD_UNION_CATEGORIES_IMAGES)
@@ -99,8 +99,8 @@ def subset_images() -> List[SubsetResponse]:
 # Input Encoder
 def input_image(idx: int, data: SubsetResponse) -> ndarray:
     data = data.data
-    x = data['samples'][idx]
-    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    sample = data['samples'][idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=sample['file_name'])
     fpath = _download(filepath)
     img = imread(fpath)
     if len(img.shape) == 2:
@@ -115,22 +115,22 @@ def input_image(idx: int, data: SubsetResponse) -> ndarray:
 # Ground Truth Encoder
 def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
     data = data.data
-    catIds = data['cocofile'].getCatIds(catNms=CATEGORIES)
-    x = data['samples'][idx]
-    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
-    anns = data['cocofile'].loadAnns(annIds)
-    mask = np.zeros([x['height'], x['width']])
+    cat_ids = data['cocofile'].getCatIds(catNms=CATEGORIES)
+    sample = data['samples'][idx]
+    ann_ids = data['cocofile'].getAnnIds(imgIds=sample['id'], catIds=cat_ids, iscrowd=None)
+    anns = data['cocofile'].loadAnns(ann_ids)
+    mask = np.zeros([sample['height'], sample['width']])
     for ann in anns:
         _mask = data['cocofile'].annToMask(ann)
-        mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
+        mask[_mask > 0] = _mask[_mask > 0] * (cat_ids.index(ann['category_id']) + 1)
     # here we add other vehicles (truck, bus, train) to the car mask to create a vehicle mask
     if SUPERCATEGORY_GROUNDTRUTH:
-        car_id = catIds[-1]
-        other_anns_ids = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=data['supercategory_ids'], iscrowd=None)
+        car_id = cat_ids[-1]
+        other_anns_ids = data['cocofile'].getAnnIds(imgIds=sample['id'], catIds=data['supercategory_ids'], iscrowd=None)
         other_anns = data['cocofile'].loadAnns(other_anns_ids)
-        for j, ot_ann in enumerate(other_anns):
+        for ot_ann in other_anns:
             _mask = data['cocofile'].annToMask(ot_ann)
-            mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(car_id) + 1)
+            mask[_mask > 0] = _mask[_mask > 0] * (cat_ids.index(car_id) + 1)
     mask = cv2.resize(mask, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
     return mask.astype(np.float)
 
@@ -156,8 +156,8 @@ def metadata_category_percent(label_key: str) -> Callable[[int, SubsetResponse],
 
 def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
     data = data.data
-    x = data['samples'][idx]
-    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    sample = data['samples'][idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=sample['file_name'])
     fpath = _download(filepath)
     img = imread(fpath)
     if len(img.shape) == 2:
@@ -172,8 +172,8 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
 
 def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     data = data.data
-    x = data['samples'][idx]
-    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    sample = data['samples'][idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=sample['file_name'])
     fpath = _download(filepath)
     img = imread(fpath)
     is_colored = len(img.shape) > 2
@@ -182,16 +182,16 @@ def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
 
 def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_key: str = 'all') -> int:
     data = data.data
-    x = data['samples'][idx]
+    sample = data['samples'][idx]
     all_labels = SUPERCATEGORY_CLASSES + CATEGORIES
     vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
-    catIds = [data['cocofile'].getCatIds(catNms=label)[0] for label in all_labels]  # keep same labels order
-    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
-    anns_list = data['cocofile'].loadAnns(annIds)
+    cat_ids = [data['cocofile'].getCatIds(catNms=label)[0] for label in all_labels]  # keep same labels order
+    ann_ids = data['cocofile'].getAnnIds(imgIds=sample['id'], catIds=cat_ids)
+    anns_list = data['cocofile'].loadAnns(ann_ids)
     if label_key == 'all':
         return len(anns_list)   # all instances within labels
-    cat_name_to_id = dict(zip(all_labels, catIds))  # map label name to its ID
-    cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
+    cat_name_to_id = dict(zip(all_labels, cat_ids))  # map label name to its ID
+    cat_id_counts = {cat_id: 0 for cat_id in cat_ids}    # counts dictionary
     for ann in anns_list:
         cat_id_counts[ann['category_id']] += 1
     if label_key == 'vehicle':  # count super category vehicle
@@ -254,5 +254,5 @@ for cat in METADATA_CATEGORY_AVG_SIZE:
                                 metadata_type=DatasetMetadataType.float, name=f'{cat}_avg_size')
 
 # For Super Category mode includes: car, truck, bus, train. For Category mode: only car.
-dataset_binder.set_metadata(function=metadata_car_vehicle_avg_size, subset='images', metadata_type=DatasetMetadataType.float, name=f'car_category_avg_size')
-
+dataset_binder.set_metadata(function=metadata_car_vehicle_avg_size, subset='images',
+                            metadata_type=DatasetMetadataType.float, name='car_category_avg_size')

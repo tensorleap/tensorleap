@@ -12,4 +12,3 @@ def leap_save_model(target_file_path: Path):
                   loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
     model.save(target_file_path)
-
