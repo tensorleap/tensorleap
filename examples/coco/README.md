@@ -2,8 +2,6 @@
 # README
 
 ## Semantic Segmantation - COCO 
-
-
 In this example, we show the use of Tensorleap on a Computer Vision task - Semantic Segmentation on COCO data. We use `coco 14` training and validation data files combined with a `mobilenet_v2` backbone and a `pix2pix` based decoder. 
 
 ### The Task
