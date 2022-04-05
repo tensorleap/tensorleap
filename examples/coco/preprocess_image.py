@@ -64,7 +64,7 @@ def test_prediction():
     model = load_model()
     pr_mask = predict_segmentation(model=model, image=img)
     iou_score = calc_iou_score(arr1=reshaped_mask_image, arr2=pr_mask)
-    print(f"iou_score: {iou_score}")
+    print(f"iou_score: {iou_score}") 
 
 
 if __name__ == "__main__":
