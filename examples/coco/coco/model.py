@@ -1,15 +1,14 @@
 # Adapted from https://www.tensorflow.org/tutorials/images/segmentation
 import tensorflow as tf
 import coco.pix2pix_upsample as pix2pix
-from coco.adapted_mobilenet_v2 import MobileNetV2
 from tensorflow.python.keras.engine.training import Model as TFModel
 
 
 def unet_model(output_channels: int) -> TFModel:
-    base_model = MobileNetV2(
+    base_model = tf.keras.applications.MobileNetV2(
         input_shape=[128, 128, 3],
         include_top=False
-    )  #Download on first run
+    )  # Download on first run
 
     # Use the activations of these layers
     layer_names = [
@@ -23,7 +22,9 @@ def unet_model(output_channels: int) -> TFModel:
 
     # Create the feature extraction model
     down_stack = tf.keras.Model(inputs=base_model.input, outputs=base_model_outputs)
-    down_stack.trainable = False
+
+    # down_stack.trainable = False
+
     up_stack = [
         pix2pix.upsample(512, 3),  # 4x4 -> 8x8
         pix2pix.upsample(256, 3),  # 8x8 -> 16x16
@@ -34,7 +35,7 @@ def unet_model(output_channels: int) -> TFModel:
     inputs = tf.keras.layers.Input(shape=[128, 128, 3])
 
     # Downsampling through the model
-    skips = down_stack.call(inputs)
+    skips = down_stack(inputs)
     x = skips[-1]
     skips = reversed(skips[:-1])
 
@@ -47,10 +48,10 @@ def unet_model(output_channels: int) -> TFModel:
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
       filters=output_channels, kernel_size=3, strides=2,
-      padding='same')  #64x64 -> 128x128
+      padding='same')  # 64x64 -> 128x128
+
     x = last(x)
-    softmax = tf.keras.layers.Softmax(axis=-1)
-    x = softmax(x)
+    x = tf.keras.layers.Softmax(axis=-1)(x)
     return tf.keras.Model(inputs=inputs, outputs=x)
-    # return down_stack
+
 
