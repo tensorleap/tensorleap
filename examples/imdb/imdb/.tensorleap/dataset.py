@@ -26,8 +26,8 @@ METRIC_NAMES = ["flesch_reading", "flesch_kincaid", "coleman_liau_index", "autom
                 "gutierrez_polini", "crawford", "gulpease_index", "osman"]
 
 
-def load_tokanizer(tokanizer_path: str) -> TokenizerType:
-    with open(tokanizer_path, 'r') as f:
+def load_tokenizer(tokenizer_path: str) -> TokenizerType:
+    with open(tokenizer_path, 'r') as f:
         data = json.load(f)
         tokenizer = tokenizer_from_json(data)
     return tokenizer
@@ -39,7 +39,7 @@ def download_load_assets() -> Tuple[TokenizerType, DataFrameType]:
     df = pd.read_csv(local_path)
     cloud_path = join("assets", "tokenizer_v2.json")
     local_path = _download(cloud_path)
-    tokenizer = load_tokanizer(local_path)
+    tokenizer = load_tokenizer(local_path)
     return tokenizer, df
 
 
