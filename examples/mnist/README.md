@@ -2,7 +2,7 @@
 
 ## The MNIST Dataset
 
-In this example, we used the [**MNIST dataset**](http://yann.lecun.com/exdb/mnist/) **** (handwritten digits) to train a convolutional neural network (CNN) for image classification, and reached a validation accuracy of \~0.98 on our trained model.
+In this example, we used the [**MNIST dataset**](http://yann.lecun.com/exdb/mnist/) (handwritten digits) to train a convolutional neural network (CNN) for image classification, and reached a validation accuracy of \~0.98 on our trained model.
 
 ### Population Exploration <a href="#population-exploration" id="population-exploration"></a>
 
@@ -30,7 +30,7 @@ In the visualization below we can see that the samples from class **7** _(peach-
 
 The dot's size in the visualization below represents the sample's loss. The selected sample is a challenging one, and we can also see that it has a relatively high loss. The sample's metadata shown on the right panel shows a distance of 6.83 to class `6` and 7.71 to the ground truth - class `5,`and indeed prediction was class `6`.
 
-![Prediction: 6](../.gitbook/assets/img\_3.png) ![GT:5](../.gitbook/assets/img\_4.png)
+![Prediction: 6](../.gitbook/assets/img_3.png) ![GT:5](../.gitbook/assets/img_4.png)
 
 ### Sample Analysis <a href="#sample-analysis" id="sample-analysis"></a>
 
@@ -59,9 +59,9 @@ Running the Fetch Similars operation to find samples that are similar to <img sr
 
 In the 4 digit class the majority of the samples are written in the open form <img src="../.gitbook/assets/image (17) (1) (1) (1) (1) (1) (1).png" alt="" data-size="line">. The operation detected four samples that are similar to the closed form <img src="../.gitbook/assets/image (7) (1) (1).png" alt="" data-size="line">, while the other samples are mostly the digit `9`. This provides us with useful insights about the model and data and how to improve them. For example, we can:
 
-* Separate the 4 class into two classes - open and closed digits.
-* Enrich the data with additional samples of closed digits.
-* Remove the closed digits from the dataset and support only the open form.
+- Separate the 4 class into two classes - open and closed digits.
+- Enrich the data with additional samples of closed digits.
+- Remove the closed digits from the dataset and support only the open form.
 
 Similar analysis can be done for the two ways of writing the digit seven: <img src="../.gitbook/assets/image (27) (1) (1) (1) (1) (1).png" alt="" data-size="line"> and <img src="../.gitbook/assets/image (23) (2) (1).png" alt="" data-size="line">.&#x20;
 
@@ -91,4 +91,3 @@ As we can see, the model convergences well and achieves an accuracy of \~0.98 on
 ## Summary
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
-

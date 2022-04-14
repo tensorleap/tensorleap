@@ -12,7 +12,7 @@ To preprocess the text, first lowercase all words and remove any HTML residues a
 
 ### Densely Connected Model
 
-A straightforward approach to solving this problem is by using a densely connected model. The proposed [model](https://github.com/tensorleap/tensorleap/blob/master/examples/imdb/imdb/imdb/model\_infer.py) is composed from a `Dense` layer followed by a `GlobalAveragePooling1D`.
+A straightforward approach to solving this problem is by using a densely connected model. The proposed [model](https://github.com/tensorleap/tensorleap/blob/master/examples/imdb/imdb/imdb/model_infer.py) is composed from a `Dense` layer followed by a `GlobalAveragePooling1D`.
 
 Below is the model's block representation within our platform:
 
@@ -46,7 +46,7 @@ Below is a [**Sample Analysis**](../reference/analysis.md#sample-analysis) of on
 
 This analysis shows a **false-positive** prediction made by the model, with a heat-map overlay that scores the significance of each word to the positive prediction.
 
-The heat-map highlighted words such as "**brilliant**", "**entertaining**", "**masterpiece**" which indeed translates positively. But when we review their context, we get "**mildly entertaining**", "not**... brillian**t", and "**masterpiece because of sympathy**", which resonates as negative.
+The heat-map highlighted words such as "**brilliant**", "**entertaining**", "**masterpiece**" which indeed translates positively. But when we review their context, we get "**mildly entertaining**", "**not... brilliant**", and "**masterpiece because of sympathy**", which resonates as negative.
 
 The dense model makes its prediction using a single word context, which can lead to inaccurate sentiment analysis. To improve upon this, next we will evaluate a separate convolutional model.
 
@@ -84,11 +84,11 @@ The Tensorleap's Dashboard enables you to see how your data is distributed acros
 
 Different correlation insights from this visualization:
 
-* `length` - the shorter the review, the higher the loss.
-* `out-of-vocabulary` - the more out-of-vocabulary words a review has, the higher its loss.
-* `subjectiveness` - the more subjective the review is, the lower the loss.
-* `score confidence` - the more confident a review is (i.e. highly negative or positive), the lower the loss.
-* `polarity` - an external (TextBlob) polarity analysis shows that sentences with neutral polarity have higher loss.
+- `length` - the shorter the review, the higher the loss.
+- `out-of-vocabulary` - the more out-of-vocabulary words a review has, the higher its loss.
+- `subjectiveness` - the more subjective the review is, the lower the loss.
+- `score confidence` - the more confident a review is (i.e. highly negative or positive), the lower the loss.
+- `polarity` - an external (TextBlob) polarity analysis shows that sentences with neutral polarity have higher loss.
 
 #### Unsupervised Clustering
 
@@ -96,13 +96,12 @@ Tensorleap's platform provides an unsupervised clustering of samples based on th
 
 In our use-case we can see that this clustering technique was able to group together samples with common features. For example, in this Population Exploration plot, each cluster is colored, while the size of the dot represents the number of out-of-vector words within each sample:
 
-![Population Exploration - Unsupervised Clustering + OOV Dot Size](../.gitbook/assets/img\_21.png)
+![Population Exploration - Unsupervised Clustering + OOV Dot Size](../.gitbook/assets/img_21.png)
 
 The green cluster is mainly composed of examples with high OOV words. Other clusters, as the light blue, have fewer samples with high OOV count. Focused view on each of these clusters:
 
-![Focus on the Green Cluster - High OOV](../.gitbook/assets/img\_22.png) ![Focus on the Blue Cluster - Low OOV ](../.gitbook/assets/img\_23.png)
+![Focus on the Green Cluster - High OOV](../.gitbook/assets/img_22.png) ![Focus on the Blue Cluster - Low OOV ](../.gitbook/assets/img_23.png)
 
 ## Summary
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
-

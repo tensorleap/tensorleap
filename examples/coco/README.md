@@ -8,7 +8,7 @@ The goal of semantic segmentation is to label each pixel of an image with a corr
 
 ## The Dataset
 
-****[**COCO**](https://cocodataset.org) (Common Objects in Context) is a large-scale object detection, segmentation, and captioning dataset with 80 classes.
+[**COCO**](https://cocodataset.org) (Common Objects in Context) is a large-scale object detection, segmentation, and captioning dataset with 80 classes.
 
 ## The Model
 
@@ -28,8 +28,8 @@ The model's task is to segment images consisting of two categories: `person` and
 
 After evaluating our model on a dataset subset containing cars and persons, we get these performance metrics:
 
-* Mean IoU **Person** **`0.309`**
-* Mean IoU **Car** **`0.262`**
+- Mean IoU **Person** **`0.309`**
+- Mean IoU **Car** **`0.262`**
 
 ### **Population Exploration**
 
@@ -75,8 +75,8 @@ One possible solution is to segment the entire **Vehicle SuperCategory** togethe
 
 After training the Vehicle SuperCategory, we get these metrics:
 
-* Mean IoU **Person** **`0.319`**
-* Mean IoU **Vehicle** **`0.312`**
+- Mean IoU **Person** **`0.319`**
+- Mean IoU **Vehicle** **`0.312`**
 
 #### **Cluster Analysis**
 
@@ -111,7 +111,7 @@ Thus, for example, when we examine the Mean IoU on the person class, we see that
 
 Our model is also able to use context to group images, as shown by this cluster containing sports activities**:**
 
-****
+---
 
 ![Sports Cluster](<../.gitbook/assets/image (15).png>)
 
@@ -156,4 +156,3 @@ From this visualization, it is clear that as the number of **persons** in an ima
 ## **Summary**
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
-
