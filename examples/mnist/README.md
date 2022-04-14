@@ -4,10 +4,6 @@
 
 In this example, we used the [**MNIST dataset**](http://yann.lecun.com/exdb/mnist/) **** (handwritten digits) to train a convolutional neural network (CNN) for image classification, and reached a validation accuracy of \~0.98 on our trained model.
 
-{% hint style="info" %}
-For more information on using Tensorleap with the MNIST dataset, see [**MNIST Guide**](../guides/full-guides/mnist-guide/).
-{% endhint %}
-
 ### Population Exploration <a href="#population-exploration" id="population-exploration"></a>
 
 Below is a **population exploration** plot. It represents a samples' similarity map based on the model's latent space, built using the extracted features of the trained model.
@@ -96,4 +92,3 @@ As we can see, the model convergences well and achieves an accuracy of \~0.98 on
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
 
-For more information, please refer to our additional [**Examples**](../guides/dataset-script/examples/) and [**Guides**](../guides/).

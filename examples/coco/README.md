@@ -157,4 +157,3 @@ From this visualization, it is clear that as the number of **persons** in an ima
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
 
-For more information, see our additional [**Examples**](../guides/dataset-script/examples/) and [**Guides**](../guides/).

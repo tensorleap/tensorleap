@@ -6,10 +6,6 @@ The `IMDB` dataset is one of the most popular sentiment analysis datasets. It co
 
 In this example, we build a classifier model to predict positive and negative reviews.
 
-{% hint style="info" %}
-For more information on using Tensorleap with the IMDB dataset, see [IMDB Guide](../guides/full-guides/imdb-guide/).
-{% endhint %}
-
 ### Text Preprocessing
 
 To preprocess the text, first lowercase all words and remove any HTML residues and punctuations. Tokenize the words and feed them into an **Embedding** layer to embed all the tokens.
@@ -110,4 +106,3 @@ The green cluster is mainly composed of examples with high OOV words. Other clus
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
 
-For more information, please refer to our additional [**Examples**](../guides/dataset-script/examples/) and [**Guides**](../guides/).
