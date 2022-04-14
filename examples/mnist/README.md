@@ -1,88 +1,93 @@
-# MNIST
+# Image Analysis
 
-This example builds a Convolutional Neural Network (CNN) trained on the MNIST dataset. 
+## The MNIST Dataset
 
-The `MNIST database (Modified National Institute of Standards and Technology database)` contains handwritten digits often used for training various image processing systems. 
+In this example, we used the [**MNIST dataset**](http://yann.lecun.com/exdb/mnist/) (handwritten digits) to train a convolutional neural network (CNN) for image classification, and reached a validation accuracy of \~0.98 on our trained model.
 
-In this example, we integrate the MNIST dataset into Tensorleap and build a simple classification model. We demonstrate how to analyze the model predictions using Tensorleap.
+### Population Exploration <a href="#population-exploration" id="population-exploration"></a>
 
-The model achieved accuracy of 0.98~. 
+Below is a **population exploration** plot. It represents a samples' similarity map based on the model's latent space, built using the extracted features of the trained model.
 
-## Population Exploration
+#### Training Set:
 
-This embedding space is a representation based on the network's extracted features. The samples are from the training set.
+The samples shown below were taken from the **training set** and are colored based on their **ground truth** class. The dot's size represents the model's error loss for that specific sample. We can see that there is a clear separation of the samples based on their classes.
 
-<img alt="img.png" height="300" src="images/img_7.png" width="800"/>
+![Population Exploration Analysis of Training Samples](<../.gitbook/assets/image (32).png>)
 
-We can see that there is a nice separation of the samples based on their classes. The samples are colored based on their GT class and the dot size is based on the network's error loss. 
+#### Validation Set:
 
-Now, we plot the validation set:
+The plot below is a similarity map within the **validation set** and we can see that there is still a nice separation, but there are quite a few samples with higher error loss (larger dot size). Interestingly, those false predictions are located within clusters of classes different from their **ground truth** class.
 
-<img alt="img.png" height="400" src="images/img_2.png" width="700"/>
+![Population Exploration of the Validation Set](<../.gitbook/assets/image (19) (1).png>)
 
-There is still a nice separation, however, with more high error loss samples. Interestingly, those false predictions (larger dot size) are located within clusters of classes different from their GT.  
+#### Similar Classes
 
-In the digits image space, there are some classes which are close to each other. For example, class 1 and class 7 tend to look alike. We can see  from the population exploration plot below that these class samples are closer to each other and there are some false prediction between the samples on the edge. Samples in light blue are from class 1 and the peach colored are from 7.
+In the visualization below we can see that the samples from class **7** _(peach-colored)_ and class **1** _(light-blue)_ are relatively close to each other. This makes sense since the digit **7** is visually similar to the digit **1**.
 
-<img alt="img_10.png" height="500" src="images/img_1.png" width="800"/>
+![Close Similar Clusters of Classes 1 and 7](../.gitbook/assets/mnist-similar-classes-2.gif)
 
+### Error Analysis <a href="#error-analysis" id="error-analysis"></a>
 
-## Error Analysis
+The dot's size in the visualization below represents the sample's loss. The selected sample is a challenging one, and we can also see that it has a relatively high loss. The sample's metadata shown on the right panel shows a distance of 6.83 to class `6` and 7.71 to the ground truth - class `5,`and indeed prediction was class `6`.
 
+![Prediction: 6](../.gitbook/assets/img_3.png) ![GT:5](../.gitbook/assets/img_4.png)
 
-<img alt="img.png" height="400" src="images/img_3.png" width="600"/> <img alt="img.png" height="400" src="images/img_4.png" width="600"/>
+### Sample Analysis <a href="#sample-analysis" id="sample-analysis"></a>
 
+The Tensorleap platform provides a way to further explore the model's response to specific data samples. For example, from the results below, we can see that the model's prediction was **9** while the ground truth is **8**. Additionally, we can use the heat map to see which features of the data contributed to each of the output classes.
 
-**Sample 11701:** Prediction: 6, GT: 5
+![Heat Maps Correlated for each Output](../.gitbook/assets/mnist-sample-analysis.gif)
 
-The loss on this sample is relatively higher than in the other samples. From metadata, we get that the sample is closer to 6 class (6.83) than its GT - 5 (7.71). This is why the model predicted the sample to be 6. 
+### Fetch Similars <a href="#fetch-similars" id="fetch-similars"></a>
 
-## Sample Analysis 
+As explained, Tensorleap tracks how each learned feature responds to each sample. This allows finding samples that the model considers similar, as they _activate_ similar learned features.
 
-Tensorleap allows us to further explore the model's response to a specific sample. For example, from the results below, we can see that the model's prediction was **9** while the ground truth is **8**.  
+This functionality also allows to automatically find **candidates for labeling**, detect **ambiguities** in the data and **mislabeled** samples.&#x20;
 
-Additionally, we can see which features of the data contribute to each of the output classes using the Heat Map option.
+#### Fetch Similars to a Sample - Example
 
-<img alt="Watch the video" height="350" src="https://1081945985-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F9UXeOlFqlw8pl79U2HGU%2Fuploads%2FGyA3pV9MZcFQgfbifJf6%2Fanalysis-prediction-heatmap-small.gif?alt=media&amp;token=9c629d9b-6e0a-405c-8c01-e79e41acb505" width="750"/>
+In the example below we ran a **Fetch Similars** operation to find similar samples to the sample <img src="../.gitbook/assets/image (26) (1).png" alt="" data-size="line">. The result is a cluster of similar samples:
 
+![Fetch Similar Results](<../.gitbook/assets/image (16) (2).png>) ![Similar Samples](<../.gitbook/assets/image (13) (1) (1) (1) (1) (1) (1).png>)
 
-## Fetch Similars
+#### Example - Investigating the "Closed" 4 Digit
 
-Using the `Fetch Similars` functionality, we can find clusters of samples similar to one another, as they *`activate`* similar learned features within the model.
+The MNIST dataset includes samples of the digit 4 written in two ways: <img src="../.gitbook/assets/image (7) (1) (1).png" alt="" data-size="line"> and <img src="../.gitbook/assets/image (17) (1) (1) (1) (1) (1) (1).png" alt="" data-size="line">. \
+Running the Fetch Similars operation to find samples that are similar to <img src="../.gitbook/assets/image (7) (1) (1).png" alt="" data-size="line"> returns similar samples with presented heat maps that highlight the features that define these similarities.
 
-<img alt="img.png" height="550" src="images/img_9.png" class="center" width="900"/>    
+![Similar Samples Heat Map](<../.gitbook/assets/image (20) (1) (1) (1) (1) (1).png>)
 
-**Fetch Similar Results**
+In the 4 digit class the majority of the samples are written in the open form <img src="../.gitbook/assets/image (17) (1) (1) (1) (1) (1) (1).png" alt="" data-size="line">. The operation detected four samples that are similar to the closed form <img src="../.gitbook/assets/image (7) (1) (1).png" alt="" data-size="line">, while the other samples are mostly the digit `9`. This provides us with useful insights about the model and data and how to improve them. For example, we can:
 
-<img alt="img.png" height="350" src="images/img_10.png" width="550"/> <img alt="img_1.png" height="350" src="images/img_11.png" width="350"/>
+- Separate the 4 class into two classes - open and closed digits.
+- Enrich the data with additional samples of closed digits.
+- Remove the closed digits from the dataset and support only the open form.
 
+Similar analysis can be done for the two ways of writing the digit seven: <img src="../.gitbook/assets/image (27) (1) (1) (1) (1) (1).png" alt="" data-size="line"> and <img src="../.gitbook/assets/image (23) (2) (1).png" alt="" data-size="line">.&#x20;
 
-## Results Analysis
+### Metrics Analysis <a href="#results-analysis" id="results-analysis"></a>
 
-By using Tensorleap Dashboard functionality, we can plot the training progress as well as visualize how key performance metrics distributed over various metadata to find correlations and trends. 
+The Tensorleap Dashboard allows users to visualize the training progress and performance metrics of their models. Additionally, users can explore correlations and trends between various metadata to gain insights into their data.
 
-**Average Euclidean Difference Metadata and Average Loss**
+**Average Euclidean Distance Metadata vs Average Loss**
 
-We plot how the samples' loss distributed over the samples' Euclidean difference metadata (per class). We expect that, for samples that are further than their class average exemplar, the loss will be higher. Consequently, the network will be less capable of generalizing on these deviated samples.
+For each class, its **mean image** is calculated (28x28) by averaging each pixel. For each sample, its Euclidean distance from the **mean image** of its class is calculated and set as its metadata.
 
-<img alt="img_16.png" src="images/img_6.png"/>
+The Dashboard allows us to visualize and investigate each metadata interactively. The visualization below shows the average error loss per class, vs the Euclidean distance.
 
-We see the trend in line with our expectations - as the Euclidean difference increases, the loss increases. 
+![Average Euclidean Distance vs Average Loss (click-to-zoom)](<../.gitbook/assets/image (25).png>)
 
+This plot reveals a strong correlation between the Euclidean distance and the average loss - as the Euclidean distance increases, the loss increases with it. This is expected, as the model is less capable of generalizing samples with high irregularities.
 
-The Euclidean difference from the class examplar is calculated as follows: 
-  - We extract the class centroid per class: we take all images with respect to their class and calculate an average per pixel. The output will be a 28x28 image.     
-  - Per sample, we calculate the Euclidean difference from its class centroid.
+**Loss and Accuracy Visualizations**
 
-**Loss and Accuracy Plots**
+During training, metrics are collected and presented in the Dashboard.\
+For example, a visualization of the model's Loss (left) and Accuracy(right) vs batches:
 
-We plot the model Loss Accuracy for training and validation sets during training iterations:
+![Loss/Accuracy vs Batch](<../.gitbook/assets/image (27) (1).png>)
 
-![img.png](images/img_5.png)
+As we can see, the model convergences well and achieves an accuracy of \~0.98 on the **validation** set.
 
-There is a nice convergence of the model, achieving accuracy of ~0.98 on validation set.  
+## Summary
 
-We have shown a few examples of the model analysis and insights we can gain using Tensorleap. Nevertheless, we have only begun to scratch the surface with the potential capabilities and wisdom we can achieve using the platform. For more information, you may refer to our additional examples and tutorials. 
-
-
-
+The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;

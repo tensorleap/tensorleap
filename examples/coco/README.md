@@ -1,170 +1,158 @@
+# Semantic Segmentation
 
-# README
+In this example, we show the use of Tensorleap on a Computer Vision task - Semantic Segmentation on COCO data. We use `coco 14` training and validation data files combined with a `MobileNetV2` backbone and a `pix2pix` based decoder.
 
-## Semantic Segmantation - COCO
+## The Task
 
-In this example, we show the use of Tensorleap on a Computer Vision task - Semantic Segmentation on COCO data. We use `coco 14` training and validation data files combined with a `mobilenet_v2` backbone and a `pix2pix` based decoder. 
+The goal of semantic segmentation is to label each pixel of an image with a corresponding class. This task is commonly referred to as dense prediction because the prediction is for every pixel in the image. In semantic segmentation, the boundary of objects is labeled with a mask, and object classes are labeled with a class label. The output is a high-resolution image (typically of the same size as the input image) in which each pixel is classified to a particular class.
 
-### The Task
+## The Dataset
 
-The goal of Semantic Segmentation is to label each pixel of an image with a corresponding class. Because the prediction is for every pixel in the image, this task is commonly referred to as dense prediction. In Semantic Segmentation, the boundary of objects is labeled with a mask, and object classes are labeled with a class label. The output itself is a high-resolution image (typically of the same size as the input image) in which each pixel is classified to a particular class. 
+[**COCO**](https://cocodataset.org) (Common Objects in Context) is a large-scale object detection, segmentation, and captioning dataset with 80 classes.
 
-### The Dataset
+## The Model
 
-COCO (Common Objects in Context) is large-scale object detection, segmentation, and captioning dataset. The COCO Dataset has 80 classes.
+The U-Net was developed by Olaf Ronneberger et al. for Biomedical Image Segmentation. The architecture consists of an encoder and a decoder. The encoder captures the image context and the decoder enables precise localization using transposed convolutions. We use a modified U-Net, which is an end-to-end Fully Convolutional Network Model, for the task.
 
-### The Model
+As in the original paper, a simplified U-Net is described as follows:
 
-#### Model Introduction
+![U-Net Architecture](<../.gitbook/assets/image (41).png>)
 
-We use a modified U-Net, which is an end-to-end Fully Convolutional Network Model for the task. The U-Net was developed by Olaf Ronneberger et al. for Biomedical Image Segmentation. The architecture consists of an encoder - which is used to capture the image context, and a decoder - which is used to enable precise localization using transposed convolutions. 
+**Transfer Learning**
 
-In the original paper, the U-Net is described as follows:
+A pre-trained MobileNetV2 model for the encoder was used. This helps to learn robust features and reduces the number of trainable parameters. The decoder/up-sampler is simply a series of upsample blocks. Only the decoder is trained during the training process, while the encoder weights are frozen.
 
-<img alt="Unet" height="400" src="./coco/images/Unet.png" width="600"/>
+### Category Prediction Model
 
-#### Transfer Learning
+The model's task is to segment images consisting of two categories: `person` and `car`.
 
-For the encoder, we use a pre-trained model - MobileNetV2. That will help to learn robust features and reduce the number of trainable parameters. The decoder/upsampler is simply a series of upsample blocks. During the training process, only the decoder is being trained when the encoder weights are being frozen.
+After evaluating our model on a dataset subset containing cars and persons, we get these performance metrics:
 
-## Category Prediction Model
+- Mean IoU **Person** **`0.309`**
+- Mean IoU **Car** **`0.262`**
 
-The model's task is to segment images consisting of two categories: `person` and `car`.  
+### **Population Exploration**
 
-First, we evaluate our model on a dataset subset containing cars and person instances:
+The plot below is a **population exploration** plot. It represents a samples' similarity map based on the model's latent space, built using the extracted features from the neural network.
 
-| Dataset            |Mean IoU Person   | Mean IOU car     |
-| --------           |  --------        | -------          |
-| Category Model     | 0.309            |    0.262         |
+To qualitatively analyze the model's predictions of the different classes, we utilize Tensorleap's **Population Exploration** analysis.
 
-#### Cluster Analysis
+![Population Exploration](<../.gitbook/assets/image (42).png>)
 
-To qualitatively analyze the model's predictions on the different classes we utilize Tesnorleap's Population Exploration algorithm.
-We select samples from different areas of the embedding space and use `fetch similar` to create unique clusters of similar samples.
+### **Cluster Analysis**
 
-Among the clusters we got are:
+Selecting samples from different areas of the model's latent space and use the **Fetch Similars** tool to create unique clusters of similar samples, such as:
 
-#### B&W cluster 
+#### **B\&W cluster**
 
-We fetch a group of similar images that are mostly greyscale images as seen below:
+A cluster with grayed images had been detected. Using the **Fetch Similars** tool, we get these images:
 
-<img alt="BWcluster" height="300" src="./coco/images/b_w_cluster.png" width="400"/>
+![Grayed Images Cluster](<../.gitbook/assets/image (21).png>)
 
-This cluster not only captures grayscale images, but also RGB images with a small variation in
-[hue](https://en.wikipedia.org/wiki/HSL_and_HSV).
+As seen from the images, this cluster not only captures **grayscale** images but also **RGB** images with a small variation in [**hue**](https://en.wikipedia.org/wiki/Hue).
 
-<img alt="BWclusterpoints" height="400" src="./coco/images/b_w_cluster_points.png" width="700"/>
+Viewing the cluster in Tensorleap's cluster analysis tools shows that the vast majority of samples are **RGB** images and not **grayscale** (plotted as red dots below). Additionally, comparing the model's performance on **grayscale** vs **RGB** images yields that, on average, RGB images have lower error loss.
 
-In fact, viewing the cluster in Tensorleap's `cluster analysis` shows that the vast majority of images are RGB image,
-and not grayscale (plotted as red dots above)
+![RGB vs Grayscale Loss Comparison](<../.gitbook/assets/image (23).png>) ![Grayed Cluster - RGB (red) and Grayscale (Blue)](<../.gitbook/assets/image (26).png>)
 
-If we compare grayscale to RGB images we see that, on average, our loss on RGB images is lower:
+#### **'Vehicle-Like' Clusters**
 
-<img height="550" src="./coco/images/b_w_loss.png" width="700"/>
+Our model's latent spaces have multiple semantically meaningful vehicle clusters, for example, the **Bicycle** and **Bus** clusters:
 
+![Bicycle Cluster (click-to-zoom)](<../.gitbook/assets/image (22).png>) ![Bus Cluster (click-to-zoom)](<../.gitbook/assets/image (21) (1).png>)
 
-#### 'Vehicle-like' clusters
-Our model latent's space have multiple semantically meaningful vehicle clusters
-#### Bicycle cluster 
+Surprisingly, the attention map that highlights cluster defining features contains not only bus features, bus also buildings and towers.
 
-<img height="400" src="./coco/images/Bicycle_cluster.png" width="400"/>
+![Bus Cluster Heat-map](<../.gitbook/assets/image (29).png>)
 
-#### Bus cluster
+### Vehicle Super-Category Model
 
-<img height="400" src="./coco/images/Bus_cluster.png" width="400"/>
+When running analysis on Tensorleap, we noticed issues with this model trying to segment **cars** as a separate class from **trucks** and **buses** (which are labeled as **background**).
 
-Suprisingly, the attention map that highlights cluster defining features contains not only bus features,
-bus also buildings and towers.
+One possible solution is to segment the entire **Vehicle SuperCategory** together, and this is what is done in this section.
 
-<img height="400" src="./coco/images/Bus_cluster_attention.png" width="400"/>
+#### **Model Performance**
 
+After training the Vehicle SuperCategory, we get these metrics:
 
-## Vehicle Supercategory Model
+- Mean IoU **Person** **`0.319`**
+- Mean IoU **Vehicle** **`0.312`**
 
-Using Tensorleap's analysis, we noticed the issues in our previous model that tries to segment cars as a separate class from truck & bus (which are labeled background).
-One possible solution could be to segment the entire vehicle SuperCategory (SC) together.
-Here, we train a Super Category model that tries to segment vehicles, person, and background.
+#### **Cluster Analysis**
 
-To see how this new model latent space is effected we could examine its latent space by using cluster analysis. 
-#### model performance
-First, we provide the IOU of our model on a per-class basis
+**Fetching Similars** to one of the vehicles, as expected, results in a more homogeneous cluster composed of cars + buses.
 
+![Vehicles Cluster](<../.gitbook/assets/image (35).png>)
 
-| Dataset                  |Mean IoU person  | Mean IOU vehicle      |
-| --------                 |  --------       | -------               |
-| Super Category Model     | 0.319           |    0.312              |
+Reviewing the attention map (below) shows that the model is able to find strong, discriminative features of this cluster, such as wheels. In addition, it reveals possible confusion as some round objects could be categorized as vehicles, due to their similarities to wheels.
 
+![Vehicles Cluster Heat-map](<../.gitbook/assets/image (9).png>)
 
-#### Cluster Analysis
+The figure below exemplify this confusion. It shows a person inside a car holding a camera. While the **ground truth** is that of a person (bottom right), the actual prediction is that of a car (top right). This is due to the camera lens that provided features that supported a vehicle class (top left) and associated the sample with the cluster (bottom left).
 
-`Fetching Similars` to one of the vehicles as expected result in a more homogenous cluster (composed of cars + buses).
+![Sample Analysis](<../.gitbook/assets/image (28).png>)
 
-<img height="400" src="./coco/images/sc_cluster.jpg" width="400"/>
+**Effect on the Person Class**
 
-Our new model is now able to find strong, discriminative, features to this cluster - such as wheels:
+Using Tensorleap's **Population Exploration** analysis, we can compare the embedding of images with a high percent of car pixels to a high percent of people pixels in the original model (top figures) and the new model (bottom figures):
 
-<img height="400" src="./coco/images/sc_cluster_attention.jpg" width="400"/>
+![Population Exploration Analysis](<../.gitbook/assets/image (19).png>)
 
-Reviewing the attention map reveals a possible confusion: round objects could be categorized as cars due to their similarity to wheels. We analyze one of the samples in this cluster to exemplify this issue.<br>
- 
-In the following figure we show a sample of a person holding a camera. While the GT is that of a person (bottom right) the actual prediction is that of a car (top right). <br>
-This is due to the camera lens that provided features that supported a car class (top left) and associated the sample with the cluster (bottom left).
+Since our new model is now able to use a wider collection of features to describe the **vehicle** category, its latent space provides better separability between **humans** and **vehicles**, and is able to more accurately capture these two categories.
 
-<img alt="img.png" height="600" src="./coco/images/round_object_3.png" width="600"/>
-
-
-#### Effect on the person class
-
-Using Tensorleap's population exploration we can compare the embedding of images with a high percent of car pixels to a high percent of people pixels, in the original model (top figures) and the new model (bottom figures):
-
-<img alt="img.png" height="500" src="./coco/images/comparing_cluster_location.png" width="1000"/>
-
-Since our new model is now able to use a wider collection of features to describe the vehicle category its latent
-space provide better seperability between humans and vehicles, and is able to more accurately capture these two categories.
-
-Thus, for example, when we examine the IOU on the person class we see that our Super Category model is more accurate than the original one:
+Thus, for example, when we examine the Mean IoU on the person class, we see that our Super Category model is more accurate than the original one:
 
 | Dataset              | Mean IoU Person |
-| --------             |  --------       |
+| -------------------- | --------------- |
 | Category Model       | 0.309           |
-| Super Category Model |  0.319          |
-#### Additional cluster: Sport cluster
+| Super Category Model | 0.319           |
 
-<img alt="img.png" height="400" src="./coco/images/sports_cluster.png" width="400"/>
+### **Sports Cluster**
 
-Our model is also able to use context to group images, as shown by this cluster containing sport activities.
+Our model is also able to use context to group images, as shown by this cluster containing sports activities**:**
 
-#### False and Ambiguous Labels
+---
 
-With the help of the `Sample Analysis` feature, we can find some ambiguous labels and false labeling images that we can choose to exclude from our train dataset to improve the performance.
+![Sports Cluster](<../.gitbook/assets/image (15).png>)
 
-<img alt="img.png" height="300" title="Van Gogh, Self-portrait." src="./coco/images/two_person_gt.png" width="500"/>       <img height="300" src="./coco/images/two_person_prediction.png" width="500"/>
-<figcaption> misslabeled GT - (left) The driver and the woman from the left are segmented as the car in GT. (right) Prediction: the model correctly segments all three people (from right).
-</figcaption>
+## **Sample Analysis**
 
-- Sample error analysis revealed that it wasn't the model's false prediction on that sample but rather false labeling.  
+### **False and Ambiguous Labels**
 
-<img height="300" src="./coco/images/inaccurate_gt.png" width="400"/>  <img height="300" src="./coco/images/toy_car_3.png" width="400"/> 
-<figcaption> (left) Inaccurate GT. (right) and ambiguous label image: toy car as a car :) . </figcaption> 
+With the help of the **Sample Analysis** tool, ambiguous labels and mislabeled images can be detected. These can later be considered for exclusion in order to improve performance.
 
-<img height="300" src="./coco/images/crowds_2.png" width="400"/><img height="300" src="./coco/images/low_light_2.png" width="400"/>
-<figcaption> Challenging images: (left) low light. (right) crowds with small people. </figcaption>
+#### Mislabeling Example
 
+![Mislabeled Ground Truth](<../.gitbook/assets/image (5).png>) ![Model's Prediction](<../.gitbook/assets/image (24).png>)
 
-### Performance and Metadata Analysis
+On the left is the mislabeled **ground truth**, which segmented the driver and one of the women as **car**. On the right is the model's **prediction,** which correctly segmented all three people.
 
-We can plot using Tensorleap the metadata we extract to identify trends and factors that are correlated to the performance. 
+#### Inaccurate Labeling
 
-<img height="350" src="./coco/images/metadata.png" width="1410"/> 
-From the left figure, we can see that when the number of person instances per image increases the Cross-Entropy Loss
-increases and the mean IoU decreases. The models's predictions are less accurate when the image is denser with objects.
+![Inaccurate Labeling Example](<../.gitbook/assets/image (40).png>)
 
-For the vehicle category, we can see that model performance decreases when the vehicle average size increases (right figure).
+#### Ambiguous Labeling
 
+In the example below, the toy car is marked as **car**.
 
-#### Summary and Conclusion
+![Ambiguous Labeling](<../.gitbook/assets/image (27).png>)
 
-We have used Tensorleap to compare different models, detect miss-labeling, and consider metadata that reflects the model's performance.
-This, in turn, helps us with model optimization and shortening the development cycle.
+#### &#x20;Challenging Images
 
+In addition, a few challenging images were detected. For example, poor lighting (left) and a crowd of people with very density:
 
+![Low Light](<../.gitbook/assets/image (20).png>) ![Crowd](<../.gitbook/assets/image (12).png>)
+
+## Performance and Metadata Analysis
+
+The Tensorleap Dashboard enables you to see how your data is distributed across various features. This enables us to identify trends and factors that are correlated to the performance.
+
+Below is a visualization of the number of **Persons** (left) and **Vehicles** (right) per image vs **Cross-entropy Loss & Mean IoU:**
+
+![Persons (left) and Vehicles (right) per image vs Cross-entropy Loss & Mean IoU](<../.gitbook/assets/image (2).png>)
+
+From this visualization, it is clear that as the number of **persons** in an image increases, the **Cross-Entropy loss** increases and the **Mean IoU** decreases. Same goes for the **vehicles** category. The model's predictions are less accurate when the image is denser with objects.
+
+## **Summary**
+
+The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
