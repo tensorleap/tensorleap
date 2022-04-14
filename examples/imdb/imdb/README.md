@@ -1,101 +1,113 @@
-# IMDB
+# Sentiment Analysis
 
-## The IMDB dataset
+## The IMDB Dataset
 
-The `IMDB` dataset is one of the most popular sentiment analysis datasets.
-It contains multiple movie reviews, each annotated with a "positive" or a "negative" label.
+The `IMDB` dataset is one of the most popular sentiment analysis datasets. It contains multiple movie reviews, each annotated with either a `positive` or `negative` label.
 
 In this example, we build a classifier model to predict positive and negative reviews.
 
-## Preprocessing
+{% hint style="info" %}
+For more information on using Tensorleap with the IMDB dataset, see [IMDB Guide](../guides/full-guides/imdb-guide/).
+{% endhint %}
 
-First, we use a [Tokenizer](https://github.com/tensorleap/tensorleap/blob/master/examples/imdb/imdb/imdb/utils.py) 
-that removes HTML residues, punctuation, and lowercase  samples.
-This tokenizer is then fed to a learned `Embedding layer` to embed all the tokens.
+### Text Preprocessing
 
-## Densely Connected Model
+To preprocess the text, first lowercase all words and remove any HTML residues and punctuations. Tokenize the words and feed them into an **Embedding** layer to embed all the tokens.
 
-### Model Introduction
+### Densely Connected Model
 
-A straightforward approach to solving this problem is by using a densely connected model. Our
-[architecture](https://github.com/tensorleap/tensorleap/blob/master/examples/imdb/imdb/imdb/model_infer.py)
-is composed from a `Dense` layer followed by a `GlobalAveragePooling1D`.
+A straightforward approach to solving this problem is by using a densely connected model. The proposed [model](https://github.com/tensorleap/tensorleap/blob/master/examples/imdb/imdb/imdb/model\_infer.py) is composed from a `Dense` layer followed by a `GlobalAveragePooling1D`.
 
-![Dense Network](images/img_2.png)
+Below is the model's block representation within our platform:
 
-We train our model for 5 epochs and log the `CategoricalCrossEntropy` loss and the `Accuracy` metric.
+![Dense Model (click-to-zoom)](<../.gitbook/assets/image (35) (1).png>)
 
-![Training metrics](images/img_3.png)
+#### Training Metrics
 
-Our final accuracy is 0.89 and our loss is 0.27.
+During the training our platform collects various performance metrics and metadata that are presented interactively within a customizable Dashboard. This enables further performance and data analysis.\
+After training the model for 5 epochs, the **accuracy** is **0.89** and the error **loss** is **0.26**. Below is a visualization of the error loss / accuracy vs batch:
 
-### Error Analysis 
+![Loss and Accuracy Metrics after Training](<../.gitbook/assets/image (24) (1).png>)
 
-To explore the model's performance, we visualize the latent space representation using  `Tensorleap's Analyzer`, 
-which embeds the dataset samples in a model-based 3D space.    
+### Error Analysis
 
-![Embedding space](images/img_7.png)
+#### Population Exploration
 
-Here, each sample is colored according to its GT value, and its size scales with loss.
-Using Tensorleap's `Sample Analysis`, we can analyze the samples that led to a high loss.
+The plot below is a **population exploration** plot. It represents a samples' similarity map based on the model's latent space, built using the extracted features from the neural network.
 
-![Embedding space](images/img_17.png)
+![Population Exploration Analysis of Training Samples](<../.gitbook/assets/image (17).png>)
 
-This example, of a specific false-positive sample, overlays a heatmap that scores the significance of each word to the
-`positive` prediction made by the model. 
+These samples are taken from the **training set** and are colored based on their **ground truth** class. Each **dot size** represents the model's error **loss** for that sample. \
+We can see that there is a clear separation of the samples based on their classes, but there are failing samples (large dots).
 
-Since the dense model makes its prediction using a single word context, it considers single words, such as
-**entertaining** or **masterpiece** as an indication for a **positive** sentiment. However, it ignores their context,
-and therefore misses that its only **mildly entertaining** or a **masterpiece because of sympathy.**
-To improve upon this, we'll evaluate a separate convolutional model.
+#### Sample Analysis
 
-## CNN
+The Tensorleap platform provides us with a way to further explore the model's response to specific data samples.
 
-Our new model aims to fix the missing context by replacing the dense layer with 3 convolutional blocks,
-which should help in capturing a wider context.
+Below is a [**Sample Analysis**](../reference/analysis.md#sample-analysis) of one of the samples with high loss:
 
-![Embedding space](images/img_11.png)
+![Sample Analysis of High Loss Samples (click-to-zoom)](<../.gitbook/assets/image (29) (1).png>)
 
-We first train the model for 3 epochs to get an accuracy of 0.89 and a loss of 0.28.
+This analysis shows a **false-positive** prediction made by the model, with a heat-map overlay that scores the significance of each word to the positive prediction.
 
-![Embedding space](images/img_12.png)
+The heat-map highlighted words such as "**brilliant**", "**entertaining**", "**masterpiece**" which indeed translates positively. But when we review their context, we get "**mildly entertaining**", "not**... brillian**t", and "**masterpiece because of sympathy**", which resonates as negative.
 
-Following the process we followed with the earlier model, we examine the same sample, which result in a 67% loss reduction.
+The dense model makes its prediction using a single word context, which can lead to inaccurate sentiment analysis. To improve upon this, next we will evaluate a separate convolutional model.
 
-![Embedding space](images/img_16.png)
+### Convolutional Neural Network (CNN)
 
-As expected, the convolutional model has a much wider context window, which results in the attention being
-spread over longer phrases. One result of this change is that **entertaining** is no longer an indication of a positive sentiment.
-In fact, the bigram **entertaining mildly** is now an indicator of a negative sentiment.
+Our new model uses three convolutional blocks in place of a dense layer in order to capture a wider context and improve performance.
 
-![img.png](images/img_18.png)
+Below is the CNN model's block representation within our platform:
 
+![CNN Model (click-to-zoom)](<../.gitbook/assets/image (6).png>)
 
-### Data Exploration
+After training the model for 3 epochs, the **accuracy** is **0.89** and the error **loss** is **0.28**.
 
-Using Tensorleap's dashboard, we can see how our data is distributed across various features.
-Here, we've selected 5 informative features and plotted their histogram vs. the loss:
+Below is a visualization of the error loss / accuracy vs batch:
 
-![img_1.png](images/img_1.png)
+![Loss and Accuracy Metrics after Training](<../.gitbook/assets/image (7).png>)
 
-- `length` - the shorter the review, the higher the loss.  
-- `out-of-vocabulary` - the more out-of-vocabulary words a review has, the higher its loss.  
-- `subjectiveness` - the more subjective the review is, the lower the loss.  
-- `score confindence` - the more confident a review is (i.e. highly negative or positive), the lower the loss.  
-- `polarity` - an external (TextBlob) polarity analysis shows that sentences with neutral polarity have higher loss.  
+#### Sample Analysis
 
+Following the process we followed with the earlier model, examining the same sample results in a 67% loss reduction.
 
-Finally, we can see that `Tensorleap's` unsupervised clustering is able to group together meaningful examples.
+Below are the heat-maps correlated with `positive` and `negative`:
 
-![img_1.png](images/img_21.png)    
+![Positive Heat-map (click-to-zoom)](<../.gitbook/assets/image (40) (1).png>) ![Negative Heat-map (click-to-zoom)](<../.gitbook/assets/image (39).png>)
 
-In this example, colors represent Tensorleap's clustering and size the amount of Out-of-vocabulary (OOV) words. We see that the green cluster is mainly composed of examples with high OOV words. Other clusters, as the light blue, have fewer samples with high OOV count.
+The convolutional model we used resulted in a **67%** loss reduction, compared to the earlier model.
 
-![img_1.png](images/img_22.png)
+As expected, the convolutional model has a much wider context window, which results in the attention being spread over longer phrases. One result of this change is that "**entertaining**" is no longer an indication of a positive sentiment. In fact, the bigram "**entertaining mildly**" is now an indicator of a `negative` sentiment.
 
-![img.png](images/img_23.png)
+#### Data Exploration
 
-**Tensorleap models of the images**
+The Tensorleap's Dashboard enables you to see how your data is distributed across various features. Below is a dashboard showing 5 histogram vs loss of informative features:
 
-Dense: (dense_v5, short_train, dense_with_meta)  
-Conv: (10x_smaller_lr, updated_ds, normal_lr, arranged)
+![Dashboard - Histogram vs. Loss for 5 Informative Features ](<../.gitbook/assets/image (23) (1).png>)
+
+Different correlation insights from this visualization:
+
+* `length` - the shorter the review, the higher the loss.
+* `out-of-vocabulary` - the more out-of-vocabulary words a review has, the higher its loss.
+* `subjectiveness` - the more subjective the review is, the lower the loss.
+* `score confidence` - the more confident a review is (i.e. highly negative or positive), the lower the loss.
+* `polarity` - an external (TextBlob) polarity analysis shows that sentences with neutral polarity have higher loss.
+
+#### Unsupervised Clustering
+
+Tensorleap's platform provides an unsupervised clustering of samples based on their similarities.
+
+In our use-case we can see that this clustering technique was able to group together samples with common features. For example, in this Population Exploration plot, each cluster is colored, while the size of the dot represents the number of out-of-vector words within each sample:
+
+![Population Exploration - Unsupervised Clustering + OOV Dot Size](../.gitbook/assets/img\_21.png)
+
+The green cluster is mainly composed of examples with high OOV words. Other clusters, as the light blue, have fewer samples with high OOV count. Focused view on each of these clusters:
+
+![Focus on the Green Cluster - High OOV](../.gitbook/assets/img\_22.png) ![Focus on the Blue Cluster - Low OOV ](../.gitbook/assets/img\_23.png)
+
+## Summary
+
+The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
+
+For more information, please refer to our additional [**Examples**](../guides/dataset-script/examples/) and [**Guides**](../guides/).
