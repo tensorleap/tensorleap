@@ -1,7 +1,7 @@
-projectName = "coco"
-organization = "dani"
-framework = "tensorflow"
-datasetName = "coco"
+projectName = "coco_pytorch"
+organization = "demo"
+#framework = "tensorflow"
+datasetName = "COCO"
 bucketName = "example-datasets-47ml982d"
 
 
