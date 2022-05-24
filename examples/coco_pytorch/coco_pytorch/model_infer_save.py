@@ -3,6 +3,7 @@ import torch
 from utils import save_to_onnx
 from unet import Unet
 
+
 def infer_save_model_test():
     model = Unet(4)
     input_size = (3, 128, 128)
