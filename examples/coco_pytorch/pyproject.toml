@@ -6,9 +6,11 @@ authors = ["tom Koren <tom.koren@tensorleap.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-leapcli = "0.2.24"
-tensorflow-estimator = "~2.4.0"
-tensorflow = "^2.8.0"
+leapcli = "0.2.26"
+#tensorflow-estimator = "~2.4.0"
+#tensorflow = "^2.8.0"
+torch = "^1.11.0"
+torchvision = "^0.12.0"
 Pillow = "~8.4.0"
 scikit-image = "~0.17.2"
 pycocotools = "^2.0.4"
