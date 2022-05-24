@@ -326,5 +326,5 @@ leap_binder.set_metadata(metadata_train_instances_count,  DatasetMetadataType.in
 leap_binder.set_metadata(metadata_vehicle_instances_count,  DatasetMetadataType.int, 'vehicle_instances_count')
 leap_binder.set_metadata(metadata_person_category_avg_size,  DatasetMetadataType.float, 'person_avg_size')
 leap_binder.set_metadata(metadata_car_vehicle_category_avg_size, DatasetMetadataType.float, 'car_vehicle_avg_size')
-leap_binder.add_prediction_type('seg_mask', ['background'] + categories, [Metric.MeanIOU])
+leap_binder.add_prediction('seg_mask', ['background'] + categories, [Metric.MeanIOU])
 leap_binder.set_metadata(hsv_std, DatasetMetadataType.float, 'hue_std')
