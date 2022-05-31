@@ -5,6 +5,7 @@ import torch
 
 SAVE_PATH = os.path.join(os.getcwd(), 'models')
 
+
 # Function to Convert to ONNX
 def save_to_onnx(model: torch.nn.Module, input_size: Tuple[int], model_name: str, path=None):
     # set the model to inference mode
