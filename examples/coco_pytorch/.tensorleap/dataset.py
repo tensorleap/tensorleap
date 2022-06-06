@@ -12,7 +12,6 @@ from skimage.color import gray2rgb
 from skimage.io import imread
 from google.auth.credentials import AnonymousCredentials
 from code_loader.contract.datasetclasses import PreprocessResponse
-from typing import Callable, Union
 import tensorflow as tf
 
 from skimage.color import rgb2hsv
@@ -160,61 +159,23 @@ def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     batch_masks = []
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds, iscrowd=None)
     anns = data['cocofile'].loadAnns(annIds)
-    mask = np.zeros([x['height'], x['width']])
+    mask = np.zeros((x['height'], x['width'], len(categories) + 1))
     for ann in anns:
         _mask = data['cocofile'].annToMask(ann)
-        mask[_mask > 0] = _mask[_mask > 0] * (catIds.index(ann['category_id']) + 1)
+        mask[_mask > 0, (catIds.index(ann['category_id']) + 1)] = _mask[_mask > 0]
+    mask[np.sum(mask, axis=2) == 0, 0] = 1  # encode background
     mask = cv2.resize(mask, (image_size, image_size), interpolation=cv2.INTER_NEAREST)[..., np.newaxis]
     return mask
 
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     mask = get_categorical_mask(idx, data)
-    return tf.keras.utils.to_categorical(mask)#.astype(np.float)
-
-
-def metadata_background_percent(idx: int, data: PreprocessResponse) -> float:
-    print("extracting background percent metadata")
-    mask = get_categorical_mask(idx, data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(0.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
-
-
-def metadata_person_category_percent(idx: int, data: PreprocessResponse) -> float:
-    print("extracting person percent metadata")
-    mask = get_categorical_mask(idx, data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(1.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
-
-
-def metadata_car_vehicle_category_percent(idx: int, data: PreprocessResponse) -> float:
-    print("extracting car vehicle percent metadata")
-    # When Super Category mode includes: car, truck, bus, train. For Category mode: only car.
-    mask = get_categorical_mask(idx, data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(2.0)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
+    # tf.keras.utils.to_categorical(mask)  # .astype(np.float)
+    return mask
 
 
 def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
-    print("extracting metadata image brightness")
+    # print("extracting metadata image brightness")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -231,7 +192,7 @@ def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
 
 
 def metadata_is_colored(idx: int, data: PreprocessResponse) -> bool:
-    print("extracting metadata is colored image")
+    # print("extracting metadata is colored image")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -242,7 +203,7 @@ def metadata_is_colored(idx: int, data: PreprocessResponse) -> bool:
 
 
 def metadata_red_std(idx: int, data: PreprocessResponse) -> bool:
-    print("extracting metadata rgb std")
+    # print("extracting metadata rgb std")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
@@ -261,21 +222,9 @@ def hsv_std(idx: int, data: PreprocessResponse) -> float:
 leap_binder.set_preprocess(subset_images)
 leap_binder.set_input(input_image, 'images')
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
-# leap_binder.set_metadata(metadata_background_percent, DatasetMetadataType.float, 'background_percent')
-# leap_binder.set_metadata(metadata_person_category_percent, DatasetMetadataType.float, 'person_percent')
-# leap_binder.set_metadata(metadata_car_vehicle_category_percent, DatasetMetadataType.float, 'car_percent')
 leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, 'brightness')
 leap_binder.set_metadata(metadata_is_colored, DatasetMetadataType.boolean, 'is_colored')
 leap_binder.add_prediction('seg_mask', categories, [Metric.MeanIOU])
 leap_binder.set_metadata(hsv_std, DatasetMetadataType.float, 'hue_std')
 
 
-def test_data():
-    data = subset_images()[0]
-    i = 0
-    x = input_image(i, data)
-    y = ground_truth_mask(i, data)
-
-
-test_data()
-print('Done')
