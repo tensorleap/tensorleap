@@ -7,7 +7,7 @@ SAVE_PATH = os.path.join(os.getcwd())
 
 
 # Function to Convert to ONNX
-def save_to_onnx(model: torch.nn.Module, input_size: Tuple[int], model_name: Union[str, None], path=None):
+def save_to_onnx(model: torch.nn.Module, input_size: Tuple[int], model_name: Union[str, None] = None, path=None):
     # set the model to inference mode
     model.eval()
     dummy_input = torch.randn(1, *input_size, requires_grad=True)
