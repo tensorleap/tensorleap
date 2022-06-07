@@ -68,13 +68,13 @@ def get_length(data):
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
-    print("connect to GCS")
+    # print("connect to GCS")
     gcs_client = storage.Client(project=PROJECT_ID, credentials=AnonymousCredentials())
     return gcs_client.bucket(bucket_name)
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
-    print("download data")
+    # print("download data")
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
         home_dir = os.getenv("HOME")
@@ -93,7 +93,7 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 
 
 def subset_images() -> List[PreprocessResponse]:
-    print("subset")
+    # print("subset")
 
     def load_set(coco, load_union=False):
         # get all images containing given categories
@@ -133,7 +133,7 @@ def subset_images() -> List[PreprocessResponse]:
 
 
 def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    print("subset")
+    # print("subset")
     data = data.data
     x = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
