@@ -1,6 +1,6 @@
 import os
 from functools import lru_cache
-from typing import List, Optional
+from typing import List, Optional, Callable
 import cv2
 import numpy as np
 from code_loader import leap_binder
@@ -25,7 +25,7 @@ preprocess = tf.keras.layers.Normalization(
     axis=-1, mean=[0.485, 0.456, 0.406], variance=[(0.229)**2, (0.224)**2, (0.225)**2]
 )
 
-categories = [
+CATEGORIES = [
     # "background",
     "airplane",
     "bicycle",
@@ -219,12 +219,37 @@ def hsv_std(idx: int, data: PreprocessResponse) -> float:
     return hue.std()
 
 
+def get_category_instances_count(idx: int, data: PreprocessResponse, label_flag: str = 'all') -> int:
+    data = data.data
+    x = data['samples'][idx]
+    catIds = [data['cocofile'].getCatIds(catNms=label)[0] for label in CATEGORIES]  # keep same labels order
+    annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
+    anns_list = data['cocofile'].loadAnns(annIds)
+    if label_flag == 'all':
+        return len(anns_list)   # all instances within labels
+    cat_to_id = dict(zip(CATEGORIES, catIds))  # map label name to its ID
+    cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
+    for ann in anns_list:
+        cat_id_counts[ann['category_id']] += 1
+    return sum(cat_id_counts.values()) if label_flag == 'all' else cat_id_counts[cat_to_id[label_flag]]
+
+
+def metadata_category_instances_count(label_key: str) -> Callable[[int, PreprocessResponse], int]:
+    def func(idx: int, data: PreprocessResponse) -> int:
+        return get_category_instances_count(idx, data, label_key=label_key)
+    func.__name__ = f'metadata_{label_key}_instances_count'
+    return func
+
 leap_binder.set_preprocess(subset_images)
 leap_binder.set_input(input_image, 'images')
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, 'brightness')
 leap_binder.set_metadata(metadata_is_colored, DatasetMetadataType.boolean, 'is_colored')
-leap_binder.add_prediction('seg_mask', categories, [Metric.MeanIOU])
+leap_binder.add_prediction('seg_mask', CATEGORIES, [Metric.MeanIOU])
 leap_binder.set_metadata(hsv_std, DatasetMetadataType.float, 'hue_std')
 
 
+metadata_cats_instances_cnt = CATEGORIES + ['all']
+for cat in metadata_cats_instances_cnt:
+    leap_binder.set_metadata(function=metadata_category_instances_count(cat),
+                                metadata_type=DatasetMetadataType.int, name=f'{cat}_instances_count')
