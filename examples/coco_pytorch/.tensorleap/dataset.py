@@ -219,19 +219,19 @@ def hsv_std(idx: int, data: PreprocessResponse) -> float:
     return hue.std()
 
 
-def get_category_instances_count(idx: int, data: PreprocessResponse, label_flag: str = 'all') -> int:
+def get_category_instances_count(idx: int, data: PreprocessResponse, label_key: str = 'all') -> int:
     data = data.data
     x = data['samples'][idx]
     catIds = [data['cocofile'].getCatIds(catNms=label)[0] for label in CATEGORIES]  # keep same labels order
     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
     anns_list = data['cocofile'].loadAnns(annIds)
-    if label_flag == 'all':
+    if label_key == 'all':
         return len(anns_list)   # all instances within labels
     cat_to_id = dict(zip(CATEGORIES, catIds))  # map label name to its ID
     cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
     for ann in anns_list:
         cat_id_counts[ann['category_id']] += 1
-    return sum(cat_id_counts.values()) if label_flag == 'all' else cat_id_counts[cat_to_id[label_flag]]
+    return sum(cat_id_counts.values()) if label_key == 'all' else cat_id_counts[cat_to_id[label_key]]
 
 
 def metadata_category_instances_count(label_key: str) -> Callable[[int, PreprocessResponse], int]:
