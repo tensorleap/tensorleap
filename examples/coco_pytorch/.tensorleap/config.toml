@@ -1,7 +1,7 @@
 projectName = "coco_segmentation"
 organization = "dani"
 #framework = "tensorflow"
-datasetName = "coco"
+datasetName = "coco_deeplab2"
 bucketName = "example-datasets-47ml982d"
 modelType = "onnx"
 
