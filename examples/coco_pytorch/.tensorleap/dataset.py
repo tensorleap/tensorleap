@@ -167,6 +167,19 @@ def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     mask = get_categorical_mask(idx, data)
     return mask
 
+def sample_id(idx: int, data: PreprocessResponse) -> int:
+    return idx
+
+def metadata_red_std(idx: int, data: PreprocessResponse) -> bool:
+    data = data.data
+    x = data['samples'][idx]
+    filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=x['file_name'])
+    fpath = _download(filepath)
+    img = imread(fpath)
+    is_colored = len(img.shape) > 2
+    return is_colored
+
+
 
 def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
     data = data.data
@@ -239,12 +252,14 @@ def pixel_accuracy(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
     accuracy = tf.reduce_mean(per_pixel_accuracy)
     return accuracy
 
+
+
 leap_binder.set_preprocess(subset_images)
 leap_binder.set_input(input_image, 'images')
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 leap_binder.add_prediction('seg_mask', ['background'] + CATEGORIES, [Metric.MeanIOU], [pixel_accuracy])
 
-
+leap_binder.set_metadata(sample_id, DatasetMetadataType.int, 'sample_id')
 leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, 'brightness')
 leap_binder.set_metadata(metadata_is_colored, DatasetMetadataType.boolean, 'is_colored')
 leap_binder.set_metadata(hsv_std, DatasetMetadataType.float, 'hue_std')
