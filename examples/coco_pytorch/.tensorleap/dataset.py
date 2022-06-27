@@ -233,16 +233,25 @@ def metadata_category_instances_count(label_key: str) -> Callable[[int, Preproce
     return func
 
 
+def pixel_accuracy(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
+    from tensorflow.python.keras.metrics import categorical_accuracy
+    per_pixel_accuracy = categorical_accuracy(y_true, y_pred)
+    accuracy = tf.reduce_mean(per_pixel_accuracy)
+    return accuracy
+
 leap_binder.set_preprocess(subset_images)
 leap_binder.set_input(input_image, 'images')
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
+leap_binder.add_prediction('seg_mask', ['background'] + CATEGORIES, [Metric.MeanIOU], [pixel_accuracy])
+
+
 leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, 'brightness')
 leap_binder.set_metadata(metadata_is_colored, DatasetMetadataType.boolean, 'is_colored')
-leap_binder.add_prediction('seg_mask', ['background'] + CATEGORIES, [Metric.MeanIOU])
 leap_binder.set_metadata(hsv_std, DatasetMetadataType.float, 'hue_std')
 
 metadata_cats_instances_cnt = CATEGORIES + ['all']
 for cat in metadata_cats_instances_cnt:
     leap_binder.set_metadata(function=metadata_category_instances_count(cat),
                              metadata_type=DatasetMetadataType.int, name=f'{cat}_instances_count')
+
 
