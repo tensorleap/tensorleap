@@ -58,17 +58,8 @@ LOAD_UNION_CATEGORIES_IMAGES = True
 APPLY_AUGMENTATION = True
 
 
-def get_length(data):
-    if data is None:
-        length = None
-    elif type(data) is dict and 'length' in data:
-        length = data['length']
-    elif type(data) is not dict:
-        length = len(data)
-    else:
-        length = None
 
-    return length
+
 
 
 @lru_cache()
@@ -246,11 +237,23 @@ def metadata_category_instances_count(label_key: str) -> Callable[[int, Preproce
     return func
 
 
-def pixel_accuracy(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
-    from tensorflow.python.keras.metrics import categorical_accuracy
-    per_pixel_accuracy = categorical_accuracy(y_true, y_pred)
-    accuracy = tf.reduce_mean(per_pixel_accuracy)
-    return accuracy
+# def pixel_accuracy(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
+#     from tensorflow.python.keras.metrics import categorical_accuracy
+#     per_pixel_accuracy = categorical_accuracy(y_true, y_pred)
+#     accuracy = tf.reduce_mean(per_pixel_accuracy)
+#     return accuracy
+
+
+def pixel_accuracy(y_true, y_pred):
+    from tensorflow.python.ops import math_ops
+    from tensorflow.python.keras import backend
+    # per_pixel_accuracy = categorical_accuracy(y_true, y_pred)
+    per_pixel_accuracy = math_ops.cast(
+        math_ops.equal(
+            math_ops.argmax(y_true, axis=-2), math_ops.argmax(y_pred, axis=-2)),
+        backend.floatx())
+    accuracy = tf.reduce_sum(per_pixel_accuracy, axis=[0, 1])
+    return [accuracy]
 
 
 
