@@ -13,9 +13,9 @@ from skimage.color import gray2rgb
 from skimage.io import imread
 
 # Tensorleap Imports
-from code_loader import dataset_binder
-from code_loader.contract.datasetclasses import SubsetResponse
-from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
+from code_loader import leap_binder
+from code_loader.contract.datasetclasses import PreprocessResponse
+from code_loader.contract.enums import DatasetMetadataType, Metric
 
 
 BUCKET_NAME = 'example-datasets-47ml982d'
@@ -58,7 +58,7 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 
 
 # Preprocessing Function
-def subset_images() -> List[SubsetResponse]:
+def subset_images() -> List[PreprocessResponse]:
 
     def load_set(coco: COCO, load_union: bool = False) -> List:
         # get all images containing given categories
@@ -90,14 +90,14 @@ def subset_images() -> List[SubsetResponse]:
     val_size = min(len(x_test_raw), TEST_SIZE)
     supercategory_ids = traincoco.getCatIds(catNms=SUPERCATEGORY_CLASSES)
     return [
-        SubsetResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size],
+        PreprocessResponse(length=train_size, data={'cocofile': traincoco, 'samples': x_train_raw[:train_size],
                                                 'subdir': 'train2014', 'supercategory_ids': supercategory_ids}),
-        SubsetResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size],
+        PreprocessResponse(length=val_size, data={'cocofile': valcoco, 'samples': x_test_raw[:val_size],
                                               'subdir': 'val2014', 'supercategory_ids': supercategory_ids})]
 
 
 # Input Encoder
-def input_image(idx: int, data: SubsetResponse) -> ndarray:
+def input_image(idx: int, data: PreprocessResponse) -> ndarray:
     data = data.data
     sample = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=sample['file_name'])
@@ -113,7 +113,7 @@ def input_image(idx: int, data: SubsetResponse) -> ndarray:
 
 
 # Ground Truth Encoder
-def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
+def ground_truth_mask(idx: int, data: PreprocessResponse) -> ndarray:
     data = data.data
     cat_ids = data['cocofile'].getCatIds(catNms=CATEGORIES)
     sample = data['samples'][idx]
@@ -136,7 +136,7 @@ def ground_truth_mask(idx: int, data: SubsetResponse) -> ndarray:
 
 
 # Metadata functions
-def get_image_percent_per_category(idx: int, data: SubsetResponse, label_key: str) -> float:
+def get_image_percent_per_category(idx: int, data: PreprocessResponse, label_key: str) -> float:
     category_id_dict = {'background': 0, 'person': 1, 'car_vehicle': 2}
     assert label_key in category_id_dict.keys()
     mask = ground_truth_mask(idx, data)
@@ -146,15 +146,15 @@ def get_image_percent_per_category(idx: int, data: SubsetResponse, label_key: st
     return cat_counts/mask.size if cat_counts is not None else 0.0
 
 
-def metadata_category_percent(label_key: str) -> Callable[[int, SubsetResponse], float]:
-    def func(idx: int, data: SubsetResponse) -> float:
+def metadata_category_percent(label_key: str) -> Callable[[int, PreprocessResponse], float]:
+    def func(idx: int, data: PreprocessResponse) -> float:
         return get_image_percent_per_category(idx, data, label_key=label_key)
 
     func.__name__ = f'metadata_{label_key}_category_percent'
     return func
 
 
-def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
+def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
     data = data.data
     sample = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=sample['file_name'])
@@ -170,7 +170,7 @@ def metadata_brightness(idx: int, data: SubsetResponse) -> ndarray:
     return np.mean(img)
 
 
-def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
+def metadata_is_colored(idx: int, data: PreprocessResponse) -> bool:
     data = data.data
     sample = data['samples'][idx]
     filepath = "coco/ms-coco/{folder}/{file}".format(folder=data['subdir'], file=sample['file_name'])
@@ -180,7 +180,7 @@ def metadata_is_colored(idx: int, data: SubsetResponse) -> bool:
     return is_colored
 
 
-def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_key: str = 'all') -> int:
+def get_counts_of_instances_per_class(idx: int, data: PreprocessResponse, label_key: str = 'all') -> int:
     data = data.data
     sample = data['samples'][idx]
     all_labels = SUPERCATEGORY_CLASSES + CATEGORIES
@@ -201,16 +201,16 @@ def get_counts_of_instances_per_class(idx: int, data: SubsetResponse, label_key:
     return cat_id_counts[cat_id]
 
 
-def metadata_category_instances_count(label_key: str) -> Callable[[int, SubsetResponse], int]:
-    def func(idx: int, data: SubsetResponse) -> int:
+def metadata_category_instances_count(label_key: str) -> Callable[[int, PreprocessResponse], int]:
+    def func(idx: int, data: PreprocessResponse) -> int:
         return get_counts_of_instances_per_class(idx, data, label_key=label_key)
 
     func.__name__ = f'metadata_{label_key}_instances_count'
     return func
 
 
-def metadata_category_avg_size(label_key: str) -> Callable[[int, SubsetResponse], float]:
-    def func(idx: int, data: SubsetResponse) -> float:
+def metadata_category_avg_size(label_key: str) -> Callable[[int, PreprocessResponse], float]:
+    def func(idx: int, data: PreprocessResponse) -> float:
         percent_val = metadata_category_percent(label_key=label_key)(idx, data)
         instances_cnt = metadata_category_instances_count(label_key)(idx, data)
         return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
@@ -219,7 +219,7 @@ def metadata_category_avg_size(label_key: str) -> Callable[[int, SubsetResponse]
     return func
 
 
-def metadata_car_vehicle_avg_size(idx: int, data: SubsetResponse) -> float:
+def metadata_car_vehicle_avg_size(idx: int, data: PreprocessResponse) -> float:
     percent_val = metadata_category_percent(label_key='car_vehicle')(idx, data)
     label_key = 'vehicle' if SUPERCATEGORY_GROUNDTRUTH else 'car'
     instances_cnt = metadata_category_instances_count(label_key)(idx, data)
@@ -227,32 +227,28 @@ def metadata_car_vehicle_avg_size(idx: int, data: SubsetResponse) -> float:
 
 
 # Dataset binding functions
-dataset_binder.set_subset(subset_images, 'images')
 
-dataset_binder.set_input(input_image, 'images', DatasetInputType.Image, 'image')
+leap_binder.set_preprocess(subset_images)
+leap_binder.set_input(input_image, 'images')
+leap_binder.set_ground_truth(ground_truth_mask, 'mask')
+leap_binder.add_prediction_type('seg_mask', ['background'] + CATEGORIES, [Metric.MeanIOU])
 
-dataset_binder.set_ground_truth(ground_truth_mask, 'images', ground_truth_type=DatasetOutputType.Mask, name='mask',
-                                labels=['background'] + CATEGORIES, masked_input="image")
 
-dataset_binder.set_metadata(metadata_brightness, 'images', DatasetMetadataType.float, 'brightness')
+leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, 'brightness')
 
-dataset_binder.set_metadata(metadata_is_colored, 'images', DatasetMetadataType.boolean, 'is_colored')
+leap_binder.set_metadata(metadata_is_colored, DatasetMetadataType.boolean, 'is_colored')
 
 METADATA_CATEGORY_PERCENT = ['background', 'person', 'car_vehicle']  # For Super Category mode includes: car, truck, bus, train. For Category mode: only car.
 for cat in METADATA_CATEGORY_PERCENT:
-    dataset_binder.set_metadata(function=metadata_category_percent(cat), subset='images',
-                                metadata_type=DatasetMetadataType.float, name=f'{cat}_percent')
+    leap_binder.set_metadata(metadata_category_percent(cat), DatasetMetadataType.float, f'{cat}_percent')
 
 METADATA_CATEGORY_INSTANCES_COUNT = ['all', 'person', 'car', 'bus', 'truck', 'train', 'vehicle']
 for cat in METADATA_CATEGORY_INSTANCES_COUNT:
-    dataset_binder.set_metadata(function=metadata_category_instances_count(cat), subset='images',
-                                metadata_type=DatasetMetadataType.int, name=f'{cat}_instances_count')
+    leap_binder.set_metadata(metadata_category_instances_count(cat), DatasetMetadataType.int, f'{cat}_instances_count')
 
 METADATA_CATEGORY_AVG_SIZE = ['person']
 for cat in METADATA_CATEGORY_AVG_SIZE:
-    dataset_binder.set_metadata(function=metadata_category_avg_size(cat), subset='images',
-                                metadata_type=DatasetMetadataType.float, name=f'{cat}_avg_size')
+    leap_binder.set_metadata(metadata_category_avg_size(cat), DatasetMetadataType.float, f'{cat}_avg_size')
 
 # For Super Category mode includes: car, truck, bus, train. For Category mode: only car.
-dataset_binder.set_metadata(function=metadata_car_vehicle_avg_size, subset='images',
-                            metadata_type=DatasetMetadataType.float, name='car_category_avg_size')
+leap_binder.set_metadata(metadata_car_vehicle_avg_size, DatasetMetadataType.float, 'car_category_avg_size')
