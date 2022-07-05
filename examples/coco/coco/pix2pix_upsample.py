@@ -76,8 +76,5 @@ def upsample(filters, size, norm_type='batchnorm', apply_dropout=False):
 
     result.add(tf.keras.layers.ReLU())
 
-<<<<<<< HEAD
   return result
-=======
-    return result
->>>>>>> 71520e8 (remove redundant lines in coco model)
+
