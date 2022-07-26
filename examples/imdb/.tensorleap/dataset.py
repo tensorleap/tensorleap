@@ -7,7 +7,7 @@ from os.path import join
 from typing import List, Optional, Callable, Tuple, Dict
 import pandas as pd
 import numpy as np
-from code_loader import dataset_binder
+from code_loader import leap_binder
 from code_loader.contract.datasetclasses import SubsetResponse
 from code_loader.contract.enums import DatasetInputType, DatasetOutputType, DatasetMetadataType
 from google.auth.credentials import AnonymousCredentials
@@ -71,7 +71,7 @@ def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> st
 
 def subset_func() -> List[SubsetResponse]:
     tokenizer, df = download_load_assets()
-    dataset_binder.cache_container["word_to_index"]["tokens"] = tokenizer.word_index
+    leap_binder.cache_container["word_to_index"]["tokens"] = tokenizer.word_index
     train_label_size = int(0.9 * NUMBER_OF_SAMPLES / 2)
     val_label_size = int(0.1 * NUMBER_OF_SAMPLES / 2)
     df = df[df['subset'] == 'train']
@@ -160,44 +160,26 @@ def subjectivity_metadata(idx, subset: SubsetResponse) -> float:
 
 
 # Binders
-dataset_binder.set_subset(function=subset_func, name='IMDBComments')
+leap_binder.set_preprocess(function=subset_func)
+leap_binder.set_input(function=input_tokens, name='tokens')
+leap_binder.set_ground_truth(function=gt_sentiment, name='sentiment')
+leap_binder.set_metadata(function=gt_metadata, metadata_type=DatasetMetadataType.string, name='gt')
+leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text, name='text_from_token')
+leap_binder.add_prediction(name='sentiment', labels=['positive','negative'], metrics=[Metric.BinaryAccuracy])
 
-dataset_binder.set_input(function=input_tokens, subset='IMDBComments', input_type=DatasetInputType.Text,
-                         name='tokens')
+leap_binder.set_metadata(gt_metadata, DatasetMetadataType.string, 'gt')
 
-dataset_binder.set_ground_truth(function=gt_sentiment, subset='IMDBComments',
-                                ground_truth_type=DatasetOutputType.Classes,
-                                name='sentiment', labels=['positive', 'negative'], masked_input=None)
+leap_binder.set_metadata(oov_metadata, DatasetMetadataType.int, 'oov_count')
 
-dataset_binder.set_metadata(function=gt_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.string,
-                            name='gt')
+leap_binder.set_metadata(length_metadata, DatasetMetadataType.int, 'length')
 
-dataset_binder.set_metadata(function=oov_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.int,
-                            name='oov_count')
+leap_binder.set_metadata(score_metadata, DatasetMetadataType.int, 'score')
 
-dataset_binder.set_metadata(function=length_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.int,
-                            name='length')
+leap_binder.set_metadata(score_confidence_metadata, DatasetMetadataType.int, 'score_confidence')
 
-dataset_binder.set_metadata(function=score_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.int,
-                            name='score')
+leap_binder.set_metadata(polarity_metadata, DatasetMetadataType.float, 'polarity')
 
-dataset_binder.set_metadata(function=score_confidence_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.int,
-                            name='score_confidence')
-
-dataset_binder.set_metadata(function=polarity_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.float,
-                            name='polarity')
-
-dataset_binder.set_metadata(function=subjectivity_metadata, subset='IMDBComments',
-                            metadata_type=DatasetMetadataType.float,
-                            name='subjectivity')
+leap_binder.set_metadata(subjectivity_metadata, DatasetMetadataType.float, 'subjectivity')
 
 for i in range(len(METRIC_NAMES)):
-    dataset_binder.set_metadata(function=metadata_encoder(i), subset='IMDBComments',
-                                metadata_type=DatasetMetadataType.float,
-                                name=METRIC_NAMES[i])
+    leap_binder.set_metadata(function=metadata_encoder(i), metadata_type=DatasetMetadataType.float, name=METRIC_NAMES[i])
