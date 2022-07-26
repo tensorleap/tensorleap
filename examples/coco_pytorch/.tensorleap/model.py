@@ -7,6 +7,13 @@ NUM_CLASSES = 4
 data_shape = (3, 128, 128)
 
 
+
+# https://www.ahajournals.org/doi/10.1161/CIRCEP.119.007284
+def model():
+
+
+
+
 def leap_save_model(target_file_path: Path):
     # Load your model
     # model = Unet(NUM_CLASSES)
