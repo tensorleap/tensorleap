@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List, Union, Tuple
+from typing import Optional, List, Tuple
 from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader import leap_binder
 from google.cloud import storage
@@ -124,7 +124,7 @@ def input_encoder(idx: int, subset: PreprocessResponse) -> np.ndarray:
     return subset.data['images'][idx].astype('float32')
 
 
-def gt_encoder(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
+def gt_encoder(idx: int, subset: PreprocessResponse) -> np.ndarray:
     return subset.data['labels'][idx].astype('float32')
 
 
@@ -133,25 +133,25 @@ def gt_encoder(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
 #############################################
 
 
-def metadata_sample_index(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
+def metadata_sample_index(idx: int, subset: PreprocessResponse) -> np.ndarray:
     """ save the sample index number """
     return idx
 
 
-def metadata_label(idx: int, subset: Union[PreprocessResponse, list]) -> int:
+def metadata_label(idx: int, subset: PreprocessResponse) -> int:
     """ save the sample index number """
     label = gt_encoder(idx, subset)
     idx = label.argmax()
     return int(idx)
 
 
-def metadata_sample_average_brightness(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
+def metadata_sample_average_brightness(idx: int, subset: PreprocessResponse) -> np.ndarray:
     """ calculate average pixels values per image """
     sample_input = subset.data['images'][idx]
     return np.mean(sample_input)
 
 
-def metadata_euclidean_diff_from_class_centroid(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
+def metadata_euclidean_diff_from_class_centroid(idx: int, subset: PreprocessResponse) -> np.ndarray:
     """ calculate euclidean distance from the average image of the specific class"""
     sample_input = subset.data['images'][idx]
     label = subset.data['labels'][idx]
@@ -180,12 +180,12 @@ def calc_most_similar_class_not_gt_label_euclidean_diff(idx: int, subset: Prepro
     return [min_distance, min_distance_class_label]
 
 
-def metadata_most_similar_class_not_gt(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
+def metadata_most_similar_class_not_gt(idx: int, subset: PreprocessResponse) -> np.ndarray:
     _, min_distance_class_label = calc_most_similar_class_not_gt_label_euclidean_diff(idx, subset)
     return min_distance_class_label
 
 
-def metadata_most_similar_class_not_gt_diff(idx: int, subset: Union[PreprocessResponse, list]) -> np.ndarray:
+def metadata_most_similar_class_not_gt_diff(idx: int, subset: PreprocessResponse) -> np.ndarray:
     min_distance, _ = calc_most_similar_class_not_gt_label_euclidean_diff(idx, subset)
     return min_distance
 
