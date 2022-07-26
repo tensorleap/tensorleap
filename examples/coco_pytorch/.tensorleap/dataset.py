@@ -12,7 +12,7 @@ from skimage.color import gray2rgb
 from skimage.io import imread
 from google.auth.credentials import AnonymousCredentials
 from code_loader.contract.datasetclasses import PreprocessResponse
-from typing import Callable, Union
+from typing import Callable
 import tensorflow as tf
 
 from skimage.color import rgb2hsv
