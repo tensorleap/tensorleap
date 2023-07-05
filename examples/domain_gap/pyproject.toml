@@ -7,8 +7,11 @@ readme = "README.md"
 packages = [{include = "domain_gap"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-leapcli = "^0.2.36"
+python = ">=3.9,<3.10"
+numpy = "^1.25.0"
+code-loader = "^0.2.83"
+matplotlib = "^3.7.1"
+google-cloud-storage = "^2.10.0"
 
 
 [build-system]
