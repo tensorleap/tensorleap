@@ -1,0 +1,9 @@
+datasetId: "64a403f958e3f60011a0f80d"
+entryFile: 'tensorleap.py'
+include:
+  - tensorleap.py
+  - armbench_segmentation/__init__.py
+  - armbench_segmentation/preprocessing.py
+  - armbench_segmentation/visualizers.py
+  - armbench_segmentation/metadata.py
+  - tests/test_tensorleap.py
