@@ -1,5 +1,5 @@
 import numpy as np
-from domain_gap.city_scapes.cs_data import Cityscapes
+from domain_gap.data.cs_data import Cityscapes
 
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'

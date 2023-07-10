@@ -9,7 +9,7 @@ from PIL import Image
 import numpy as np
 import numpy.typing as npt
 import json
-from pathlib import Path
+
 from matplotlib import colors
 from matplotlib import cm as cmx
 import matplotlib.pyplot as plt
@@ -20,90 +20,10 @@ from code_loader.contract.enums import (
 
 from domain_gap.utils.configs import *
 from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket, _download
+from domain_gap.data.cs_data import get_cityscapes_data
+from domain_gap.data.kitti_data import get_kitti_data
 
 
-
-def get_cityscapes_data() -> List[PreprocessResponse]:
-    np.random.seed(42)
-    bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
-    dataset_path = Path('Cityscapes')
-    responses = []
-    FOLDERS_NAME = ["zurich", "weimar", "ulm", "tubingen", "stuttgart", "strasbourg", "monchengladbach", "krefeld",
-                    "jena",
-                    "hanover", "hamburg", "erfurt", "dusseldorf", "darmstadt", "cologne", "bremen", "bochum", "aachen"]
-    FOLDERS_NAME = [FOLDERS_NAME[-1], FOLDERS_NAME[0]]
-    all_images = [[], []]
-    all_gt_images = [[], []]
-    all_gt_labels = [[], []]
-    all_file_names = [[], []]
-    all_cities = [[], []]
-    all_metadata = [[], []]
-    for folder_name in FOLDERS_NAME:
-        image_list = [obj.name for obj in bucket.list_blobs(
-            prefix=str(dataset_path / "leftImg8bit_trainvaltest/leftImg8bit/train" / folder_name))]
-        permuted_list = np.random.permutation(image_list)
-        file_names = ["_".join(os.path.basename(pth).split("_")[:-1]) for pth in permuted_list]
-        images = [
-            str(dataset_path / "leftImg8bit_trainvaltest/leftImg8bit/train" / folder_name / fn) + "_leftImg8bit.png" for
-            fn in file_names]
-        gt_labels = [str(dataset_path / "gtFine_trainvaltest/gtFine/train" / folder_name / fn) + "_gtFine_labelIds.png"
-                     for fn in file_names]
-        gt_images = [str(dataset_path / "gtFine_trainvaltest/gtFine/train" / folder_name / fn) + "_gtFine_color.png" for
-                     fn in file_names]
-        metadata_json = [str(dataset_path / "vehicle_trainvaltest/vehicle/train" / folder_name / fn) + "_vehicle.json"
-                         for fn in file_names]
-        train_size = int(len(permuted_list) * TRAIN_PERCENT)
-        all_images[0], all_images[1] = all_images[0] + images[:train_size], all_images[1] + images[train_size:]
-        all_gt_images[0], all_gt_images[1] = all_gt_images[0] + gt_images[:train_size], all_gt_images[1] + gt_images[
-                                                                                                           train_size:]
-        all_gt_labels[0], all_gt_labels[1] = all_gt_labels[0] + gt_labels[:train_size], all_gt_labels[1] + gt_labels[
-                                                                                                           train_size:]
-        all_file_names[0], all_file_names[1] = all_file_names[0] + file_names[:train_size], all_file_names[
-            1] + file_names[train_size:]
-        all_cities[0], all_cities[1] = all_cities[0] + [folder_name] * train_size, all_cities[1] + [folder_name] * (
-                    len(permuted_list) - train_size)
-        all_metadata[0], all_metadata[1] = all_metadata[0] + metadata_json[:train_size], all_metadata[
-            1] + metadata_json[train_size:]
-
-    responses = [PreprocessResponse(length=len(all_images[0]), data={
-        "image_path": all_images[0],
-        "subset_name": "train",
-        "gt_path": all_gt_labels[0],
-        "gt_image_path": all_gt_images[0],
-        "real_size": len(all_images[0]),
-        "file_names": all_file_names[0],
-        "cities": all_cities[0],
-        "metadata": all_metadata[0],
-        "dataset": ["cityscapes"] * len(all_images[0])}),
-                 PreprocessResponse(length=len(all_images[1]), data={
-                     "image_path": all_images[1],
-                     "subset_name": "val",
-                     "gt_path": all_gt_labels[1],
-                     "gt_image_path": all_gt_images[1],
-                     "real_size": len(all_images[1]),
-                     "file_names": all_file_names[1],
-                     "cities": all_cities[1],
-                     "metadata": all_metadata[1],
-                     "dataset": ["cityscapes"] * len(all_images[1])})]
-    return responses
-
-
-def get_kitti_data() -> Dict[str, List[str]]:
-    responses = []
-    dataset_path = Path('KITTI/data_semantics/training')
-    train_indices = [i for i in range(200) if i not in VAL_INDICES]
-    indices_lists = [train_indices, VAL_INDICES]
-    data_dict = {'train': {}, "validation": {}}
-    TRAIN_SIZE = 170
-    VAL_SIZE = 30
-    for indices, size, title in zip(indices_lists, (TRAIN_SIZE, VAL_SIZE), ("train", "validation")):
-        images = [str(dataset_path / "image_2" / (str(i).zfill(6) + "_10.png")) for i in indices]
-        gt_labels = [str(dataset_path / "semantic" / (str(i).zfill(6) + "_10.png")) for i in indices]
-        gt_images = [str(dataset_path / "semantic_rgb" / (str(i).zfill(6) + "_10.png")) for i in indices]
-        data_dict[title]['image_path'] = images
-        data_dict[title]['gt_path'] = gt_labels
-        data_dict[title]['gt_image_path'] = gt_images
-    return data_dict
 
 
 def subset_images() -> List[PreprocessResponse]:

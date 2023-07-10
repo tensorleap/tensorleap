@@ -1,5 +1,14 @@
+import os
+from typing import List
+from pathlib import Path
 from collections import namedtuple
 import numpy as np
+from code_loader.contract.datasetclasses import PreprocessResponse
+
+from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket
+from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT
+
+
 
 
 class Cityscapes:
@@ -72,3 +81,67 @@ class Cityscapes:
         target[target == 255] = 19
         return cls.train_id_to_color[target]
 
+
+def get_cityscapes_data() -> List[PreprocessResponse]:
+    np.random.seed(42)
+    bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
+    dataset_path = Path('Cityscapes')
+    responses = []
+    FOLDERS_NAME = ["zurich", "weimar", "ulm", "tubingen", "stuttgart", "strasbourg", "monchengladbach", "krefeld",
+                    "jena",
+                    "hanover", "hamburg", "erfurt", "dusseldorf", "darmstadt", "cologne", "bremen", "bochum", "aachen"]
+    FOLDERS_NAME = [FOLDERS_NAME[-1], FOLDERS_NAME[0]]
+    all_images = [[], []]
+    all_gt_images = [[], []]
+    all_gt_labels = [[], []]
+    all_file_names = [[], []]
+    all_cities = [[], []]
+    all_metadata = [[], []]
+    for folder_name in FOLDERS_NAME:
+        image_list = [obj.name for obj in bucket.list_blobs(
+            prefix=str(dataset_path / "leftImg8bit_trainvaltest/leftImg8bit/train" / folder_name))]
+        permuted_list = np.random.permutation(image_list)
+        file_names = ["_".join(os.path.basename(pth).split("_")[:-1]) for pth in permuted_list]
+        images = [
+            str(dataset_path / "leftImg8bit_trainvaltest/leftImg8bit/train" / folder_name / fn) + "_leftImg8bit.png" for
+            fn in file_names]
+        gt_labels = [str(dataset_path / "gtFine_trainvaltest/gtFine/train" / folder_name / fn) + "_gtFine_labelIds.png"
+                     for fn in file_names]
+        gt_images = [str(dataset_path / "gtFine_trainvaltest/gtFine/train" / folder_name / fn) + "_gtFine_color.png" for
+                     fn in file_names]
+        metadata_json = [str(dataset_path / "vehicle_trainvaltest/vehicle/train" / folder_name / fn) + "_vehicle.json"
+                         for fn in file_names]
+        train_size = int(len(permuted_list) * TRAIN_PERCENT)
+        all_images[0], all_images[1] = all_images[0] + images[:train_size], all_images[1] + images[train_size:]
+        all_gt_images[0], all_gt_images[1] = all_gt_images[0] + gt_images[:train_size], all_gt_images[1] + gt_images[
+                                                                                                           train_size:]
+        all_gt_labels[0], all_gt_labels[1] = all_gt_labels[0] + gt_labels[:train_size], all_gt_labels[1] + gt_labels[
+                                                                                                           train_size:]
+        all_file_names[0], all_file_names[1] = all_file_names[0] + file_names[:train_size], all_file_names[
+            1] + file_names[train_size:]
+        all_cities[0], all_cities[1] = all_cities[0] + [folder_name] * train_size, all_cities[1] + [folder_name] * (
+                    len(permuted_list) - train_size)
+        all_metadata[0], all_metadata[1] = all_metadata[0] + metadata_json[:train_size], all_metadata[
+            1] + metadata_json[train_size:]
+
+    responses = [PreprocessResponse(length=len(all_images[0]), data={
+        "image_path": all_images[0],
+        "subset_name": "train",
+        "gt_path": all_gt_labels[0],
+        "gt_image_path": all_gt_images[0],
+        "real_size": len(all_images[0]),
+        "file_names": all_file_names[0],
+        "cities": all_cities[0],
+        "metadata": all_metadata[0],
+        "dataset": ["cityscapes"] * len(all_images[0])}),
+                 PreprocessResponse(length=len(all_images[1]), data={
+                     "image_path": all_images[1],
+                     "subset_name": "val",
+                     "gt_path": all_gt_labels[1],
+                     "gt_image_path": all_gt_images[1],
+                     "real_size": len(all_images[1]),
+                     "file_names": all_file_names[1],
+                     "cities": all_cities[1],
+                     "metadata": all_metadata[1],
+                     "dataset": ["cityscapes"] * len(all_images[1])})]
+    return responses
