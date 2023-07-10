@@ -1,7 +1,6 @@
 .terraform*
 .idea/
 __pycache__/
-test/*
 *.csv
 .python-version
 *secret.json
@@ -12,5 +11,4 @@ tests/
 examples/imdb/aclImdb/
 examples/coco/coco/coco_data/
 *.json
-*.yaml
 examples/coco/.tensorleap/config.toml
