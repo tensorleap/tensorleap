@@ -233,7 +233,7 @@ leap_binder.set_input(input_image, 'normalized_image')
 # leap_binder.set_input(non_normalized_image, 'image')
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 leap_binder.set_metadata(metadata_background_percent, DatasetMetadataType.float, 'background_percent')
-for i in range(19):  # TODO change to num classes
+for i in range(NUM_CLASSES):  # TODO change to num classes
     leap_binder.set_metadata(metadata_percent_function_generator(i),
                              DatasetMetadataType.float,
                              Cityscapes.train_id_to_label[i] + "_" + "class_percent")
