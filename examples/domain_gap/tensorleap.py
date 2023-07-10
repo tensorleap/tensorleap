@@ -1,17 +1,11 @@
-import copy
-from functools import lru_cache
 from typing import List, Optional, Dict
 from code_loader import leap_binder
 from code_loader.contract.enums import DatasetMetadataType, Metric
-from google.cloud import storage
-from google.cloud.storage import Bucket
 from code_loader.contract.datasetclasses import PreprocessResponse
 import tensorflow as tf
 from tensorflow.python.ops.stateless_random_ops import stateless_random_uniform
 import os
-from collections import namedtuple
 from PIL import Image
-from google.oauth2 import service_account
 import numpy as np
 import numpy.typing as npt
 import json
@@ -24,142 +18,9 @@ from code_loader.contract.enums import (
     LeapDataType
 )
 
+from domain_gap.utils.configs import *
+from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket, _download
 
-class Cityscapes:
-    """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
-
-    **Parameters:**
-        - **root** (string): Root directory of dataset where directory 'leftImg8bit' and 'gtFine' or 'gtCoarse' are located.
-        - **split** (string, optional): The image split to use, 'train', 'test' or 'val' if mode="gtFine" otherwise 'train', 'train_extra' or 'val'
-        - **mode** (string, optional): The quality mode to use, 'gtFine' or 'gtCoarse' or 'color'. Can also be a list to output a tuple with all specified target types.
-        - **transform** (callable, optional): A function/transform that takes in a PIL image and returns a transformed version. E.g, ``transforms.RandomCrop``
-        - **target_transform** (callable, optional): A function/transform that takes in the target and transforms it.
-    """
-
-    # Based on https://github.com/mcordts/cityscapesScripts
-    CityscapesClass = namedtuple('CityscapesClass', ['name', 'id', 'train_id', 'category', 'category_id',
-                                                     'has_instances', 'ignore_in_eval', 'color'])
-    classes = [
-        CityscapesClass('unlabeled', 0, 19, 'void', 0, False, True, (0, 0, 0)),
-        CityscapesClass('ego vehicle', 1, 19, 'void', 0, False, True, (0, 0, 0)),
-        CityscapesClass('rectification border', 2, 19, 'void', 0, False, True, (0, 0, 0)),
-        CityscapesClass('out of roi', 3, 19, 'void', 0, False, True, (0, 0, 0)),
-        CityscapesClass('static', 4, 19, 'void', 0, False, True, (0, 0, 0)),
-        CityscapesClass('dynamic', 5, 19, 'void', 0, False, True, (111, 74, 0)),
-        CityscapesClass('ground', 6, 19, 'void', 0, False, True, (81, 0, 81)),
-        CityscapesClass('road', 7, 0, 'flat', 1, False, False, (128, 64, 128)),
-        CityscapesClass('sidewalk', 8, 1, 'flat', 1, False, False, (244, 35, 232)),
-        CityscapesClass('parking', 9, 19, 'flat', 1, False, True, (250, 170, 160)),
-        CityscapesClass('rail track', 10, 19, 'flat', 1, False, True, (230, 150, 140)),
-        CityscapesClass('building', 11, 2, 'construction', 2, False, False, (70, 70, 70)),
-        CityscapesClass('wall', 12, 3, 'construction', 2, False, False, (102, 102, 156)),
-        CityscapesClass('fence', 13, 4, 'construction', 2, False, False, (190, 153, 153)),
-        CityscapesClass('guard rail', 14, 19, 'construction', 2, False, True, (180, 165, 180)),
-        CityscapesClass('bridge', 15, 19, 'construction', 2, False, True, (150, 100, 100)),
-        CityscapesClass('tunnel', 16, 19, 'construction', 2, False, True, (150, 120, 90)),
-        CityscapesClass('pole', 17, 5, 'object', 3, False, False, (153, 153, 153)),
-        CityscapesClass('polegroup', 18, 19, 'object', 3, False, True, (153, 153, 153)),
-        CityscapesClass('traffic light', 19, 6, 'object', 3, False, False, (250, 170, 30)),
-        CityscapesClass('traffic sign', 20, 7, 'object', 3, False, False, (220, 220, 0)),
-        CityscapesClass('vegetation', 21, 8, 'nature', 4, False, False, (107, 142, 35)),
-        CityscapesClass('terrain', 22, 9, 'nature', 4, False, False, (152, 251, 152)),
-        CityscapesClass('sky', 23, 10, 'sky', 5, False, False, (70, 130, 180)),
-        CityscapesClass('person', 24, 11, 'human', 6, True, False, (220, 20, 60)),
-        CityscapesClass('rider', 25, 12, 'human', 6, True, False, (255, 0, 0)),
-        CityscapesClass('car', 26, 13, 'vehicle', 7, True, False, (0, 0, 142)),
-        CityscapesClass('truck', 27, 14, 'vehicle', 7, True, False, (0, 0, 70)),
-        CityscapesClass('bus', 28, 15, 'vehicle', 7, True, False, (0, 60, 100)),
-        CityscapesClass('caravan', 29, 19, 'vehicle', 7, True, True, (0, 0, 90)),
-        CityscapesClass('trailer', 30, 19, 'vehicle', 7, True, True, (0, 0, 110)),
-        CityscapesClass('train', 31, 16, 'vehicle', 7, True, False, (0, 80, 100)),
-        CityscapesClass('motorcycle', 32, 17, 'vehicle', 7, True, False, (0, 0, 230)),
-        CityscapesClass('bicycle', 33, 18, 'vehicle', 7, True, False, (119, 11, 32)),
-        CityscapesClass('license plate', -1, 19, 'vehicle', 7, False, True, (0, 0, 142)),
-    ]
-
-    train_id_to_color = np.array(list({cls.train_id: cls.color for cls in classes[::-1]}.values())[::-1])
-    id_to_train_id = np.array([c.train_id for c in classes])
-    train_id_to_label = {label.train_id: label.name for label in classes}
-
-    @classmethod
-    def encode_target(cls, target):
-        return cls.id_to_train_id[np.array(target)]
-
-    @classmethod
-    def encode_target_cityscapes(cls, target):
-        target[target == 255] = 19
-        return cls.id_to_train_id[np.array(target)]
-
-    @classmethod
-    def decode_target(cls, target):
-        target[target == 255] = 19
-        return cls.train_id_to_color[target]
-
-
-BUCKET_NAME = 'datasets-reteai'
-PROJECT_ID = 'splendid-flow-231921'
-image_size = (2048, 1024)  # TODO check all occurences and fix
-train_size, val_size = 400, 90
-subset_sizes = [train_size, val_size]
-categories = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
-SUPERCATEGORY_GROUNDTRUTH = False
-SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
-                                   Cityscapes.classes[i].train_id < 19])
-LOAD_UNION_CATEGORIES_IMAGES = False
-APPLY_AUGMENTATION = True
-IMAGE_MEAN = np.array([0.485, 0.456, 0.406])
-IMAGE_STD = np.array([0.229, 0.224, 0.225])
-KITTI_MEAN = np.array([0.379, 0.398, 0.384])
-KITTI_STD = np.array([0.298, 0.308, 0.315])
-CITYSCAPES_MEAN = np.array([0.287, 0.325, 0.284])
-CITYSCAPES_STD = np.array([0.176, 0.181, 0.178])
-VAL_INDICES = [190, 198, 45, 25, 141, 104, 17, 162, 49, 167, 168, 34, 150, 113, 44,
-               182, 196, 11, 6, 46, 133, 74, 81, 65, 66, 79, 96, 92, 178, 103]
-AUGMENT = True
-SUBSET_REPEATS = [1, 1]
-# Augmentation limits
-HUE_LIM = 0.3 / np.pi
-SATUR_LIM = 0.3
-BRIGHT_LIM = 0.3
-CONTR_LIM = 0.3
-DEFAULT_GPS_HEADING = 281.
-DEFAULT_GPS_LATITUDE = 50.780881831805594
-DEFAULT_GPS_LONGTITUDE = 6.108147476339736
-DEFAULT_TEMP = 19.5
-DEFAULT_SPEED = 10.81
-DEFAULT_YAW_RATE = 0.171
-
-
-@lru_cache()
-def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
-    auth_secret_string = os.environ['AUTH_SECRET']
-    auth_secret = json.loads(auth_secret_string)
-    if type(auth_secret) is dict:
-        # getting credentials from dictionary account info
-        credentials = service_account.Credentials.from_service_account_info(auth_secret)
-    else:
-        # getting credentials from path
-        credentials = service_account.Credentials.from_service_account_file(auth_secret)
-    project = credentials.project_id
-    gcs_client = storage.Client(project=project, credentials=credentials)
-    return gcs_client.bucket(bucket_name)
-
-
-def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
-    # if local_file_path is not specified saving in home dir
-    if local_file_path is None:
-        home_dir = os.getenv("HOME")
-        local_file_path = os.path.join(home_dir, "Tensorleap", BUCKET_NAME, cloud_file_path)
-
-    # check if file already exists
-    if os.path.exists(local_file_path):
-        return local_file_path
-    bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
-    dir_path = os.path.dirname(local_file_path)
-    os.makedirs(dir_path, exist_ok=True)
-    blob = bucket.blob(cloud_file_path)
-    blob.download_to_filename(local_file_path)
-    return local_file_path
 
 
 def get_cityscapes_data() -> List[PreprocessResponse]:
@@ -167,7 +28,6 @@ def get_cityscapes_data() -> List[PreprocessResponse]:
     bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
     dataset_path = Path('Cityscapes')
     responses = []
-    TRAIN_PERCENT = 0.8
     FOLDERS_NAME = ["zurich", "weimar", "ulm", "tubingen", "stuttgart", "strasbourg", "monchengladbach", "krefeld",
                     "jena",
                     "hanover", "hamburg", "erfurt", "dusseldorf", "darmstadt", "cologne", "bremen", "bochum", "aachen"]
@@ -204,6 +64,7 @@ def get_cityscapes_data() -> List[PreprocessResponse]:
                     len(permuted_list) - train_size)
         all_metadata[0], all_metadata[1] = all_metadata[0] + metadata_json[:train_size], all_metadata[
             1] + metadata_json[train_size:]
+
     responses = [PreprocessResponse(length=len(all_images[0]), data={
         "image_path": all_images[0],
         "subset_name": "train",
@@ -228,8 +89,8 @@ def get_cityscapes_data() -> List[PreprocessResponse]:
 
 
 def get_kitti_data() -> Dict[str, List[str]]:
-    dataset_path = Path('KITTI/data_semantics/training')
     responses = []
+    dataset_path = Path('KITTI/data_semantics/training')
     train_indices = [i for i in range(200) if i not in VAL_INDICES]
     indices_lists = [train_indices, VAL_INDICES]
     data_dict = {'train': {}, "validation": {}}
@@ -274,7 +135,7 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     if data.data['dataset'][idx % data.data["real_size"]] == 'kitti':
         img = (img - KITTI_MEAN) * CITYSCAPES_STD / KITTI_STD + CITYSCAPES_MEAN
     normalized_image = (img - IMAGE_MEAN) / IMAGE_STD
-    return normalized_image.astype(np.float)
+    return normalized_image.astype(float)
 
 
 def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
@@ -291,8 +152,7 @@ def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     mask = get_categorical_mask(idx % data.data["real_size"], data)
-    return tf.keras.utils.to_categorical(mask, num_classes=20).astype(np.float)[...,
-           :19]  # Remove background class from cross-entropy
+    return tf.keras.utils.to_categorical(mask, num_classes=20).astype(float)[..., :19]  # Remove background class from cross-entropy
 
 
 def metadata_background_percent(idx: int, data: PreprocessResponse) -> float:
@@ -436,9 +296,7 @@ def cityscape_segmentation_visualizer(mask: npt.NDArray[np.uint8]) -> LeapImage:
 jet = plt.get_cmap('jet')
 cNorm = colors.Normalize(vmin=0, vmax=1)
 scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
-
-
-def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]):
+def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]) -> LeapImage:
     image = unnormalize_image(image)
     ls = tf.keras.losses.CategoricalCrossentropy(from_logits=True, reduction='none')
     ls_image = ls(gt, prediction).numpy()
