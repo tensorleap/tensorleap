@@ -6,4 +6,4 @@ if __name__ == '__main__':
     script_path = 'tensorleap.py'
     datascript = LeapLoader(code_path=dir_path, code_entry_name=script_path)
     res = datascript.check_dataset()
-    print(res)
+    assert res.is_valid
