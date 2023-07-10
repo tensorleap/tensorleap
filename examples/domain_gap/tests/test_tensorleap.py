@@ -37,7 +37,7 @@ if __name__ == "__main__":
     img = input_image(i, train)
     mask = ground_truth_mask(i, train)
     plot_mask(img, mask)     # plot the GT
-    # iter_all_samples(data_subsets)
+    iter_all_samples(data_subsets)
 
     MODEL_PATH = None   # TODO: FILL here your path model
     # Infer
