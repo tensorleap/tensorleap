@@ -4,16 +4,16 @@ from domain_gap.data.cs_data import Cityscapes
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 
-
+NUM_CLASSES = 19
 image_size = (2048, 1024)  # TODO check all occurences and fix
 train_size, val_size = 400, 90
 subset_sizes = [train_size, val_size]
 TRAIN_PERCENT = 0.8
 
 SUPERCATEGORY_GROUNDTRUTH = False
-categories = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
+categories = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < NUM_CLASSES]
 SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
-                                   Cityscapes.classes[i].train_id < 19])
+                                   Cityscapes.classes[i].train_id < NUM_CLASSES])
 LOAD_UNION_CATEGORIES_IMAGES = False
 APPLY_AUGMENTATION = True
 IMAGE_MEAN = np.array([0.485, 0.456, 0.406])

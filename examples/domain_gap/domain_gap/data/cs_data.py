@@ -9,8 +9,6 @@ from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket
 from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT
 
 
-
-
 class Cityscapes:
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
 
