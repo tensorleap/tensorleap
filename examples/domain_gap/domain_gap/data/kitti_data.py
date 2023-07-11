@@ -3,8 +3,8 @@ from pathlib import Path
 
 from domain_gap.utils.configs import VAL_INDICES
 
+
 def get_kitti_data() -> Dict[str, List[str]]:
-    responses = []
     dataset_path = Path('KITTI/data_semantics/training')
     train_indices = [i for i in range(200) if i not in VAL_INDICES]
     indices_lists = [train_indices, VAL_INDICES]
