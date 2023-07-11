@@ -1,11 +1,3 @@
-import numpy as np
-from PIL import Image
-from code_loader.contract.datasetclasses import PreprocessResponse
-
-from armbench_segmentation import CACHE_DICTS
-from armbench_segmentation.utils import polygon_to_bbox
-from armbench_segmentation.yolo_helpers.yolo_utils import BOXES_GENERATOR
-
 BATCH_SIZE = 32
 
 BUCKET_NAME = 'datasets-reteai'
@@ -37,61 +29,7 @@ CONF_THRESH = 0.35
 NMS_THRESH = 0.5
 OVERLAP_THRESH = 1 / 16
 SMALL_BBS_TH = 0.0003  # Equivelent to ~120 pixels of area at most
-DEFAULT_BOXES = BOXES_GENERATOR.generate_anchors()
 LOAD_UNION_CATEGORIES_IMAGES = True
-
-
-def get_annotation_coco(idx: int, data: PreprocessResponse) -> np.ndarray:
-    x = data['samples'][idx]
-    coco = data['cocofile']
-    # rescale
-    ann_ids = coco.getAnnIds(imgIds=x['id'])
-    anns = coco.loadAnns(ann_ids)
-    return anns
-
-
-def get_masks(idx: int, data: PreprocessResponse) -> np.ndarray:
-    data = data.data
-    MASK_SIZE = (160, 160)
-    coco = data['cocofile']
-    anns = get_annotation_coco(idx, data)
-    masks = np.zeros([MAX_BB_PER_IMAGE, *MASK_SIZE], dtype=np.uint8)
-    # mask = coco.annToMask(anns[0])
-    for i in range(min(len(anns), MAX_BB_PER_IMAGE)):
-        ann = anns[i]
-        mask = coco.annToMask(ann)
-        mask = np.array(Image.fromarray(mask).resize((MASK_SIZE[0], MASK_SIZE[1]), Image.NEAREST))
-        masks[i, ...] = mask
-    return masks
-
-
-def get_bbs(idx: int, data: PreprocessResponse) -> np.ndarray:
-    data = data.data
-    res = CACHE_DICTS['bbs'].get(str(idx) + data['subdir'])
-    if res is not None:
-        return res
-    x = data['samples'][idx]
-    coco = data['cocofile']
-    ann_ids = coco.getAnnIds(imgIds=x['id'])
-    anns = coco.loadAnns(ann_ids)
-    bboxes = np.zeros([MAX_BB_PER_IMAGE, 5])
-    max_anns = min(MAX_BB_PER_IMAGE, len(anns))
-    # mask = coco.annToMask(anns[0])
-    for i in range(max_anns):
-        ann = anns[i]
-        img_size = (x['height'], x['width'])
-        class_id = 2 - ann['category_id']
-        # resize
-        bbox = polygon_to_bbox(ann['segmentation'][0])
-        bbox /= np.array((img_size[1], img_size[0], img_size[1], img_size[0]))
-        bboxes[i, :4] = bbox
-        bboxes[i, 4] = class_id
-    bboxes[max_anns:, 4] = BACKGROUND_LABEL
-    if len(CACHE_DICTS['bbs'].keys()) > BATCH_SIZE:
-        CACHE_DICTS['bbs'] = {str(idx) + data['subdir']: bboxes}
-    else:
-        CACHE_DICTS['bbs'][str(idx) + data['subdir']] = bboxes
-    return bboxes
 
 
 def load_set(coco, load_union=False):
@@ -108,4 +46,3 @@ def load_set(coco, load_union=False):
         imgIds = list(imgIds)[:-1]  # we're missing the last image for some reason
     imgs = coco.loadImgs(imgIds)
     return imgs
-

@@ -1,5 +1,5 @@
 import os
-from typing import Union
+from typing import Union, List
 
 import numpy as np
 import tensorflow as tf
@@ -14,11 +14,13 @@ from code_loader.contract.enums import (
 from code_loader.contract.datasetclasses import PreprocessResponse
 from pycocotools.coco import COCO
 
+from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.gcs_utils import _download
 from armbench_segmentation.preprocessing import BACKGROUND_LABEL, CATEGORIES, IMAGE_SIZE, SMALL_BBS_TH, DIR, IMG_FOLDER, \
-    LOAD_UNION_CATEGORIES_IMAGES, load_set, TRAIN_SIZE, VAL_SIZE, UL_SIZE, get_bbs, get_masks, CLASSES
-from armbench_segmentation.utils import get_cat_instances_seg_lst, calculate_iou_all_pairs, count_obj_masks_occlusions, \
-    count_obj_bbox_occlusions
+    LOAD_UNION_CATEGORIES_IMAGES, load_set, TRAIN_SIZE, VAL_SIZE, UL_SIZE, CLASSES, BATCH_SIZE, \
+    MAX_BB_PER_IMAGE
+from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
+    count_obj_bbox_occlusions, polygon_to_bbox
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
     mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, non_binary_over_segmented, \
     non_binary_under_segmented, average_segments_num_over_segment, average_segments_num_under_segmented, \
@@ -79,7 +81,82 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     return image
 
 
+def get_annotation_coco(idx: int, data: PreprocessResponse) -> np.ndarray:
+    x = data['samples'][idx]
+    coco = data['cocofile']
+    # rescale
+    ann_ids = coco.getAnnIds(imgIds=x['id'])
+    anns = coco.loadAnns(ann_ids)
+    return anns
+
+
+def get_masks(idx: int, data: PreprocessResponse) -> np.ndarray:
+    data = data.data
+    MASK_SIZE = (160, 160)
+    coco = data['cocofile']
+    anns = get_annotation_coco(idx, data)
+    masks = np.zeros([MAX_BB_PER_IMAGE, *MASK_SIZE], dtype=np.uint8)
+    # mask = coco.annToMask(anns[0])
+    for i in range(min(len(anns), MAX_BB_PER_IMAGE)):
+        ann = anns[i]
+        mask = coco.annToMask(ann)
+        mask = np.array(Image.fromarray(mask).resize((MASK_SIZE[0], MASK_SIZE[1]), Image.NEAREST))
+        masks[i, ...] = mask
+    return masks
+
+
+def get_bbs(idx: int, data: PreprocessResponse) -> np.ndarray:
+    data = data.data
+    res = CACHE_DICTS['bbs'].get(str(idx) + data['subdir'])
+    if res is not None:
+        return res
+    x = data['samples'][idx]
+    coco = data['cocofile']
+    ann_ids = coco.getAnnIds(imgIds=x['id'])
+    anns = coco.loadAnns(ann_ids)
+    bboxes = np.zeros([MAX_BB_PER_IMAGE, 5])
+    max_anns = min(MAX_BB_PER_IMAGE, len(anns))
+    # mask = coco.annToMask(anns[0])
+    for i in range(max_anns):
+        ann = anns[i]
+        img_size = (x['height'], x['width'])
+        class_id = 2 - ann['category_id']
+        # resize
+        bbox = polygon_to_bbox(ann['segmentation'][0])
+        bbox /= np.array((img_size[1], img_size[0], img_size[1], img_size[0]))
+        bboxes[i, :4] = bbox
+        bboxes[i, 4] = class_id
+    bboxes[max_anns:, 4] = BACKGROUND_LABEL
+    if len(CACHE_DICTS['bbs'].keys()) > BATCH_SIZE:
+        CACHE_DICTS['bbs'] = {str(idx) + data['subdir']: bboxes}
+    else:
+        CACHE_DICTS['bbs'][str(idx) + data['subdir']] = bboxes
+    return bboxes
+
+
 # ----------------------------------------------------------metadata----------------------------------------------------
+def get_cat_instances_seg_lst(idx: int, data: PreprocessResponse, cat: str) -> List[np.ma.array]:
+    img = input_image(idx, data)
+    if cat == "tote":
+        masks = get_tote_instances_masks(idx, data)
+    elif cat == "object":
+        masks = get_object_instances_masks(idx, data)
+    else:
+        print('Error category not supported')
+        return None
+    if masks is None:
+        return None
+    if masks[0, ...].shape != IMAGE_SIZE:
+        masks = tf.image.resize(masks[..., None], IMAGE_SIZE, tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
+        masks = masks.numpy()
+    instances = []
+    for mask in masks:
+        mask = np.broadcast_to(mask[..., np.newaxis], img.shape)
+        masked_arr = np.ma.masked_array(img, mask)
+        instances.append(masked_arr)
+    return instances
+
+
 def get_idx(index: int, subset: PreprocessResponse):
     return index
 

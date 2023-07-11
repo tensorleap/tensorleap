@@ -3,7 +3,7 @@ import tensorflow as tf
 from code_loader.contract.visualizer_classes import LeapImageWithBBox, LeapImageMask
 
 from armbench_segmentation.preprocessing import MAX_INSTANCES_PER_CLASS, CATEGORIES, INSTANCES
-from armbench_segmentation.utils import get_mask_list, get_ioa_array, remove_label_from_bbs
+from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
 
 
 # Visualizers

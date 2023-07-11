@@ -6,13 +6,15 @@ from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.preprocessing import MODEL_FORMAT, IMAGE_SIZE, SMALL_BBS_TH
-from armbench_segmentation.utils import get_ioa_array, get_mask_list, remove_label_from_bbs
+from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
+from armbench_segmentation.utils.ioa_utils import get_ioa_array
 from armbench_segmentation.yolo_helpers.yolo_utils import LOSS_FN
 
 
 def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor,
-                   mask_true, instance_seg: tf.Tensor) -> Union[Tuple[List[tf.Tensor], List[tf.Tensor], List[tf.Tensor]],
-                  Tuple[List[tf.Tensor], List[tf.Tensor], List[tf.Tensor], List[tf.Tensor]]]:
+                   mask_true, instance_seg: tf.Tensor) -> Union[
+    Tuple[List[tf.Tensor], List[tf.Tensor], List[tf.Tensor]],
+    Tuple[List[tf.Tensor], List[tf.Tensor], List[tf.Tensor], List[tf.Tensor]]]:
     """
     Computes the sum of the classification (CE loss) and localization (regression) losses from all heads
     """
@@ -63,6 +65,7 @@ def mask_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
     _, _, _, loss_m = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
     return tf.reduce_sum(loss_m, axis=0)[:, 0]  # shape of batch
 
+
 def under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
     th = 0.8
     under_segmented_arr = []
@@ -86,6 +89,7 @@ def over_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
         over_segmented_arr.append(is_over_segmented)
     return tf.convert_to_tensor(over_segmented_arr)
 
+
 def metric_small_bb_in_under_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):  # bb_visualizer + gt_visualizer
     th = 0.8  # equivelan
     has_small_bbs = [0.] * image.shape[0]
@@ -103,6 +107,7 @@ def metric_small_bb_in_under_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask_
             if new_bb_array[j].width * new_bb_array[j].height < SMALL_BBS_TH:
                 has_small_bbs[i] = 1.
     return tf.convert_to_tensor(has_small_bbs)
+
 
 def non_binary_over_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
     th = 0.8

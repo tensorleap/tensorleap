@@ -3,11 +3,12 @@ from code_loader.helpers.detection.yolo.loss import YoloLoss
 from code_loader.helpers.detection.yolo.grid import Grid
 from code_loader.helpers.detection.yolo.decoder import Decoder
 
-from armbench_segmentation.preprocessing import CLASSES, FEATURE_MAPS, DEFAULT_BOXES, BOX_SIZES, OVERLAP_THRESH, \
+from armbench_segmentation.preprocessing import CLASSES, FEATURE_MAPS, BOX_SIZES, OVERLAP_THRESH, \
     BACKGROUND_LABEL, MODEL_FORMAT, IMAGE_SIZE, CONF_THRESH, NMS_THRESH, STRIDES, OFFSET
 
 BOXES_GENERATOR = Grid(image_size=IMAGE_SIZE, feature_maps=FEATURE_MAPS, box_sizes=BOX_SIZES,
                        strides=STRIDES, offset=OFFSET)
+DEFAULT_BOXES = BOXES_GENERATOR.generate_anchors()
 
 LOSS_FN = YoloLoss(num_classes=CLASSES, overlap_thresh=OVERLAP_THRESH,
                    features=FEATURE_MAPS, anchors=np.array(BOX_SIZES),
