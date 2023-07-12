@@ -14,13 +14,11 @@ from code_loader.contract.enums import (
 from code_loader.contract.datasetclasses import PreprocessResponse
 from pycocotools.coco import COCO
 
-from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.gcs_utils import _download
 from armbench_segmentation.preprocessing import BACKGROUND_LABEL, CATEGORIES, IMAGE_SIZE, SMALL_BBS_TH, DIR, IMG_FOLDER, \
-    LOAD_UNION_CATEGORIES_IMAGES, load_set, TRAIN_SIZE, VAL_SIZE, UL_SIZE, CLASSES, BATCH_SIZE, \
-    MAX_BB_PER_IMAGE
+    LOAD_UNION_CATEGORIES_IMAGES, load_set, TRAIN_SIZE, VAL_SIZE, UL_SIZE, CLASSES, MAX_BB_PER_IMAGE
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
-    count_obj_bbox_occlusions, polygon_to_bbox, extract_and_cache_bboxes
+    count_obj_bbox_occlusions, extract_and_cache_bboxes
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
     mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, non_binary_over_segmented, \
     non_binary_under_segmented, average_segments_num_over_segment, average_segments_num_under_segmented, \
@@ -110,7 +108,7 @@ def get_bbs(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 
 # ----------------------------------------------------------metadata----------------------------------------------------
-def get_cat_instances_seg_lst(idx: int, data: PreprocessResponse, cat: str) -> List[np.ma.array]:
+def get_cat_instances_seg_lst(idx: int, data: PreprocessResponse, cat: str) -> Union[List[np.ma.array], None]:
     img = input_image(idx, data)
     if cat == "tote":
         masks = get_tote_instances_masks(idx, data)

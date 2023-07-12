@@ -46,6 +46,20 @@ def polygon_to_bbox(vertices):
 
 
 def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
+    """
+    Calculates the Intersection over Union (IOU) for all pairs of bounding boxes.
+
+    This function utilizes vectorization to efficiently compute the IOU for all possible pairs of bounding boxes.
+    By leveraging NumPy's array operations, the calculations are performed in parallel, leading to improved performance.
+
+    Args:
+        bboxes (np.ndarray): Array of bounding boxes in the format [x, y, w, h].
+        image_size (int): Size of the image.
+
+    Returns:
+        np.ndarray: Array containing the IOU values for all pairs of bounding boxes.
+    """
+
     # Reformat all bboxes to (x_min, y_min, x_max, y_max)
     bboxes = np.asarray([xywh_to_xyxy_format(bbox[:-1]) for bbox in bboxes]) * image_size
     num_bboxes = len(bboxes)
@@ -56,14 +70,13 @@ def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
     y_max = np.minimum(bboxes[:, 3][:, np.newaxis], bboxes[:, 3])
 
     # Calculate areas for all pairs
-    area_a = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])
-    area_b = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])
+    areas = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])
 
     # Calculate intersection area for all pairs
     intersection_area = np.maximum(x_max - x_min, 0) * np.maximum(y_max - y_min, 0)
 
     # Calculate union area for all pairs
-    union_area = area_a[:, np.newaxis] + area_b - intersection_area
+    union_area = areas[:, np.newaxis] + areas - intersection_area
 
     # Calculate IOU for all pairs
     iou = intersection_area / union_area
@@ -73,6 +86,25 @@ def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
 
 def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_threshold: float, calc_avg_flag: bool) -> \
         Union[float, int]:
+    """
+    Counts the occluded bounding boxes of a specific object category in an image.
+
+    This function takes an image and an array of bounding boxes as input and counts the number of occluded
+    bounding boxes of a specific object category. The occlusion is determined based on the Intersection over Union (IOU)
+    between the bounding boxes.
+
+    Args:
+        img (np.ndarray): Image represented as a NumPy array.
+        bboxes (np.ndarray): Array of bounding boxes in the format [x, y, w, h, label].
+        occlusion_threshold (float): Threshold value for determining occlusion based on IOU.
+        calc_avg_flag (bool): Flag indicating whether to calculate the average occlusion count.
+
+    Returns:
+        Union[float, int]: Number of occluded bounding boxes of the specified object category.
+                           If calc_avg_flag is True, it returns the average occlusion count as a float.
+                           If calc_avg_flag is False, it returns the total occlusion count as an integer.
+
+    """
     img_size = img.shape[0]
     label = CATEGORIES.index('Object')
     obj_bbox = bboxes[bboxes[..., -1] == label]
@@ -88,6 +120,18 @@ def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_thr
 
 
 def count_obj_masks_occlusions(masks: Union[np.ndarray, None], occlusion_threshold: float) -> int:
+    """
+    Counts the occluded masks based on Intersection over Union (IOU).
+
+    Args:
+        masks (Union[np.ndarray, None]): Masks represented as a NumPy array. Can be None if no masks are provided.
+        occlusion_threshold (float): Threshold value for determining occlusion based on IOU.
+
+    Returns:
+        int: Number of occluded masks based on the specified occlusion threshold.
+
+    """
+
     if masks is None:
         return 0
 
@@ -121,14 +165,32 @@ def count_obj_masks_occlusions(masks: Union[np.ndarray, None], occlusion_thresho
 def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded: bool = True, bg_label: int = 0,
                        is_gt=False, masks: Optional[tf.Tensor] = None) -> List[BoundingBox]:
     """
-    Assumes a (X,Y,W,H) Format for the BB text
-    bb_array is (CLASSES,TOP_K,PROPERTIES) WHERE PROPERTIES =(conf,xmin,ymin,xmax,ymax)
+    Converts a bounding box array to a list of BoundingBox objects.
+
+    This function takes a bounding box array and optional masks as input and converts it into a list of BoundingBox objects.
+    The bounding box array is expected to be in the format (CLASSES, TOP_K, PROPERTIES), where PROPERTIES corresponds to
+    (confidence, xmin, ymin, xmax, ymax). If iscornercoded is set to True, the bounding box coordinates are assumed to be
+    in the format (xmin, ymin, xmax, ymax); otherwise, they are assumed to be in the format (x, y, width, height).
+
+    Args:
+        bb_array (Union[NDArray[float], tf.Tensor]): Bounding box array.
+        iscornercoded (bool, optional): Flag indicating whether the bounding box coordinates are corner-coded.
+                                        Defaults to True.
+        bg_label (int, optional): Background label index. Defaults to 0.
+        is_gt (bool, optional): Flag indicating whether the bounding box array represents ground truth.
+                                Defaults to False.
+        masks (Optional[tf.Tensor], optional): Optional masks associated with the bounding boxes. Defaults to None.
+
+    Returns:
+        Tuple[List[BoundingBox], List[np.ndarray]]: Tuple containing the list of BoundingBox objects and the list of masks.
+                                                    If masks are not provided, the second element will be an empty list.
+
     """
+
     bb_list = []
     mask_list = []
     if not isinstance(bb_array, np.ndarray):
         bb_array = bb_array.numpy()
-    # fig, ax = plt.subplots(figsize=(6, 9)
     if len(bb_array.shape) == 3:
         bb_array = bb_array.reshape(-1, bb_array.shape[-1])
     if masks is not None and len(bb_array) > 0:
@@ -147,7 +209,6 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
         if bb_array[i][-1] != bg_label:
             if iscornercoded:
                 x, y, w, h = xyxy_to_xywh_format(bb_array[i][1:5])  # FIXED TOM
-                # unormalize to image dimensions
             else:
                 x, y = bb_array[i][0], bb_array[i][1]
                 w, h = bb_array[i][2], bb_array[i][3]
@@ -163,10 +224,6 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
                     int(max(x - w / 2, 0) * h_factor):int(min(x + w / 2, out_masks.shape[1]) * w_factor), i] = 1
                     fixed_mask = out_masks[..., i] * no_object_masks[..., i]
                 mask_list.append(fixed_mask.round().astype(int))
-                # new_mask = Image.fromarray(fixed_mask).resize((IMAGE_SIZE[1], IMAGE_SIZE[0]), Image.NEAREST)
-            # downscale box
-            # crop mask according to prediction
-            # increase mask to image size
             bb_list.append(curr_bb)
     return bb_list, mask_list
 
@@ -186,7 +243,6 @@ def get_mask_list(data, masks, is_gt):
         decoded = is_inference
         class_list_reshaped, loc_list_reshaped = reshape_output_list(
             np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=IMAGE_SIZE)
-        # add batch
         outputs = DECODER(loc_list_reshaped,
                           class_list_reshaped,
                           DEFAULT_BOXES,
@@ -195,7 +251,7 @@ def get_mask_list(data, masks, is_gt):
                           )
         bb_object, mask_list = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL,
                                                   masks=masks)
-    if len(CACHE_DICTS['mask_list'].keys()) > 4 * BATCH_SIZE:  # BATCH_SIZE*[FALSE/TRUE,MASK/NO-MASK]
+    if len(CACHE_DICTS['mask_list'].keys()) > 4 * BATCH_SIZE:
         CACHE_DICTS['mask_list'] = {str(data) + str(masks) + str(is_gt): (bb_object, mask_list)}
     else:
         CACHE_DICTS['mask_list'][str(data) + str(masks) + str(is_gt)] = (bb_object, mask_list)

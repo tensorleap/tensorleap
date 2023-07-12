@@ -38,17 +38,18 @@ def get_ioa_array(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt, containing='pre
     res = CACHE_DICTS['get_ioa_array'].get(hash_str)
     if res is not None:
         return res
+
     prediction_masks = multiple_mask_pred(image, y_pred_bb, y_pred_mask)
     gt_masks = multiple_mask_gt(image, bb_gt, mask_gt)
-    ioas = np.zeros((len(prediction_masks), len(gt_masks)))
-    for i, pred_mask in enumerate(prediction_masks):
-        for j, gt_mask in enumerate(gt_masks):
-            if containing == 'pred':
-                ioas[i, j] = ioa_mask(pred_mask, gt_mask)
-            else:
-                ioas[i, j] = ioa_mask(gt_mask, pred_mask)
+
+    if containing == 'pred':
+        ioas = np.array([[ioa_mask(pred_mask, gt_mask) for gt_mask in gt_masks] for pred_mask in prediction_masks])
+    else:
+        ioas = np.array([[ioa_mask(gt_mask, pred_mask) for gt_mask in gt_masks] for pred_mask in prediction_masks])
+
     if len(CACHE_DICTS['get_ioa_array'].keys()) > 2 * BATCH_SIZE:
         CACHE_DICTS['get_ioa_array'] = {hash_str: ioas}
     else:
         CACHE_DICTS['get_ioa_array'][hash_str] = ioas
+
     return ioas
