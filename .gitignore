@@ -11,3 +11,4 @@ examples/imdb/aclImdb/
 examples/coco/coco/coco_data/
 *.json
 examples/coco/.tensorleap/config.toml
+/examples/armbench-segmentation/sandbox/
