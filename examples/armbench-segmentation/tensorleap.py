@@ -20,25 +20,26 @@ from armbench_segmentation.preprocessing import BACKGROUND_LABEL, CATEGORIES, IM
     LOAD_UNION_CATEGORIES_IMAGES, load_set, TRAIN_SIZE, VAL_SIZE, UL_SIZE, CLASSES, BATCH_SIZE, \
     MAX_BB_PER_IMAGE
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
-    count_obj_bbox_occlusions, polygon_to_bbox
+    count_obj_bbox_occlusions, polygon_to_bbox, extract_and_cache_bboxes
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
     mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, non_binary_over_segmented, \
     non_binary_under_segmented, average_segments_num_over_segment, average_segments_num_under_segmented, \
     over_segment_avg_confidence
-from armbench_segmentation.visualizers import mask_visualizer_gt, mask_visualizer_prediction, gt_bb_decoder, bb_decoder, \
+from armbench_segmentation.visualizers.visualizers import gt_bb_decoder, bb_decoder, \
     under_segmented_bb_visualizer, over_segmented_bb_visualizer
+from armbench_segmentation.visualizers.visualizers_getters import mask_visualizer_gt, mask_visualizer_prediction
 
 
 # ----------------------------------------------------data processing--------------------------------------------------
 def subset_images():
-    annFile = os.path.join(DIR, IMG_FOLDER, "train.json")
-    fpath = _download(annFile)
+    ann_file = os.path.join(DIR, IMG_FOLDER, "train.json")
+    fpath = _download(ann_file)
     # initialize COCO api for instance annotations
     train = COCO(fpath)
     x_train_raw = load_set(coco=train, load_union=LOAD_UNION_CATEGORIES_IMAGES)
 
-    annFile = os.path.join(DIR, IMG_FOLDER, "test.json")
-    fpath = _download(annFile)
+    ann_file = os.path.join(DIR, IMG_FOLDER, "test.json")
+    fpath = _download(ann_file)
     val = COCO(fpath)
     x_val_raw = load_set(coco=val, load_union=LOAD_UNION_CATEGORIES_IMAGES)
 
@@ -77,14 +78,12 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     fpath = _download(filepath)
     # rescale
     image = np.array(Image.open(fpath).resize((IMAGE_SIZE[0], IMAGE_SIZE[1]), Image.BILINEAR)) / 255.
-    # todo: add normalization
     return image
 
 
 def get_annotation_coco(idx: int, data: PreprocessResponse) -> np.ndarray:
     x = data['samples'][idx]
     coco = data['cocofile']
-    # rescale
     ann_ids = coco.getAnnIds(imgIds=x['id'])
     anns = coco.loadAnns(ann_ids)
     return anns
@@ -96,7 +95,6 @@ def get_masks(idx: int, data: PreprocessResponse) -> np.ndarray:
     coco = data['cocofile']
     anns = get_annotation_coco(idx, data)
     masks = np.zeros([MAX_BB_PER_IMAGE, *MASK_SIZE], dtype=np.uint8)
-    # mask = coco.annToMask(anns[0])
     for i in range(min(len(anns), MAX_BB_PER_IMAGE)):
         ann = anns[i]
         mask = coco.annToMask(ann)
@@ -107,30 +105,7 @@ def get_masks(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 def get_bbs(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
-    res = CACHE_DICTS['bbs'].get(str(idx) + data['subdir'])
-    if res is not None:
-        return res
-    x = data['samples'][idx]
-    coco = data['cocofile']
-    ann_ids = coco.getAnnIds(imgIds=x['id'])
-    anns = coco.loadAnns(ann_ids)
-    bboxes = np.zeros([MAX_BB_PER_IMAGE, 5])
-    max_anns = min(MAX_BB_PER_IMAGE, len(anns))
-    # mask = coco.annToMask(anns[0])
-    for i in range(max_anns):
-        ann = anns[i]
-        img_size = (x['height'], x['width'])
-        class_id = 2 - ann['category_id']
-        # resize
-        bbox = polygon_to_bbox(ann['segmentation'][0])
-        bbox /= np.array((img_size[1], img_size[0], img_size[1], img_size[0]))
-        bboxes[i, :4] = bbox
-        bboxes[i, 4] = class_id
-    bboxes[max_anns:, 4] = BACKGROUND_LABEL
-    if len(CACHE_DICTS['bbs'].keys()) > BATCH_SIZE:
-        CACHE_DICTS['bbs'] = {str(idx) + data['subdir']: bboxes}
-    else:
-        CACHE_DICTS['bbs'][str(idx) + data['subdir']] = bboxes
+    bboxes = extract_and_cache_bboxes(idx, data)
     return bboxes
 
 

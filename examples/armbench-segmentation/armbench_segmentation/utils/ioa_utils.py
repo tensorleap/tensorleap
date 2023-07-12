@@ -2,7 +2,7 @@ import numpy as np
 
 from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.preprocessing import BATCH_SIZE
-from armbench_segmentation.visualizers import multiple_mask_gt, multiple_mask_pred
+from armbench_segmentation.visualizers.visualizers_getters import multiple_mask_pred, multiple_mask_gt
 
 
 def ioa_mask(mask_containing, mask_contained):

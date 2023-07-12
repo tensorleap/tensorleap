@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 
 import numpy as np
 import tensorflow as tf
@@ -9,7 +9,8 @@ from code_loader.helpers.detection.yolo.utils import reshape_output_list
 from numpy._typing import NDArray
 
 from armbench_segmentation import CACHE_DICTS
-from armbench_segmentation.preprocessing import BATCH_SIZE, CATEGORIES, MODEL_FORMAT, BACKGROUND_LABEL, IMAGE_SIZE
+from armbench_segmentation.preprocessing import BATCH_SIZE, CATEGORIES, MODEL_FORMAT, BACKGROUND_LABEL, IMAGE_SIZE, \
+    MAX_INSTANCES_PER_CLASS, INSTANCES, MAX_BB_PER_IMAGE
 from armbench_segmentation.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 
@@ -44,9 +45,6 @@ def polygon_to_bbox(vertices):
     return bbox
 
 
-
-
-
 def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
     # Reformat all bboxes to (x_min, y_min, x_max, y_max)
     bboxes = np.asarray([xywh_to_xyxy_format(bbox[:-1]) for bbox in bboxes]) * image_size
@@ -73,7 +71,8 @@ def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
     return iou
 
 
-def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_threshold: float, calc_avg_flag: bool) -> Union[float, int]:
+def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_threshold: float, calc_avg_flag: bool) -> \
+        Union[float, int]:
     img_size = img.shape[0]
     label = CATEGORIES.index('Object')
     obj_bbox = bboxes[bboxes[..., -1] == label]
@@ -183,7 +182,7 @@ def get_mask_list(data, masks, is_gt):
                                                   is_gt=True,
                                                   masks=masks)
     else:
-        from_logits = ~ is_inference
+        from_logits = not is_inference
         decoded = is_inference
         class_list_reshaped, loc_list_reshaped = reshape_output_list(
             np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=IMAGE_SIZE)
@@ -228,3 +227,54 @@ def calculate_overlap(box1, box2):
     overlap_area = w_intersection * h_intersection
 
     return overlap_area
+
+
+def get_argmax_map_and_separate_masks(image, bbs, masks):
+    image_size = image.shape[:2]
+    argmax_map = np.zeros(image_size, dtype=np.uint8)
+    cats_dict = {}
+    separate_masks = []
+    for bb, mask in zip(bbs, masks):
+        if mask.shape != image_size:
+            resize_mask = tf.image.resize(mask[..., None], image_size, tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
+            if not isinstance(resize_mask, np.ndarray):
+                resize_mask = resize_mask.numpy()
+        else:
+            resize_mask = mask
+        resize_mask = resize_mask.astype(bool)
+        label = bb.label
+        instance_number = cats_dict.get(label, 0)
+        # update counter if reach max instances we treat the last objects as one
+        cats_dict[label] = instance_number + 1 if instance_number < MAX_INSTANCES_PER_CLASS else instance_number
+        argmax_map[resize_mask] = CATEGORIES.index(label) * MAX_INSTANCES_PER_CLASS + cats_dict[label]  # curr_idx
+        if bb.label == 'Object':
+            separate_masks.append(resize_mask)
+    argmax_map[argmax_map == 0] = len(INSTANCES) + 1
+    argmax_map -= 1
+    return {"argmax_map": argmax_map, "separate_masks": separate_masks}
+
+
+def extract_and_cache_bboxes(idx: int, data: Dict):
+    res = CACHE_DICTS['bbs'].get(str(idx) + data['subdir'])
+    if res is not None:
+        return res
+    x = data['samples'][idx]
+    coco = data['cocofile']
+    ann_ids = coco.getAnnIds(imgIds=x['id'])
+    anns = coco.loadAnns(ann_ids)
+    bboxes = np.zeros([MAX_BB_PER_IMAGE, 5])
+    max_anns = min(MAX_BB_PER_IMAGE, len(anns))
+    for i in range(max_anns):
+        ann = anns[i]
+        img_size = (x['height'], x['width'])
+        class_id = 2 - ann['category_id']
+        bbox = polygon_to_bbox(ann['segmentation'][0])
+        bbox /= np.array((img_size[1], img_size[0], img_size[1], img_size[0]))
+        bboxes[i, :4] = bbox
+        bboxes[i, 4] = class_id
+    bboxes[max_anns:, 4] = BACKGROUND_LABEL
+    if len(CACHE_DICTS['bbs'].keys()) > BATCH_SIZE:
+        CACHE_DICTS['bbs'] = {str(idx) + data['subdir']: bboxes}
+    else:
+        CACHE_DICTS['bbs'][str(idx) + data['subdir']] = bboxes
+    return bboxes
