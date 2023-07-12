@@ -2,8 +2,10 @@ import numpy as np
 import tensorflow as tf
 from code_loader.contract.visualizer_classes import LeapImageWithBBox, LeapImageMask
 
-from armbench_segmentation.preprocessing import MAX_INSTANCES_PER_CLASS, CATEGORIES, INSTANCES
-from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
+from armbench_segmentation.preprocessing import INSTANCES
+from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs, \
+    get_argmax_map_and_separate_masks
+from armbench_segmentation.utils.ioa_utils import get_ioa_array
 
 
 # Visualizers
@@ -46,50 +48,9 @@ def get_mask_visualizer(image, bbs, masks):
 
 
 def get_mask_visualizer_fixed_instances(image, bbs, masks):
-    image_size = image.shape[:2]
-    argmax_map = np.zeros(image_size, dtype=np.uint8)
-    cats_dict = {}
-    seperate_masks = []
-    for bb, mask in zip(bbs, masks):
-        if mask.shape != image_size:
-            resize_mask = tf.image.resize(mask[..., None], image_size, tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
-            if not isinstance(resize_mask, np.ndarray):
-                resize_mask = resize_mask.numpy()
-        else:
-            resize_mask = mask
-        resize_mask = resize_mask.astype(bool)
-        label = bb.label
-        instance_number = cats_dict.get(label, 0)
-        # update counter if reach max instances we treat the last objects as one
-        cats_dict[label] = instance_number + 1 if instance_number < MAX_INSTANCES_PER_CLASS else instance_number
-        argmax_map[resize_mask] = CATEGORIES.index(label) * MAX_INSTANCES_PER_CLASS + cats_dict[label]  # curr_idx
-        if bb.label == 'Object':
-            seperate_masks.append(resize_mask)
-    argmax_map[argmax_map == 0] = len(INSTANCES) + 1
-    argmax_map -= 1
+    argmax_map, separate_masks = get_argmax_map_and_separate_masks(image, bbs, masks).values()
     return LeapImageMask(mask=argmax_map.astype(np.uint8), image=image.astype(np.float32),
-                         labels=INSTANCES + ["background"]), seperate_masks
-
-
-# Visualizers getters
-def mask_visualizer_gt(image, data, mask):
-    bbs, masks = get_mask_list(data, mask, is_gt=True)
-    return get_mask_visualizer_fixed_instances(image, bbs, masks)[0]
-
-
-def mask_visualizer_prediction(image, data, mask):
-    bbs, masks = get_mask_list(data, mask, is_gt=False)
-    return get_mask_visualizer_fixed_instances(image, bbs, masks)[0]
-
-
-def multiple_mask_gt(image, data, mask):
-    bbs, masks = get_mask_list(data, mask, is_gt=True)
-    return get_mask_visualizer_fixed_instances(image, bbs, masks)[1]
-
-
-def multiple_mask_pred(image, data, mask):
-    bbs, masks = get_mask_list(data, mask, is_gt=False)
-    return get_mask_visualizer_fixed_instances(image, bbs, masks)[1]
+                         labels=INSTANCES + ["background"]), separate_masks
 
 
 def under_segmented_bb_visualizer(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):  # bb_visualizer + gt_visualizer
