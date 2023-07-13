@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "cifar10"
+version = "0.1.0"
+description = ""
+authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.11"
+code-loader = "^0.2.83"
+sklearn = "^0.0.post5"
+scikit-learn = "^1.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "tests.test_tensorleap: check_integration"
