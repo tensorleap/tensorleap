@@ -6,7 +6,7 @@ This quick start guide will walk you through the steps to get started with this 
 
 Before you begin, ensure that you have the following prerequisites installed:
 
-- **[Python](https://www.python.org/)** (version 3.7 or higher)
+- **[Python](https://www.python.org/)** (version 3.8 or higher)
 - **[Poetry](https://python-poetry.org/)**
 
 ### Tensorleap **CLI Installation**
