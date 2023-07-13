@@ -44,8 +44,6 @@ tensorleap auth login [api key] [api url].
 
 1. Login to the platform in 'CLIENT_NAME.tensorleap.ai'
 2. Scroll down to the bottom of the **Resources Management** page, then click `GENERATE CLI TOKEN`  in the bottom-left corner.
-<img src="screenshots/Screenshot 2023-07-11 at 14.57.10.png" alt="drawing" width="1000"/>
-<img src="screenshots/Screenshot 2023-07-11 at 14.57.19.png" alt="drawing" width="1000"/>
 3. Once a CLI token is generated, just copy the whole text and paste it into your shell:
 
 ```
