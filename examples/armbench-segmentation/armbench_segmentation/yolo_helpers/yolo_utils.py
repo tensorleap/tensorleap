@@ -2,27 +2,31 @@ import numpy as np
 from code_loader.helpers.detection.yolo.loss import YoloLoss
 from code_loader.helpers.detection.yolo.grid import Grid
 from code_loader.helpers.detection.yolo.decoder import Decoder
+from armbench_segmentation.config_utils import CONFIG
 
-from armbench_segmentation.preprocessing import CLASSES, FEATURE_MAPS, BOX_SIZES, OVERLAP_THRESH, \
-    BACKGROUND_LABEL, MODEL_FORMAT, IMAGE_SIZE, CONF_THRESH, NMS_THRESH, STRIDES, OFFSET
-
-BOXES_GENERATOR = Grid(image_size=IMAGE_SIZE, feature_maps=FEATURE_MAPS, box_sizes=BOX_SIZES,
-                       strides=STRIDES, offset=OFFSET)
+BOXES_GENERATOR = Grid(image_size=CONFIG['IMAGE_SIZE'], 
+                       feature_maps=CONFIG['FEATURE_MAPS'],
+                       box_sizes=CONFIG['BOX_SIZES'],
+                       strides=CONFIG['STRIDES'],
+                       offset=CONFIG['OFFSET'])
 DEFAULT_BOXES = BOXES_GENERATOR.generate_anchors()
 
-LOSS_FN = YoloLoss(num_classes=CLASSES, overlap_thresh=OVERLAP_THRESH,
-                   features=FEATURE_MAPS, anchors=np.array(BOX_SIZES),
-                   default_boxes=DEFAULT_BOXES, background_label=BACKGROUND_LABEL,
-                   from_logits=False if MODEL_FORMAT == "inference" else True,
-                   image_size=IMAGE_SIZE,
+LOSS_FN = YoloLoss(num_classes=CONFIG['CLASSES'],
+                   overlap_thresh=CONFIG['OVERLAP_THRESH'],
+                   features=CONFIG['FEATURE_MAPS'],
+                   anchors=np.array(CONFIG['BOX_SIZES']),
+                   default_boxes=DEFAULT_BOXES, 
+                   background_label=CONFIG['BACKGROUND_LABEL'],
+                   from_logits=False if CONFIG['MODEL_FORMAT'] == "inference" else True,
+                   image_size=CONFIG['IMAGE_SIZE'],
                    yolo_match=True,
                    semantic_instance=True)
 
-DECODER = Decoder(CLASSES,
-                  background_label=BACKGROUND_LABEL,
+DECODER = Decoder(CONFIG['CLASSES'],
+                  background_label=CONFIG['BACKGROUND_LABEL'],
                   top_k=50,
-                  conf_thresh=CONF_THRESH,
-                  nms_thresh=NMS_THRESH,
+                  conf_thresh=CONFIG['CONF_THRESH'],
+                  nms_thresh=CONFIG['NMS_THRESH'],
                   semantic_instance=True,
                   max_bb=50,
                   max_bb_per_layer=50)

@@ -5,7 +5,7 @@ import tensorflow as tf
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from armbench_segmentation import CACHE_DICTS
-from armbench_segmentation.preprocessing import MODEL_FORMAT, IMAGE_SIZE, SMALL_BBS_TH
+from config_utils import CONFIG
 from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
 from armbench_segmentation.utils.ioa_utils import get_ioa_array
 from armbench_segmentation.yolo_helpers.yolo_utils import LOSS_FN
@@ -21,9 +21,9 @@ def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor,
     res = CACHE_DICTS['loss'].get(str(obj_true) + str(od_pred) + str(mask_true) + str(instance_seg))
     if res is not None:
         return res
-    decoded = False if MODEL_FORMAT != "inference" else True
+    decoded = False if CONFIG["MODEL_FORMAT"] != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(od_pred, decoded=decoded,
-                                                                 image_size=IMAGE_SIZE)  # add batch
+                                                                 image_size=CONFIG["IMAGE_SIZE"])  # add batch
     loss_l, loss_c, loss_o, loss_m = LOSS_FN(y_true=obj_true, y_pred=(loc_list_reshaped, class_list_reshaped),
                                              instance_seg=instance_seg, instance_true=mask_true)
     CACHE_DICTS['loss'] = {
@@ -104,7 +104,7 @@ def metric_small_bb_in_under_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask_
         new_gt_objects = remove_label_from_bbs(bb_gt_object, "Tote", "gt")
         new_bb_array = [new_gt_objects[i] for i in relevant_gts]
         for j in range(len(new_bb_array)):
-            if new_bb_array[j].width * new_bb_array[j].height < SMALL_BBS_TH:
+            if new_bb_array[j].width * new_bb_array[j].height < CONFIG["SMALL_BBS_TH"]:
                 has_small_bbs[i] = 1.
     return tf.convert_to_tensor(has_small_bbs)
 

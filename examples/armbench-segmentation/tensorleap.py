@@ -14,9 +14,9 @@ from code_loader.contract.enums import (
 from code_loader.contract.datasetclasses import PreprocessResponse
 from pycocotools.coco import COCO
 
+from armbench_segmentation.config_utils import CONFIG
 from armbench_segmentation.gcs_utils import _download
-from armbench_segmentation.preprocessing import BACKGROUND_LABEL, CATEGORIES, IMAGE_SIZE, SMALL_BBS_TH, DIR, IMG_FOLDER, \
-    LOAD_UNION_CATEGORIES_IMAGES, load_set, TRAIN_SIZE, VAL_SIZE, UL_SIZE, CLASSES, MAX_BB_PER_IMAGE
+from armbench_segmentation.preprocessing import load_set
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
     count_obj_bbox_occlusions, extract_and_cache_bboxes
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
@@ -29,36 +29,37 @@ from armbench_segmentation.visualizers.visualizers_getters import mask_visualize
 
 
 # ----------------------------------------------------data processing--------------------------------------------------
-def subset_images():
-    ann_file = os.path.join(DIR, IMG_FOLDER, "train.json")
+def subset_images() -> List[PreprocessResponse]:
+    ann_file = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "train.json")
     fpath = _download(ann_file)
     # initialize COCO api for instance annotations
     train = COCO(fpath)
-    x_train_raw = load_set(coco=train, load_union=LOAD_UNION_CATEGORIES_IMAGES)
+    x_train_raw = load_set(coco=train, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
 
-    ann_file = os.path.join(DIR, IMG_FOLDER, "test.json")
+    ann_file = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "test.json")
     fpath = _download(ann_file)
     val = COCO(fpath)
-    x_val_raw = load_set(coco=val, load_union=LOAD_UNION_CATEGORIES_IMAGES)
+    x_val_raw = load_set(coco=val, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
 
-    train_size = min(len(x_train_raw), TRAIN_SIZE)
-    val_size = min(len(x_val_raw), VAL_SIZE)
+    train_size = min(len(x_train_raw), CONFIG['TRAIN_SIZE'])
+    val_size = min(len(x_val_raw), CONFIG['VAL_SIZE'])
     np.random.seed(0)
     train_idx, val_idx = np.random.choice(len(x_train_raw), train_size), np.random.choice(len(x_val_raw), val_size)
-    return [PreprocessResponse(length=train_size, data={'cocofile': train,
+    training_subset = PreprocessResponse(length=train_size, data={'cocofile': train,
                                                         'samples': np.take(x_train_raw, train_idx),
-                                                        'subdir': 'train'}),
-            PreprocessResponse(length=val_size, data={'cocofile': val,
+                                                        'subdir': 'train'})
+    validation_subset = PreprocessResponse(length=val_size, data={'cocofile': val,
                                                       'samples': np.take(x_val_raw, val_idx),
-                                                      'subdir': 'test'})]
+                                                      'subdir': 'test'})
+    return [training_subset, validation_subset]
 
 
 def unlabeled_preprocessing_func() -> PreprocessResponse:
-    annFile = os.path.join(DIR, IMG_FOLDER, "val.json")
+    annFile = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "val.json")
     fpath = _download(annFile)
     val = COCO(fpath)
-    x_val_raw = load_set(coco=val, load_union=LOAD_UNION_CATEGORIES_IMAGES)
-    val_size = min(len(x_val_raw), UL_SIZE)
+    x_val_raw = load_set(coco=val, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
+    val_size = min(len(x_val_raw), CONFIG['UL_SIZE'])
     np.random.seed(0)
     val_idx = np.random.choice(len(x_val_raw), val_size)
     return PreprocessResponse(length=val_size, data={'cocofile': val,
@@ -72,10 +73,10 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     """
     data = data.data
     x = data['samples'][idx]
-    filepath = f"{DIR}/{IMG_FOLDER}/images/{x['file_name']}"
+    filepath = f"{CONFIG['DIR']}/{CONFIG['IMG_FOLDER']}/images/{x['file_name']}"
     fpath = _download(filepath)
     # rescale
-    image = np.array(Image.open(fpath).resize((IMAGE_SIZE[0], IMAGE_SIZE[1]), Image.BILINEAR)) / 255.
+    image = np.array(Image.open(fpath).resize((CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]), Image.BILINEAR)) / 255.
     return image
 
 
@@ -92,8 +93,8 @@ def get_masks(idx: int, data: PreprocessResponse) -> np.ndarray:
     MASK_SIZE = (160, 160)
     coco = data['cocofile']
     anns = get_annotation_coco(idx, data)
-    masks = np.zeros([MAX_BB_PER_IMAGE, *MASK_SIZE], dtype=np.uint8)
-    for i in range(min(len(anns), MAX_BB_PER_IMAGE)):
+    masks = np.zeros([CONFIG['MAX_BB_PER_IMAGE'], *MASK_SIZE], dtype=np.uint8)
+    for i in range(min(len(anns), CONFIG['MAX_BB_PER_IMAGE'])):
         ann = anns[i]
         mask = coco.annToMask(ann)
         mask = np.array(Image.fromarray(mask).resize((MASK_SIZE[0], MASK_SIZE[1]), Image.NEAREST))
@@ -119,8 +120,8 @@ def get_cat_instances_seg_lst(idx: int, data: PreprocessResponse, cat: str) -> U
         return None
     if masks is None:
         return None
-    if masks[0, ...].shape != IMAGE_SIZE:
-        masks = tf.image.resize(masks[..., None], IMAGE_SIZE, tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
+    if masks[0, ...].shape != CONFIG['IMAGE_SIZE']:
+        masks = tf.image.resize(masks[..., None], CONFIG['IMAGE_SIZE'], tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
         masks = masks.numpy()
     instances = []
     for mask in masks:
@@ -154,40 +155,40 @@ def get_original_height(index: int, subset: PreprocessResponse) -> int:
 
 def bbox_num(index: int, subset: PreprocessResponse) -> int:
     bbs = get_bbs(index, subset)
-    number_of_bb = np.count_nonzero(bbs[..., -1] != BACKGROUND_LABEL)
+    number_of_bb = np.count_nonzero(bbs[..., -1] != CONFIG['BACKGROUND_LABEL'])
     return number_of_bb
 
 
 def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)  # x,y,w,h
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     areas = valid_bbs[:, 2] * valid_bbs[:, 3]
     return areas.mean()
 
 
 def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
     return aspect_ratios.mean()
 
 
 def instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     return float(valid_bbs.shape[0])
 
 
 def object_instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
-    label = CATEGORIES.index('Object')
+    label = CONFIG['CATEGORIES'].index('Object')
     valid_bbs = bbs[bbs[..., -1] == label]
     return float(valid_bbs.shape[0])
 
 
 def tote_instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
-    label = CATEGORIES.index('Tote')
+    label = CONFIG['CATEGORIES'].index('Tote')
     valid_bbs = bbs[bbs[..., -1] == label]
     return float(valid_bbs.shape[0])
 
@@ -195,7 +196,7 @@ def tote_instances_num(index: int, subset: PreprocessResponse) -> float:
 def avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
     mask = get_masks(idx, data)
     bboxs = get_bbs(idx, data)
-    valid_masks = mask[bboxs[..., -1] != BACKGROUND_LABEL]
+    valid_masks = mask[bboxs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     if valid_masks.size == 0:
         return 0.
     res = np.sum(valid_masks, axis=(1, 2))
@@ -206,7 +207,7 @@ def avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
 def get_tote_instances_masks(idx: int, data: PreprocessResponse) -> Union[float, None]:
     mask = get_masks(idx, data)
     bboxs = get_bbs(idx, data)
-    label = CATEGORIES.index('Tote')
+    label = CONFIG['CATEGORIES'].index('Tote')
     valid_masks = mask[bboxs[..., -1] == label]
     if valid_masks.size == 0:
         return None
@@ -263,7 +264,7 @@ def get_object_instances_std(idx: int, data: PreprocessResponse) -> float:
 def get_object_instances_masks(idx: int, data: PreprocessResponse) -> Union[np.ndarray, None]:
     mask = get_masks(idx, data)
     bboxs = get_bbs(idx, data)
-    label = CATEGORIES.index('Object')
+    label = CONFIG['CATEGORIES'].index('Object')
     valid_masks = mask[bboxs[..., -1] == label]
     if valid_masks.size == 0:
         return None
@@ -292,7 +293,7 @@ def object_std_instance_percent(idx: int, data: PreprocessResponse) -> float:
 def background_percent(idx: int, data: PreprocessResponse) -> float:
     masks = get_masks(idx, data)
     bboxs = get_bbs(idx, data)
-    valid_masks = masks[bboxs[..., -1] != BACKGROUND_LABEL]
+    valid_masks = masks[bboxs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     if valid_masks.size == 0:
         return 1.0
     res = np.sum(valid_masks, axis=0)
@@ -321,7 +322,7 @@ def obj_mask_occlusions_count(idx: int, data: PreprocessResponse) -> int:
 
 def duplicate_bb(index: int, subset: PreprocessResponse):
     bbs_gt = get_bbs(index, subset)
-    real_gt = bbs_gt[bbs_gt[..., 4] != BACKGROUND_LABEL]
+    real_gt = bbs_gt[bbs_gt[..., 4] != CONFIG['BACKGROUND_LABEL']]
     return int(real_gt.shape[0] != np.unique(real_gt, axis=0).shape[0])
 
 
@@ -329,7 +330,7 @@ def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     bboxes = get_bbs(idx, data)
     obj_boxes = bboxes[bboxes[..., -1] == 0]
     areas = obj_boxes[..., 2] * obj_boxes[..., 3]
-    return float(len(areas[areas < SMALL_BBS_TH]))
+    return float(len(areas[areas < CONFIG['SMALL_BBS_TH']]))
 
 
 # ---------------------------------------------------------binding------------------------------------------------------
@@ -344,7 +345,7 @@ leap_binder.set_ground_truth(get_masks, 'masks')
 # set prediction (object)
 leap_binder.add_prediction('object detection',
                            ["x", "y", "w", "h", "obj"] +
-                           [f"class_{i}" for i in range(CLASSES)] +
+                           [f"class_{i}" for i in range(CONFIG['CLASSES'])] +
                            [f"mask_coeff_{i}" for i in range(32)])
 
 # set prediction (segmentation)

@@ -9,8 +9,7 @@ from code_loader.helpers.detection.yolo.utils import reshape_output_list
 from numpy._typing import NDArray
 
 from armbench_segmentation import CACHE_DICTS
-from armbench_segmentation.preprocessing import BATCH_SIZE, CATEGORIES, MODEL_FORMAT, BACKGROUND_LABEL, IMAGE_SIZE, \
-    MAX_INSTANCES_PER_CLASS, INSTANCES, MAX_BB_PER_IMAGE
+from armbench_segmentation.config_utils import CONFIG
 from armbench_segmentation.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 
@@ -106,7 +105,7 @@ def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_thr
 
     """
     img_size = img.shape[0]
-    label = CATEGORIES.index('Object')
+    label = CONFIG["CATEGORIES"].index('Object')
     obj_bbox = bboxes[bboxes[..., -1] == label]
     if len(obj_bbox) == 0:
         return 0.0
@@ -135,8 +134,8 @@ def count_obj_masks_occlusions(masks: Union[np.ndarray, None], occlusion_thresho
     if masks is None:
         return 0
 
-    if masks[0, ...].shape != IMAGE_SIZE:
-        masks = tf.image.resize(masks[..., None], IMAGE_SIZE, tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
+    if masks[0, ...].shape != CONFIG["IMAGE_SIZE"]:
+        masks = tf.image.resize(masks[..., None], CONFIG["IMAGE_SIZE"], tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
         masks = masks.numpy()
 
     num_masks = len(masks)
@@ -214,7 +213,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
                 w, h = bb_array[i][2], bb_array[i][3]
             conf = 1 if is_gt else bb_array[i][0]
             curr_bb = BoundingBox(x=x, y=y, width=w, height=h, confidence=conf,
-                                  label=CATEGORIES[int(bb_array[i][min(5, len(bb_array[i]) - 1)])])
+                                  label=CONFIG["CATEGORIES"][int(bb_array[i][min(5, len(bb_array[i]) - 1)])])
             if masks is not None:
                 if is_gt:
                     fixed_mask = out_masks[..., i]
@@ -233,25 +232,25 @@ def get_mask_list(data, masks, is_gt):
     if res is not None:
         return res
 
-    is_inference = MODEL_FORMAT == "inference"
+    is_inference = CONFIG["MODEL_FORMAT"] == "inference"
     if is_gt:
-        bb_object, mask_list = bb_array_to_object(data, iscornercoded=False, bg_label=BACKGROUND_LABEL,
+        bb_object, mask_list = bb_array_to_object(data, iscornercoded=False, bg_label=CONFIG["BACKGROUND_LABEL"],
                                                   is_gt=True,
                                                   masks=masks)
     else:
         from_logits = not is_inference
         decoded = is_inference
         class_list_reshaped, loc_list_reshaped = reshape_output_list(
-            np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=IMAGE_SIZE)
+            np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=CONFIG["IMAGE_SIZE"])
         outputs = DECODER(loc_list_reshaped,
                           class_list_reshaped,
                           DEFAULT_BOXES,
                           from_logits=from_logits,
                           decoded=decoded,
                           )
-        bb_object, mask_list = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL,
+        bb_object, mask_list = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=CONFIG["BACKGROUND_LABEL"],
                                                   masks=masks)
-    if len(CACHE_DICTS['mask_list'].keys()) > 4 * BATCH_SIZE:
+    if len(CACHE_DICTS['mask_list'].keys()) > 4 * CONFIG["BATCH_SIZE"]:
         CACHE_DICTS['mask_list'] = {str(data) + str(masks) + str(is_gt): (bb_object, mask_list)}
     else:
         CACHE_DICTS['mask_list'][str(data) + str(masks) + str(is_gt)] = (bb_object, mask_list)
@@ -301,11 +300,11 @@ def get_argmax_map_and_separate_masks(image, bbs, masks):
         label = bb.label
         instance_number = cats_dict.get(label, 0)
         # update counter if reach max instances we treat the last objects as one
-        cats_dict[label] = instance_number + 1 if instance_number < MAX_INSTANCES_PER_CLASS else instance_number
-        argmax_map[resize_mask] = CATEGORIES.index(label) * MAX_INSTANCES_PER_CLASS + cats_dict[label]  # curr_idx
+        cats_dict[label] = instance_number + 1 if instance_number < CONFIG["MAX_INSTANCES_PER_CLASS"] else instance_number
+        argmax_map[resize_mask] = CONFIG["CATEGORIES"].index(label) * CONFIG["MAX_INSTANCES_PER_CLASS"] + cats_dict[label]  # curr_idx
         if bb.label == 'Object':
             separate_masks.append(resize_mask)
-    argmax_map[argmax_map == 0] = len(INSTANCES) + 1
+    argmax_map[argmax_map == 0] = len(CONFIG['INSTANCES']) + 1
     argmax_map -= 1
     return {"argmax_map": argmax_map, "separate_masks": separate_masks}
 
@@ -318,8 +317,8 @@ def extract_and_cache_bboxes(idx: int, data: Dict):
     coco = data['cocofile']
     ann_ids = coco.getAnnIds(imgIds=x['id'])
     anns = coco.loadAnns(ann_ids)
-    bboxes = np.zeros([MAX_BB_PER_IMAGE, 5])
-    max_anns = min(MAX_BB_PER_IMAGE, len(anns))
+    bboxes = np.zeros([CONFIG['MAX_BB_PER_IMAGE'], 5])
+    max_anns = min(CONFIG['MAX_BB_PER_IMAGE'], len(anns))
     for i in range(max_anns):
         ann = anns[i]
         img_size = (x['height'], x['width'])
@@ -328,8 +327,8 @@ def extract_and_cache_bboxes(idx: int, data: Dict):
         bbox /= np.array((img_size[1], img_size[0], img_size[1], img_size[0]))
         bboxes[i, :4] = bbox
         bboxes[i, 4] = class_id
-    bboxes[max_anns:, 4] = BACKGROUND_LABEL
-    if len(CACHE_DICTS['bbs'].keys()) > BATCH_SIZE:
+    bboxes[max_anns:, 4] = CONFIG['BACKGROUND_LABEL']
+    if len(CACHE_DICTS['bbs'].keys()) > CONFIG['BATCH_SIZE']:
         CACHE_DICTS['bbs'] = {str(idx) + data['subdir']: bboxes}
     else:
         CACHE_DICTS['bbs'][str(idx) + data['subdir']] = bboxes

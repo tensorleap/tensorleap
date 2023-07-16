@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from code_loader.contract.visualizer_classes import LeapImageWithBBox, LeapImageMask
 
-from armbench_segmentation.preprocessing import INSTANCES
+from armbench_segmentation.config_utils import CONFIG
 from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs, \
     get_argmax_map_and_separate_masks
 from armbench_segmentation.utils.ioa_utils import get_ioa_array
@@ -50,7 +50,7 @@ def get_mask_visualizer(image, bbs, masks):
 def get_mask_visualizer_fixed_instances(image, bbs, masks):
     argmax_map, separate_masks = get_argmax_map_and_separate_masks(image, bbs, masks).values()
     return LeapImageMask(mask=argmax_map.astype(np.uint8), image=image.astype(np.float32),
-                         labels=INSTANCES + ["background"]), separate_masks
+                         labels=CONFIG['INSTANCES'] + ["background"]), separate_masks
 
 
 def under_segmented_bb_visualizer(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):  # bb_visualizer + gt_visualizer
