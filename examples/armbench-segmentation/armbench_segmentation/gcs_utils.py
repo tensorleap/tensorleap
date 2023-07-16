@@ -8,7 +8,7 @@ from google.cloud import storage
 from google.cloud.storage import Bucket
 from google.oauth2 import service_account
 
-from armbench_segmentation.config_utils import CONFIG
+from armbench_segmentation.config import CONFIG
 
 
 @lru_cache()

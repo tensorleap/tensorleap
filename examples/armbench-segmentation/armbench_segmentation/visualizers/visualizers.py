@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from code_loader.contract.visualizer_classes import LeapImageWithBBox, LeapImageMask
 
-from armbench_segmentation.config_utils import CONFIG
+from armbench_segmentation.config import CONFIG
 from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs, \
     get_argmax_map_and_separate_masks
 from armbench_segmentation.utils.ioa_utils import get_ioa_array

@@ -1,7 +1,7 @@
 import numpy as np
 
 from armbench_segmentation import CACHE_DICTS
-from armbench_segmentation.config_utils import CONFIG
+from armbench_segmentation.config import CONFIG
 from armbench_segmentation.visualizers.visualizers_getters import multiple_mask_pred, multiple_mask_gt
 
 

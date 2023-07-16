@@ -9,7 +9,7 @@ from code_loader.helpers.detection.yolo.utils import reshape_output_list
 from numpy._typing import NDArray
 
 from armbench_segmentation import CACHE_DICTS
-from armbench_segmentation.config_utils import CONFIG
+from armbench_segmentation.config import CONFIG
 from armbench_segmentation.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 

@@ -5,7 +5,7 @@ import tensorflow as tf
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from armbench_segmentation import CACHE_DICTS
-from config_utils import CONFIG
+from config import CONFIG
 from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
 from armbench_segmentation.utils.ioa_utils import get_ioa_array
 from armbench_segmentation.yolo_helpers.yolo_utils import LOSS_FN
