@@ -16,7 +16,6 @@ from cifar10.encoders import input_encoder
 from keras.datasets import cifar10
 
 
-
 # Preprocess Function
 def preprocess_func_leap() -> List[PreprocessResponse]:
     train_X, val_X, train_Y, val_Y =preprocess_func()
