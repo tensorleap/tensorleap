@@ -6,7 +6,7 @@ import numpy as np
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket
-from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT
+from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT, SEED
 
 
 class Cityscapes:
@@ -81,7 +81,7 @@ class Cityscapes:
 
 
 def get_cityscapes_data() -> List[PreprocessResponse]:
-    np.random.seed(42)
+    np.random.seed(SEED)
     bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
     dataset_path = Path('Cityscapes')
     responses = []

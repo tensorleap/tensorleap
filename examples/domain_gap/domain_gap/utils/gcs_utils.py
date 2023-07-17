@@ -8,6 +8,7 @@ from google.oauth2 import service_account
 
 from domain_gap.utils.configs import BUCKET_NAME
 
+
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
     auth_secret_string = os.environ['AUTH_SECRET']

@@ -6,10 +6,10 @@ BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 
 # --------------- Data --------------------
+SEED = 42
 NUM_CLASSES = 19
 IMAGE_SIZE = (2048, 1024)  # TODO check all occurences and fix
 TRAIN_SIZE, VAL_SIZE = 400, 90
-subset_sizes = [TRAIN_SIZE, VAL_SIZE]
 TRAIN_PERCENT = 0.8
 
 SUPERCATEGORY_GROUNDTRUTH = False
