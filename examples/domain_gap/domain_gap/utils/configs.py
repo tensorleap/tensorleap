@@ -1,20 +1,24 @@
 import numpy as np
 from domain_gap.data.cs_data import Cityscapes
 
+# --------------- GCS --------------------
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 
+# --------------- Data --------------------
 NUM_CLASSES = 19
-image_size = (2048, 1024)  # TODO check all occurences and fix
-train_size, val_size = 400, 90
-subset_sizes = [train_size, val_size]
+IMAGE_SIZE = (2048, 1024)  # TODO check all occurences and fix
+TRAIN_SIZE, VAL_SIZE = 400, 90
+subset_sizes = [TRAIN_SIZE, VAL_SIZE]
 TRAIN_PERCENT = 0.8
 
 SUPERCATEGORY_GROUNDTRUTH = False
-categories = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < NUM_CLASSES]
 SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
                                    Cityscapes.classes[i].train_id < NUM_CLASSES])
+CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < NUM_CLASSES]
 LOAD_UNION_CATEGORIES_IMAGES = False
+
+# --------------- Augmentations --------------------
 APPLY_AUGMENTATION = True
 IMAGE_MEAN = np.array([0.485, 0.456, 0.406])
 IMAGE_STD = np.array([0.229, 0.224, 0.225])
