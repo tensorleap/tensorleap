@@ -1,5 +1,4 @@
 import numpy as np
-from domain_gap.data.cs_data import Cityscapes
 
 # --------------- GCS --------------------
 BUCKET_NAME = 'datasets-reteai'
@@ -13,9 +12,7 @@ TRAIN_SIZE, VAL_SIZE = 400, 90
 TRAIN_PERCENT = 0.8
 
 SUPERCATEGORY_GROUNDTRUTH = False
-SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
-                                   Cityscapes.classes[i].train_id < NUM_CLASSES])
-CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < NUM_CLASSES]
+
 LOAD_UNION_CATEGORIES_IMAGES = False
 
 # --------------- Augmentations --------------------

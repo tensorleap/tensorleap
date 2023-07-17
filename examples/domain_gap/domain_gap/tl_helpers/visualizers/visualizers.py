@@ -5,7 +5,7 @@ from code_loader.contract.visualizer_classes import LeapImage, LeapImageMask
 
 from domain_gap.data.cs_data import Cityscapes
 from domain_gap.tl_helpers.visualizers.visualizers_utils import unnormalize_image, scalarMap
-from domain_gap.utils.configs import CATEGORIES
+from domain_gap.data.cs_data import CATEGORIES
 
 
 def image_visualizer(image: npt.NDArray[np.float32]) -> LeapImage:
