@@ -12,6 +12,7 @@ pycocotools = "^2.0.6"
 tqdm = "^4.65.0"
 google-cloud-storage = "^2.10.0"
 pyyaml = "^6.0"
+datasets = "^2.13.1"
 
 
 [build-system]
