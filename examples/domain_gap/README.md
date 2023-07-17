@@ -1,12 +1,12 @@
 # Domain Gap
 
-![Untitled](domain_gap/utils/images/domain_gap.png)
+![Untitled](domain_gap/images/domain_gap.png)
 
 **Domain adaptation** is a technique in deep learning that reduces the difference between two datasets so that a model trained on one dataset can perform well on the other dataset. This is often done by manually identifying and addressing the differences between the datasets, which can be a time-consuming and difficult task. Using **Tensorleap** we can automatically reduce domain gaps with minimal time and effort. This example project demonstrates how. 
 
 The model: which is a semantic segmentation model: [DeepLabV3Plus](https://github.com/VainF/DeepLabV3Plus-Pytorch) was imported into Tensorleap along with the two datasets: the source data (the dataset the model was trained on): Cityscapes dataset and the target dataset: KITTI dataset. 
 
-![Untitled](domain_gap/utils/images/cs_kitti_masks.png)
+![Untitled](domain_gap/images/cs_kitti_masks.png)
 
 This quick start guide will walk you through the steps to get started with this example repository project.
 
@@ -112,13 +112,13 @@ This file will execute several tests on [the tensorleap.py](http://tensorleap.py
 
 The latent space visualization of the datasets shows the domain gap between Cityscapes and KITTI. The size of the sample within the cluster reflects the loss, with a higher loss represented by a bigger radius. As expected, Cityscapes (the source dataset) samples have lower loss values than KITTI samples.
 
-![Untitled](domain_gap/utils/images/latent_space_before_norm.png)
+![Untitled](domain_gap/images/latent_space_before_norm.png)
 
 **Measuring Model Average Loss**
 
 We assess the average loss across datasets. Figure 3 shows the model’s average loss for Cityscapes (left) and KITTI (right).
 
-![Untitled](domain_gap/utils/images/before_norm_plot.png)
+![Untitled](domain_gap/images/before_norm_plot.png)
 
 We used multiple Tensorleap analysis tools to identify the root cause of the domain gap. We found a possible root cause: which is a color mismatch across the entire dataset.
 
@@ -126,11 +126,11 @@ We used multiple Tensorleap analysis tools to identify the root cause of the dom
 
 We analysed the distributions of RGB standard deviation across both datasets and identified color variations. The figure below shows the Kitti samples with higher deviations in red.
 
-![Untitled](domain_gap/utils/images/std_diff.png)
+![Untitled](domain_gap/images/std_diff.png)
 
 By examining single images, we can immediately view apparent differences between the images in datasets. The Cityscapes, shown at the bottom, has a greenish hue compared to the KITTI sample. 
 
-![Untitled](domain_gap/utils/images/single_samples_vis.png)
+![Untitled](domain_gap/images/single_samples_vis.png)
 
 A straightforward solution will be to normalize the RGB channels of both datasets. This will make the distributions of the two datasets more similar.
 
@@ -138,9 +138,9 @@ A straightforward solution will be to normalize the RGB channels of both dataset
 
 This modification resulted in a large reduction in the model’s loss on the KITTI dataset.
 
-![Untitled](domain_gap/utils/images/latent_space_after_norm.png)
+![Untitled](domain_gap/images/latent_space_after_norm.png)
 
 By comparing the loss of the model before and after color normalization, we observe that the model loss decreased by 23%.
 
-![Untitled](domain_gap/utils/images/loss_diff_after_norm.png)
+![Untitled](domain_gap/images/loss_diff_after_norm.png)
 
