@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "cityscapes"
+version = "0.1.0"
+description = ""
+authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+code-loader = "0.2.83"
+pycocotools = "^2.0.6"
+tqdm = "^4.65.0"
+google-cloud-storage = "^2.10.0"
+pyyaml = "^6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
