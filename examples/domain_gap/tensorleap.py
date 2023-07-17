@@ -1,5 +1,3 @@
-from typing import  Dict
-import json
 from code_loader import leap_binder
 from code_loader.contract.enums import DatasetMetadataType
 from code_loader.contract.datasetclasses import PreprocessResponse
@@ -9,6 +7,7 @@ from code_loader.contract.enums import (
     LeapDataType
 )
 
+from domain_gap.data.cs_data import Cityscapes, CATEGORIES
 from domain_gap.utils.configs import *
 from domain_gap.utils.gcs_utils import _download
 from domain_gap.tl_helpers.preprocess import subset_images

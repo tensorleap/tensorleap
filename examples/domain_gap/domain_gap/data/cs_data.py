@@ -6,7 +6,7 @@ import numpy as np
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket
-from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT, SEED
+from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT, SEED, NUM_CLASSES
 
 
 class Cityscapes:
@@ -79,6 +79,10 @@ class Cityscapes:
         target[target == 255] = 19
         return cls.train_id_to_color[target]
 
+
+SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
+                                   Cityscapes.classes[i].train_id < NUM_CLASSES])
+CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < NUM_CLASSES]
 
 def get_cityscapes_data() -> List[PreprocessResponse]:
     np.random.seed(SEED)
