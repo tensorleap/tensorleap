@@ -6,8 +6,7 @@ import json
 from google.oauth2 import service_account
 from typing import Optional
 
-from cityscapes.preprocessing import BUCKET_NAME
-
+BUCKET_NAME = 'datasets-reteai'
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:

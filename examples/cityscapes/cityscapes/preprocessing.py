@@ -113,6 +113,22 @@ DEFAULT_TEMP = 19.5
 DEFAULT_SPEED = 10.81
 DEFAULT_YAW_RATE = 0.171
 
+BACKGROUND_LABEL = 19
+MODEL_FORMAT = "inference"
+MAX_BB_PER_IMAGE = 20
+CLASSES = 35
+FEATURE_MAPS = ((80, 80), (40, 40), (20, 20))
+BOX_SIZES = (((10, 13), (16, 30), (33, 23)),
+             ((30, 61), (62, 45), (59, 119)),
+             ((116, 90), (156, 198), (373, 326)))
+OFFSET = 0
+STRIDES = (8, 16, 32)
+CONF_THRESH = 0.35
+NMS_THRESH = 0.5
+OVERLAP_THRESH = 1 / 16
+SMALL_BBS_TH = 0.0003  # Equivelent to ~120 pixels of area at most
+LOAD_UNION_CATEGORIES_IMAGES = True
+
 
 
 def load_cityscapes_data():
