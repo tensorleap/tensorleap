@@ -29,6 +29,9 @@ from armbench_segmentation.visualizers.visualizers_getters import mask_visualize
 
 # ----------------------------------------------------data processing--------------------------------------------------
 def subset_images() -> List[PreprocessResponse]:
+    """
+    This function returns the training and validation datasets in the format expected by tensorleap
+    """
     ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "train.json")
     # initialize COCO api for instance annotations
     train = COCO(ann_filepath)
@@ -43,15 +46,18 @@ def subset_images() -> List[PreprocessResponse]:
     np.random.seed(0)
     train_idx, val_idx = np.random.choice(len(x_train_raw), train_size), np.random.choice(len(x_val_raw), val_size)
     training_subset = PreprocessResponse(length=train_size, data={'cocofile': train,
-                                                        'samples': np.take(x_train_raw, train_idx),
-                                                        'subdir': 'train'})
+                                                                  'samples': np.take(x_train_raw, train_idx),
+                                                                  'subdir': 'train'})
     validation_subset = PreprocessResponse(length=val_size, data={'cocofile': val,
-                                                      'samples': np.take(x_val_raw, val_idx),
-                                                      'subdir': 'test'})
+                                                                  'samples': np.take(x_val_raw, val_idx),
+                                                                  'subdir': 'test'})
     return [training_subset, validation_subset]
 
 
 def unlabeled_preprocessing_func() -> PreprocessResponse:
+    """
+    This function returns the unlabeled data split in the format expected by tensorleap
+    """
     ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "val.json")
     val = COCO(ann_filepath)
     x_val_raw = load_set(coco=val, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
@@ -71,7 +77,8 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     x = data['samples'][idx]
     filepath = f"{CONFIG['DIR']}/{CONFIG['IMG_FOLDER']}/images/{x['file_name']}"
     # rescale
-    image = np.array(Image.open(filepath).resize((CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]), Image.BILINEAR)) / 255.
+    image = np.array(
+        Image.open(filepath).resize((CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]), Image.BILINEAR)) / 255.
     return image
 
 

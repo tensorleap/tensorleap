@@ -7,7 +7,6 @@ include:
   - armbench_segmentation/visualizers/visualizers.py
   - armbench_segmentation/visualizers/visualizers_getters.py
   - armbench_segmentation/metadata.py
-  - armbench_segmentation/gcs_utils.py
   - armbench_segmentation/metrics.py
   - armbench_segmentation/utils/general_utils.py
   - armbench_segmentation/utils/ioa_utils.py
