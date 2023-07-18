@@ -1,6 +1,8 @@
+from typing import List
 import matplotlib.pyplot as plt
 from tensorleap import *
 
+from domain_gap.tl_helpers.utils import mean_iou
 
 def iter_all_samples(data: List[PreprocessResponse]):
     err_i = 0
@@ -36,18 +38,22 @@ if __name__ == "__main__":
     i, train = 0, data_subsets[0]
     img = input_image(i, train)
     mask = ground_truth_mask(i, train)
+
+
     plot_mask(img, mask)     # plot the GT
     iter_all_samples(data_subsets)
 
-    MODEL_PATH = None   # TODO: FILL here your path model
+    MODEL_PATH = "/Users/daniellebenbashat/tensorleap/assets/domain_gap/norm.h5" #None   # TODO: FILL here your path model
     # Infer
     if MODEL_PATH is not None:
         model = tf.keras.models.load_model(MODEL_PATH)
         x = np.expand_dims(img, axis=0)
         pred = model(x)[0, ...]     # infer
+        mean_iou(mask[np.newaxis, ...], pred)
         plot_mask(img, pred)        # plot the model's prediction
         vis_obj = loss_visualizer(img, mask, pred)       # run the custom visualizer
         plt.imshow(vis_obj.data)    # plot the custom heatmap
+
 
 
 
