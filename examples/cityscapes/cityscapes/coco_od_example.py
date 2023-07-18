@@ -902,11 +902,11 @@ ALLLABELS = ALLCATS + ALLLOCS
 
 leap_binder.set_metadata(number_of_bb, DatasetMetadataType.int, 'bb_count')
 leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, 'avg_bb_aspect_ratio')
-#TODO:
-#-------------------------------------------
 leap_binder.set_metadata(avg_bb_area_metadata, DatasetMetadataType.float, 'avg_bb_area')
 for i in range(4):
     leap_binder.set_metadata(is_class_exist_gen(i), DatasetMetadataType.float, f'does_{i}_exist')
+# TODO:
+# -------------------------------------------
 leap_binder.add_custom_loss(od_loss, 'od_loss')
 #-----------------------------------
 

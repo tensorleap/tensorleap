@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Callable
 
 import tensorflow as tf
 
@@ -12,6 +12,7 @@ from matplotlib import cm as cmx
 import matplotlib.pyplot as plt
 
 from cityscapes.gcs_utils import _download
+from cityscapes.metrics import regression_metric, classification_metric, object_metric
 from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, categories, Cityscapes, image_size, load_cityscapes_data, \
     BACKGROUND_LABEL
 from cityscapes.utils.general_utils import polygon_to_bbox
@@ -108,6 +109,21 @@ def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
     assert ((valid_bbs[:, 3] > 0).all())
     aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
     return aspect_ratios.mean()
+
+def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
+    bbs = ground_truth_bbox(index, subset)  # x,y,w,h
+    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    areas = valid_bbs[:, 2] * valid_bbs[:, 3]
+    return areas.mean()
+
+def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], float]:
+    def func(index: int, subset: PreprocessResponse):
+        bbs = ground_truth_bbox(index, subset)
+        is_i_exist = (bbs[..., -1] == class_id).any()
+        return float(is_i_exist)
+
+    func.__name__ = f'metadata_{class_id}_instances_count'
+    return func
 
 # ----------------------------------------------------------metadata----------------------------------------------------
 
@@ -285,14 +301,22 @@ leap_binder.set_metadata(metadata_gps_longtitude, DatasetMetadataType.float, 'gp
 leap_binder.set_metadata(metadata_outside_temperature, DatasetMetadataType.float, 'outside_temperature')
 leap_binder.set_metadata(metadata_speed, DatasetMetadataType.float, 'speed')
 leap_binder.set_metadata(metadata_yaw_rate, DatasetMetadataType.float, 'yaw_rate')
-#TODO: SEE IF HAVE MORE METADATA
 leap_binder.set_metadata(number_of_bb, DatasetMetadataType.int, 'bb_count')
 leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, 'avg_bb_aspect_ratio')
+leap_binder.set_metadata(avg_bb_area_metadata, DatasetMetadataType.float, 'avg_bb_area')
+#TODO: SEE IF NEEDED
+for i in range(4):
+    leap_binder.set_metadata(is_class_exist_gen(i), DatasetMetadataType.float, f'does_{i}_exist')
 #TODO: MORE METADATA FROM AMAZON
 
 #set visualizer
 leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)
 leap_binder.set_visualizer(bb_decoder, 'bb_decoder', LeapDataType.ImageWithBBox)
+
+# set custom metrics
+leap_binder.add_custom_metric(regression_metric, "Regression_metric")
+leap_binder.add_custom_metric(classification_metric, "Classification_metric")
+leap_binder.add_custom_metric(object_metric, "Objectness_metric")
 
 #TODO: custome loss
 #leap_binder.set_visualizer(loss_visualizer,'loss_visualizer', LeapDataType.Image)
