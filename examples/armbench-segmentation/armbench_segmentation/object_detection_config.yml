@@ -1,5 +1,25 @@
-BACKGROUND_LABEL: 2
+DIR: Amazon/armbench-segmentation-0.1/armbench-segmentation-0.1
+IMG_FOLDER: mix-object-tote
 BATCH_SIZE: 32
+TRAIN_SIZE: 1000
+UL_SIZE: 1000
+VAL_SIZE: 1000
+BACKGROUND_LABEL: 2
+
+BUCKET_NAME: datasets-reteai
+CATEGORIES:
+- Object
+- Tote
+CLASSES: 2
+CONF_THRESH: 0.35
+
+FEATURE_MAPS:
+- - 80
+  - 80
+- - 40
+  - 40
+- - 20
+  - 20
 BOX_SIZES:
 - - - 10
     - 13
@@ -19,22 +39,7 @@ BOX_SIZES:
     - 198
   - - 373
     - 326
-BUCKET_NAME: datasets-reteai
-CATEGORIES:
-- Object
-- Tote
-CLASSES: 2
-CONF_THRESH: 0.35
-DIR: Amazon/armbench-segmentation-0.1/armbench-segmentation-0.1
-FEATURE_MAPS:
-- - 80
-  - 80
-- - 40
-  - 40
-- - 20
-  - 20
 IMAGE_SIZE: (640, 640)
-IMG_FOLDER: mix-object-tote
 INSTANCES:
 - Object_1
 - Object_2
@@ -89,6 +94,3 @@ STRIDES:
 - 8
 - 16
 - 32
-TRAIN_SIZE: 1000
-UL_SIZE: 1000
-VAL_SIZE: 1000
