@@ -1,7 +1,5 @@
 from typing import List
-
 import numpy as np
-from code_loader.contract.visualizer_classes import LeapImageWithBBox
 
 from cityscapes.preprocessing import BACKGROUND_LABEL
 from cityscapes.utils.general_utils import bb_array_to_object
@@ -9,6 +7,7 @@ from cityscapes.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
+from code_loader.contract.visualizer_classes import LeapImageWithBBox
 
 def gt_bb_decoder(image, bb_gt) -> LeapImageWithBBox:
     bb_object: List[BoundingBox] = bb_array_to_object(bb_gt, iscornercoded=False, bg_label=BACKGROUND_LABEL,

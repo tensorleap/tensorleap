@@ -1,32 +1,21 @@
-from typing import List, Optional, Dict, Callable
-
-import tensorflow as tf
-
-
+from typing import List, Dict, Callable
 from PIL import Image
 import numpy as np
-import numpy.typing as npt
 import json
-from matplotlib import colors
-from matplotlib import cm as cmx
-import matplotlib.pyplot as plt
 
 from cityscapes.gcs_utils import _download
 from cityscapes.metrics import regression_metric, classification_metric, object_metric
-from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, CATEGORIES, Cityscapes, image_size, load_cityscapes_data, \
+from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, Cityscapes, image_size, load_cityscapes_data, \
     BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES
 from cityscapes.utils.general_utils import polygon_to_bbox
+from cityscapes.visualizers.visualizers import bb_decoder, gt_bb_decoder
 
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
-from code_loader.contract.visualizer_classes import LeapImage
 from code_loader.contract.enums import (
     DatasetMetadataType,
     LeapDataType
 )
-
-from cityscapes.visualizers.visualizers import bb_decoder, gt_bb_decoder
-
 
 # ----------------------------------------------------data processing--------------------------------------------------
 def load_cityscapes_data_leap() -> List[PreprocessResponse]:
@@ -271,7 +260,6 @@ leap_binder.set_visualizer(bb_decoder, 'bb_decoder', LeapDataType.ImageWithBBox)
 leap_binder.add_custom_metric(regression_metric, "Regression_metric")
 leap_binder.add_custom_metric(classification_metric, "Classification_metric")
 leap_binder.add_custom_metric(object_metric, "Objectness_metric")
-
 
 
 if __name__ == '__main__':

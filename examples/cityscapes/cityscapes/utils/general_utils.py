@@ -1,17 +1,13 @@
-
 from copy import deepcopy
-from typing import Union, Optional, List, Dict
-
+from typing import Union, List
+from numpy._typing import NDArray
 import numpy as np
 import tensorflow as tf
+
+from cityscapes.preprocessing import CATEGORIES
+
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
-from code_loader.helpers.detection.yolo.utils import reshape_output_list
-from numpy._typing import NDArray
-
-from cityscapes.preprocessing import BATCH_SIZE, CATEGORIES, MODEL_FORMAT, BACKGROUND_LABEL, image_size, \
-    MAX_INSTANCES_PER_CLASS, MAX_BB_PER_IMAGE
-from cityscapes.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 def polygon_to_bbox(polygon): #TODO: change description
     """

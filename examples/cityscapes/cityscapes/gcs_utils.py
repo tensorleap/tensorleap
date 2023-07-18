@@ -1,9 +1,9 @@
-from functools import lru_cache
 from google.cloud import storage
 from google.cloud.storage import Bucket
+from google.oauth2 import service_account
 import os
 import json
-from google.oauth2 import service_account
+from functools import lru_cache
 from typing import Optional
 
 #TODO: think on the bucket name
