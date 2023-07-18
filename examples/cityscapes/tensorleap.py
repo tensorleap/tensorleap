@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 
 from cityscapes.gcs_utils import _download
 from cityscapes.metrics import regression_metric, classification_metric, object_metric
-from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, categories, Cityscapes, image_size, load_cityscapes_data, \
-    BACKGROUND_LABEL
+from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, CATEGORIES, Cityscapes, image_size, load_cityscapes_data, \
+    BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES
 from cityscapes.utils.general_utils import polygon_to_bbox
 
 from code_loader import leap_binder
@@ -81,7 +81,7 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     for object in objects:
         b = np.zeros(5)
         class_label = object['label']
-        class_id = Cityscapes.get_class_id(class_label) #TODO: class label to class id
+        class_id = Cityscapes.get_class_id(class_label)
         bbox = polygon_to_bbox(object['polygon'])
         bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
         b[:4] = bbox
@@ -110,6 +110,13 @@ def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
     aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
     return aspect_ratios.mean()
 
+def instances_num(index: int, subset: PreprocessResponse) -> float:
+    bbs = ground_truth_bbox(index, subset)
+    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    return float(valid_bbs.shape[0])
+
+#TODO: maybe total number of bbox per label id
+
 def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
     bbs = ground_truth_bbox(index, subset)  # x,y,w,h
     valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
@@ -124,6 +131,12 @@ def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], flo
 
     func.__name__ = f'metadata_{class_id}_instances_count'
     return func
+
+def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
+    bboxes = ground_truth_bbox(idx, data)
+    obj_boxes = bboxes[bboxes[..., -1] == 0]
+    areas = obj_boxes[..., 2] * obj_boxes[..., 3]
+    return float(len(areas[areas < SMALL_BBS_TH]))
 
 # ----------------------------------------------------------metadata----------------------------------------------------
 
@@ -161,6 +174,14 @@ def metadata_speed(idx: int, data: PreprocessResponse) -> float:
 def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
     return get_metadata_json(idx, data)['yawRate']
 
+#TODO: for all
+def object_instances_num(index: int, subset: PreprocessResponse) -> float:
+    bbs = ground_truth_bbox(index, subset)
+    label = CATEGORIES.index('Object') ##TODO: for cityscapes
+    valid_bbs = bbs[bbs[..., -1] == label]
+    return float(valid_bbs.shape[0])
+
+
 #todo: THINK ON METADATA
 
 # def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
@@ -192,55 +213,7 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
 #     factor = stateless_random_uniform(shape=[], minval=-BRIGHT_LIM, maxval=BRIGHT_LIM, seed=(idx, idx+1))
 #     return aug_factor_or_zero(idx, data, factor)
 
-# def get_counts_of_instances_per_class(idx: int, data: PreprocessResponse, label_flag: str = 'all') -> int:
-#     data = data.data
-#     x = data['samples'][idx]
-#     all_labels = SUPERCATEGORY_CLASSES + categories
-#     vehicle_labels = ['car'] + SUPERCATEGORY_CLASSES
-#     catIds = [data['cocofile'].getCatIds(catNms=label)[0] for label in all_labels]  # keep same labels order
-#     annIds = data['cocofile'].getAnnIds(imgIds=x['id'], catIds=catIds)
-#     anns_list = data['cocofile'].loadAnns(annIds)
-#     if label_flag == 'all':
-#         return len(anns_list)   # all instances within labels
-#     cat_name_to_id = dict(zip(all_labels, catIds))  # map label name to its ID
-#     cat_id_counts = {cat_id: 0 for cat_id in catIds}    # counts dictionary
-#     for ann in anns_list:
-#         cat_id_counts[ann['category_id']] += 1
-#     if label_flag == 'vehicle':  # count super category vehicle
-#         vehicle_ids = [cat_name_to_id[cat_name] for cat_name in vehicle_labels]
-#         return np.sum([cat_id_counts[cat_id] for cat_id in vehicle_ids])
-#     cat_id = cat_name_to_id[label_flag]
-#     return cat_id_counts[cat_id]
-#
-#
-# def metadata_total_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='all')
-#
-#
-# def metadata_person_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='person')
-#
-#
-# def metadata_car_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='car')
-#
-#
-# def metadata_bus_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='bus')
-#
-#
-# def metadata_truck_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='truck')
-#
-#
-# def metadata_train_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='train')
-#
-#
-# def metadata_vehicle_instances_count(idx: int, data: PreprocessResponse) -> int:
-#     return get_counts_of_instances_per_class(idx, data, label_flag='vehicle')
-#
-#
+
 # def metadata_person_category_avg_size(idx: int, data: PreprocessResponse) -> float:
 #     percent_val = metadata_person_category_percent(idx, data)
 #     instances_cnt = metadata_person_instances_count(idx, data)
@@ -255,27 +228,6 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
 #         instances_cnt = metadata_car_instances_count(idx, data)
 #     return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
-#todo:
-#-------------------------------loss------------------------
-def unnormalize_image(image: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-    return image*IMAGE_STD + IMAGE_MEAN
-
-
-jet = plt.get_cmap('jet')
-cNorm = colors.Normalize(vmin=0, vmax=1)
-scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet)
-
-def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]):
-    image = unnormalize_image(image)
-    ls = tf.keras.losses.CategoricalCrossentropy(from_logits=True, reduction='none')
-    ls_image = ls(gt,prediction).numpy()
-    ls_image = ls_image.clip(0,np.percentile(ls_image,95))
-    ls_image /= ls_image.max()
-    heatmap = scalarMap.to_rgba(ls_image)[..., :-1]
-    # overlayed_image = ((heatmap * 0.4 + image * 0.6).clip(0,1)*255).astype(np.uint8)
-    overlayed_image = ((heatmap).clip(0,1)*255).astype(np.uint8)
-    return LeapImage(overlayed_image)
-
 # ---------------------------------------------------------binding------------------------------------------------------
 
 #preprocess function
@@ -289,7 +241,7 @@ leap_binder.set_ground_truth(ground_truth_bbox, 'bbox')
 #set prediction
 leap_binder.add_prediction('object detection',
                                ["x", "y", "w", "h", "obj"] +
-                                [cl for cl in categories])
+                                [cl for cl in CATEGORIES])
 
 #set meata_data
 leap_binder.set_metadata(metadata_filename, DatasetMetadataType.string, 'filename')
@@ -304,6 +256,8 @@ leap_binder.set_metadata(metadata_yaw_rate, DatasetMetadataType.float, 'yaw_rate
 leap_binder.set_metadata(number_of_bb, DatasetMetadataType.int, 'bb_count')
 leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, 'avg_bb_aspect_ratio')
 leap_binder.set_metadata(avg_bb_area_metadata, DatasetMetadataType.float, 'avg_bb_area')
+leap_binder.set_metadata(instances_num, DatasetMetadataType.float, "instances_number_metadata")
+leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small bbs number")
 #TODO: SEE IF NEEDED
 for i in range(4):
     leap_binder.set_metadata(is_class_exist_gen(i), DatasetMetadataType.float, f'does_{i}_exist')
@@ -317,10 +271,6 @@ leap_binder.set_visualizer(bb_decoder, 'bb_decoder', LeapDataType.ImageWithBBox)
 leap_binder.add_custom_metric(regression_metric, "Regression_metric")
 leap_binder.add_custom_metric(classification_metric, "Classification_metric")
 leap_binder.add_custom_metric(object_metric, "Objectness_metric")
-
-#TODO: custome loss
-#leap_binder.set_visualizer(loss_visualizer,'loss_visualizer', LeapDataType.Image)
-
 
 
 

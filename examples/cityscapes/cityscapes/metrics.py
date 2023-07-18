@@ -1,12 +1,10 @@
 from typing import Tuple, List, Union
 import tensorflow as tf
 
-from code_loader.helpers.detection.yolo.utils import reshape_output_list
-
 from cityscapes.preprocessing import MODEL_FORMAT, image_size
 from cityscapes.yolo_helpers.yolo_utils import LOSS_FN
 
-#TODO: over it
+from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor) -> Union[
     Tuple[List[tf.Tensor], List[tf.Tensor], List[tf.Tensor]],

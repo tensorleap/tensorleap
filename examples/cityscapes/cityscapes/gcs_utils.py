@@ -6,6 +6,7 @@ import json
 from google.oauth2 import service_account
 from typing import Optional
 
+#TODO: think on the bucket name
 BUCKET_NAME = 'datasets-reteai'
 
 @lru_cache()

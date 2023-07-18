@@ -1,10 +1,11 @@
 import numpy as np
-from code_loader.helpers.detection.yolo.loss import YoloLoss
-from code_loader.helpers.detection.yolo.grid import Grid
-from code_loader.helpers.detection.yolo.decoder import Decoder
 
 from cityscapes.preprocessing import CLASSES, FEATURE_MAPS, BOX_SIZES, OVERLAP_THRESH, \
     BACKGROUND_LABEL, MODEL_FORMAT, image_size, CONF_THRESH, NMS_THRESH, STRIDES, OFFSET
+
+from code_loader.helpers.detection.yolo.loss import YoloLoss
+from code_loader.helpers.detection.yolo.grid import Grid
+from code_loader.helpers.detection.yolo.decoder import Decoder
 
 #TODO: check about heat_maps and BACKGROUND_LABEL
 BOXES_GENERATOR = Grid(image_size=image_size, feature_maps=FEATURE_MAPS, box_sizes=BOX_SIZES,

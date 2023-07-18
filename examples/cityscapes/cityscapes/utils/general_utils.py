@@ -13,10 +13,6 @@ from cityscapes.preprocessing import BATCH_SIZE, CATEGORIES, MODEL_FORMAT, BACKG
     MAX_INSTANCES_PER_CLASS, MAX_BB_PER_IMAGE
 from cityscapes.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
-
-#todo
-#CATEGORIES??
-
 def polygon_to_bbox(polygon): #TODO: change description
     """
     Converts a polygon representation to a bounding box representation.
@@ -73,7 +69,7 @@ def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
 def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_threshold: float, calc_avg_flag: bool) -> \
         Union[float, int]:
     img_size = img.shape[0]
-    label = CATEGORIES.index('Object')
+    label = CATEGORIES.index('Object') #TODO: change
     obj_bbox = bboxes[bboxes[..., -1] == label]
     if len(obj_bbox) == 0:
         return 0.0
@@ -110,7 +106,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
                 w, h = bb_array[i][2], bb_array[i][3]
             conf = 1 if is_gt else bb_array[i][0]
             curr_bb = BoundingBox(x=x, y=y, width=w, height=h, confidence=conf,
-                                  label=CATEGORIES[int(bb_array[i][min(5, len(bb_array[i]) - 1)])])
+                                  label=CATEGORIES[int(bb_array[i][min(5, len(bb_array[i]) - 1)])]) #TODO: change maybe
 
             bb_list.append(curr_bb)
     return bb_list

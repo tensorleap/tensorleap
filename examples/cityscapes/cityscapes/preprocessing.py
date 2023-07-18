@@ -1,12 +1,9 @@
 import os
-from typing import List
 import numpy as np
 from collections import namedtuple
 from pathlib import Path
 
 from cityscapes.gcs_utils import _connect_to_gcs_and_return_bucket
-
-from code_loader.contract.datasetclasses import PreprocessResponse
 
 class Cityscapes:
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
@@ -89,7 +86,7 @@ class Cityscapes:
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 image_size = (2048, 1024) #TODO check all occurences and fix
-categories = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
+CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
 SUPERCATEGORY_GROUNDTRUTH = False
 SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
                                    Cityscapes.classes[i].train_id < 19])
