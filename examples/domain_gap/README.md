@@ -144,3 +144,9 @@ By comparing the loss of the model before and after color normalization, we obse
 
 ![Untitled](domain_gap/images/loss_diff_after_norm.png)
 
+
+<br>
+<br>
+
+_Our full 'Domain Gap' blog post can be found [here](https://tensorleap.ai/bridging-domain-gaps-an-adas-dataset-application/)_
+
