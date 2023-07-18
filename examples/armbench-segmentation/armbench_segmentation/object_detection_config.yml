@@ -1,4 +1,4 @@
-DIR: Amazon/armbench-segmentation-0.1/armbench-segmentation-0.1
+DIR: dataset/armbench-segmentation-0.1
 IMG_FOLDER: mix-object-tote
 BATCH_SIZE: 32
 TRAIN_SIZE: 1000

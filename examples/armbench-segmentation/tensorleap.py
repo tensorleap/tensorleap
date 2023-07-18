@@ -15,7 +15,6 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from pycocotools.coco import COCO
 
 from armbench_segmentation.config import CONFIG
-from armbench_segmentation.gcs_utils import _download
 from armbench_segmentation.preprocessing import load_set
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
     count_obj_bbox_occlusions, extract_and_cache_bboxes
@@ -30,15 +29,13 @@ from armbench_segmentation.visualizers.visualizers_getters import mask_visualize
 
 # ----------------------------------------------------data processing--------------------------------------------------
 def subset_images() -> List[PreprocessResponse]:
-    ann_file = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "train.json")
-    fpath = _download(ann_file)
+    ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "train.json")
     # initialize COCO api for instance annotations
-    train = COCO(fpath)
+    train = COCO(ann_filepath)
     x_train_raw = load_set(coco=train, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
 
-    ann_file = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "test.json")
-    fpath = _download(ann_file)
-    val = COCO(fpath)
+    ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "test.json")
+    val = COCO(ann_filepath)
     x_val_raw = load_set(coco=val, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
 
     train_size = min(len(x_train_raw), CONFIG['TRAIN_SIZE'])
@@ -55,9 +52,8 @@ def subset_images() -> List[PreprocessResponse]:
 
 
 def unlabeled_preprocessing_func() -> PreprocessResponse:
-    annFile = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "val.json")
-    fpath = _download(annFile)
-    val = COCO(fpath)
+    ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "val.json")
+    val = COCO(ann_filepath)
     x_val_raw = load_set(coco=val, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
     val_size = min(len(x_val_raw), CONFIG['UL_SIZE'])
     np.random.seed(0)
@@ -74,9 +70,8 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
     x = data['samples'][idx]
     filepath = f"{CONFIG['DIR']}/{CONFIG['IMG_FOLDER']}/images/{x['file_name']}"
-    fpath = _download(filepath)
     # rescale
-    image = np.array(Image.open(fpath).resize((CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]), Image.BILINEAR)) / 255.
+    image = np.array(Image.open(filepath).resize((CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]), Image.BILINEAR)) / 255.
     return image
 
 
