@@ -117,6 +117,7 @@ We used a subset of 3000 images from the `mix-object-tote` and split them into t
     </div>
 </div> <br>
 
+> **Note**: for now this project is limited to 3000 samples
 
 ### Model
 The model used to predict both bounding boxes and segmentation masks is `YOLOv5s`
