@@ -1,4 +1,4 @@
-DIR: dataset/armbench-segmentation-0.1
+DIR: armbench_segmentation/dataset/armbench-segmentation-0.1
 IMG_FOLDER: mix-object-tote
 BATCH_SIZE: 32
 TRAIN_SIZE: 1000
@@ -39,7 +39,7 @@ BOX_SIZES:
     - 198
   - - 373
     - 326
-IMAGE_SIZE: (640, 640)
+IMAGE_SIZE: [640, 640]
 INSTANCES:
 - Object_1
 - Object_2

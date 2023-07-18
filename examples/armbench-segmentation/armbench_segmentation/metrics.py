@@ -5,7 +5,7 @@ import tensorflow as tf
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from armbench_segmentation import CACHE_DICTS
-from config import CONFIG
+from armbench_segmentation.config import CONFIG
 from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
 from armbench_segmentation.utils.ioa_utils import get_ioa_array
 from armbench_segmentation.yolo_helpers.yolo_utils import LOSS_FN
@@ -66,7 +66,8 @@ def mask_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
     return tf.reduce_sum(loss_m, axis=0)[:, 0]  # shape of batch
 
 
-def under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
+def under_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                    mask_gt: tf.Tensor):
     th = 0.8
     under_segmented_arr = []
     for i in range(image.shape[0]):
@@ -78,7 +79,8 @@ def under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
     return tf.convert_to_tensor(under_segmented_arr)
 
 
-def over_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
+def over_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                   mask_gt: tf.Tensor):
     th = 0.8
     over_segmented_arr = []
     for i in range(image.shape[0]):
@@ -90,7 +92,8 @@ def over_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
     return tf.convert_to_tensor(over_segmented_arr)
 
 
-def metric_small_bb_in_under_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):  # bb_visualizer + gt_visualizer
+def metric_small_bb_in_under_segment(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                                     mask_gt: tf.Tensor):  # bb_visualizer + gt_visualizer
     th = 0.8  # equivelan
     has_small_bbs = [0.] * image.shape[0]
     for i in range(image.shape[0]):
@@ -109,7 +112,8 @@ def metric_small_bb_in_under_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask_
     return tf.convert_to_tensor(has_small_bbs)
 
 
-def non_binary_over_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
+def non_binary_over_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                              mask_gt: tf.Tensor):
     th = 0.8
     over_segmented_arr = []
     for i in range(image.shape[0]):
@@ -121,7 +125,8 @@ def non_binary_over_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
     return tf.convert_to_tensor(over_segmented_arr)
 
 
-def non_binary_under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
+def non_binary_under_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                               mask_gt: tf.Tensor):
     th = 0.8
     under_segmented_arr = []
     for i in range(image.shape[0]):
@@ -133,7 +138,8 @@ def non_binary_under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
     return tf.convert_to_tensor(under_segmented_arr)
 
 
-def average_segments_num_over_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
+def average_segments_num_over_segment(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                                      mask_gt: tf.Tensor):
     th = 0.8
     over_segmented_arr = []
     for i in range(image.shape[0]):
@@ -148,7 +154,8 @@ def average_segments_num_over_segment(image, y_pred_bb, y_pred_mask, bb_gt, mask
     return tf.convert_to_tensor(over_segmented_arr)
 
 
-def average_segments_num_under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):
+def average_segments_num_under_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor,
+                                         bb_gt: tf.Tensor, mask_gt: tf.Tensor):
     th = 0.8
     under_segmented_arr = []
     for i in range(image.shape[0]):
@@ -163,7 +170,8 @@ def average_segments_num_under_segmented(image, y_pred_bb, y_pred_mask, bb_gt, m
     return tf.convert_to_tensor(under_segmented_arr)
 
 
-def over_segment_avg_confidence(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):  # bb_visualizer + gt_visualizer
+def over_segment_avg_confidence(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                                mask_gt: tf.Tensor):  # bb_visualizer + gt_visualizer
     th = 0.8
     conf_arr = []
     for i in range(image.shape[0]):

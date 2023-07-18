@@ -1,11 +1,10 @@
 from typing import Dict, Any
-
 import yaml
 
 
 def load_od_config() -> Dict[str, Any]:
     # Load the existing YAML config
-    with open('object_detection_config.yml', 'r') as file:
+    with open('armbench_segmentation/object_detection_config.yml', 'r') as file:
         config = yaml.safe_load(file)
 
     if config.get('INSTANCES', None) is None:
