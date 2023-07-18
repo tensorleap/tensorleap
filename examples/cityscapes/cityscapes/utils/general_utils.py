@@ -115,26 +115,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
             bb_list.append(curr_bb)
     return bb_list
 
-#TODO: what is this name?
 
-def get_mask_list(data, is_gt):
-    is_inference = MODEL_FORMAT == "inference"
-    if is_gt:
-        bb_object = bb_array_to_object(data, iscornercoded=False, bg_label=BACKGROUND_LABEL, is_gt=True)
-    else:
-        from_logits = not is_inference
-        decoded = is_inference
-        class_list_reshaped, loc_list_reshaped = reshape_output_list(
-            np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=image_size)
-        # add batch
-        outputs = DECODER(loc_list_reshaped,
-                          class_list_reshaped,
-                          DEFAULT_BOXES,
-                          from_logits=from_logits,
-                          decoded=decoded,
-                          )
-        bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL)
-    return bb_object
 
 
 def remove_label_from_bbs(bbs_object_array, removal_label, add_to_label):
@@ -162,37 +143,3 @@ def calculate_overlap(box1, box2):
     overlap_area = w_intersection * h_intersection
 
     return overlap_area
-
-
-def get_argmax_map(image, bbs):
-    image_size = image.shape[:2]
-    argmax_map = np.zeros(image_size, dtype=np.uint8)
-    cats_dict = {}
-    for bb in zip(bbs):
-        label = bb.label
-        instance_number = cats_dict.get(label, 0)
-        # update counter if reach max instances we treat the last objects as one
-        cats_dict[label] = instance_number + 1 if instance_number < MAX_INSTANCES_PER_CLASS else instance_number
-        #TODO: #argmax_map[resize_mask] = CATEGORIES.index(label) * MAX_INSTANCES_PER_CLASS + cats_dict[label]  # curr_idx
-    argmax_map[argmax_map == 0] = len(INSTANCES) + 1
-    argmax_map -= 1
-    return {"argmax_map": argmax_map}
-
-#TODO:
-def extract_bboxes(idx: int, data: Dict):
-    x = data['samples'][idx]
-    coco = data['cocofile']
-    ann_ids = coco.getAnnIds(imgIds=x['id'])
-    anns = coco.loadAnns(ann_ids)
-    bboxes = np.zeros([MAX_BB_PER_IMAGE, 5])
-    max_anns = min(MAX_BB_PER_IMAGE, len(anns))
-    for i in range(max_anns):
-        ann = anns[i]
-        img_size = (x['height'], x['width'])
-        class_id = 2 - ann['category_id']
-        bbox = polygon_to_bbox(ann['segmentation'][0])
-        bbox /= np.array((img_size[1], img_size[0], img_size[1], img_size[0]))
-        bboxes[i, :4] = bbox
-        bboxes[i, 4] = class_id
-    bboxes[max_anns:, 4] = BACKGROUND_LABEL
-    return bboxes

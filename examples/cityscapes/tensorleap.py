@@ -1,8 +1,5 @@
 from typing import List, Optional, Dict
-from code_loader import leap_binder
-from code_loader.contract.enums import DatasetMetadataType
 
-from code_loader.contract.datasetclasses import PreprocessResponse
 import tensorflow as tf
 
 
@@ -13,12 +10,21 @@ import json
 from matplotlib import colors
 from matplotlib import cm as cmx
 import matplotlib.pyplot as plt
-from code_loader.contract.visualizer_classes import LeapImage
-
 
 from cityscapes.gcs_utils import _download
-from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, categories, Cityscapes, image_size, load_cityscapes_data
+from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, categories, Cityscapes, image_size, load_cityscapes_data, \
+    BACKGROUND_LABEL
 from cityscapes.utils.general_utils import polygon_to_bbox
+
+from code_loader import leap_binder
+from code_loader.contract.datasetclasses import PreprocessResponse
+from code_loader.contract.visualizer_classes import LeapImage
+from code_loader.contract.enums import (
+    DatasetMetadataType,
+    LeapDataType
+)
+
+from cityscapes.visualizers.visualizers import bb_decoder, gt_bb_decoder
 
 
 # ----------------------------------------------------data processing--------------------------------------------------
@@ -90,6 +96,18 @@ def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
         json_data = json.load(file)
     bounding_boxes = extract_bounding_boxes_from_instance_segmentation_polygons(json_data)
     return bounding_boxes
+
+def number_of_bb(index: int, subset: PreprocessResponse) -> int:
+    bbs = ground_truth_bbox(index, subset)
+    number_of_bb = np.count_nonzero(bbs[..., -1] != BACKGROUND_LABEL)
+    return number_of_bb
+
+def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
+    bbs = ground_truth_bbox(index, subset)
+    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    assert ((valid_bbs[:, 3] > 0).all())
+    aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
+    return aspect_ratios.mean()
 
 # ----------------------------------------------------------metadata----------------------------------------------------
 
@@ -226,9 +244,6 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
 def unnormalize_image(image: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     return image*IMAGE_STD + IMAGE_MEAN
 
-def image_visualizer(image: npt.NDArray[np.float32]) -> LeapImage:
-    return LeapImage((unnormalize_image(image)*255).astype(np.uint8))
-
 
 jet = plt.get_cmap('jet')
 cNorm = colors.Normalize(vmin=0, vmax=1)
@@ -271,12 +286,16 @@ leap_binder.set_metadata(metadata_outside_temperature, DatasetMetadataType.float
 leap_binder.set_metadata(metadata_speed, DatasetMetadataType.float, 'speed')
 leap_binder.set_metadata(metadata_yaw_rate, DatasetMetadataType.float, 'yaw_rate')
 #TODO: SEE IF HAVE MORE METADATA
+leap_binder.set_metadata(number_of_bb, DatasetMetadataType.int, 'bb_count')
+leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, 'avg_bb_aspect_ratio')
 #TODO: MORE METADATA FROM AMAZON
 
 #set visualizer
+leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)
+leap_binder.set_visualizer(bb_decoder, 'bb_decoder', LeapDataType.ImageWithBBox)
+
 #TODO: custome loss
 #leap_binder.set_visualizer(loss_visualizer,'loss_visualizer', LeapDataType.Image)
-#TODO: visuelizers of bbox
 
 
 
