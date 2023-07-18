@@ -12,7 +12,7 @@ from domain_gap.utils.configs import *
 from domain_gap.utils.gcs_utils import _download
 from domain_gap.tl_helpers.preprocess import subset_images
 from domain_gap.tl_helpers.visualizers.visualizers import image_visualizer, loss_visualizer, mask_visualizer, cityscape_segmentation_visualizer
-from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json
+from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json, get_class_mean_iou, mean_iou
 
 
 
@@ -145,10 +145,12 @@ leap_binder.set_input(input_image, 'normalized_image')
 # leap_binder.set_input(non_normalized_image, 'image')
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 leap_binder.set_metadata(metadata_background_percent, DatasetMetadataType.float, 'background_percent')
-for i in range(NUM_CLASSES):
+for i, c in enumerate(CATEGORIES):
     leap_binder.set_metadata(metadata_percent_function_generator(i),
                              DatasetMetadataType.float,
                              Cityscapes.train_id_to_label[i] + "_" + "class_percent")
+    leap_binder.add_custom_metric(get_class_mean_iou(i), name=f"iou_class_{c}")
+leap_binder.add_custom_metric(mean_iou, name=f"iou")
 leap_binder.set_metadata(metadata_filename, DatasetMetadataType.string, 'filename')
 leap_binder.set_metadata(metadata_city, DatasetMetadataType.string, 'city')
 leap_binder.set_metadata(metadata_dataset, DatasetMetadataType.string, 'dataset')
