@@ -128,7 +128,8 @@ NMS_THRESH = 0.5
 OVERLAP_THRESH = 1 / 16
 SMALL_BBS_TH = 0.0003  # Equivelent to ~120 pixels of area at most
 LOAD_UNION_CATEGORIES_IMAGES = True
-
+BATCH_SIZE = 32
+MAX_INSTANCES_PER_CLASS = 20
 
 
 def load_cityscapes_data():

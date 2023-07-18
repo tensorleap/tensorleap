@@ -17,13 +17,13 @@ LOSS_FN = YoloLoss(num_classes=CLASSES, overlap_thresh=OVERLAP_THRESH,
                    from_logits=False if MODEL_FORMAT == "inference" else True,
                    image_size=image_size,
                    yolo_match=True,
-                   semantic_instance=True)
+                   semantic_instance=False)
 
 DECODER = Decoder(CLASSES,
                   background_label=BACKGROUND_LABEL,
                   top_k=50,
                   conf_thresh=CONF_THRESH,
                   nms_thresh=NMS_THRESH,
-                  semantic_instance=True,
+                  semantic_instance=False,
                   max_bb=50,
                   max_bb_per_layer=50)
