@@ -5,6 +5,7 @@ BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 
 # --------------- Data --------------------
+NORM_CS = False
 SEED = 42
 NUM_CLASSES = 19
 IMAGE_SIZE = (2048, 1024)  # TODO check all occurences and fix

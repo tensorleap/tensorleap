@@ -141,9 +141,14 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
 
 
 leap_binder.set_preprocess(subset_images)
-leap_binder.set_input(input_image, 'normalized_image')
-# leap_binder.set_input(non_normalized_image, 'image')
+
+if NORM_CS:
+    leap_binder.set_input(input_image, 'normalized_image')
+else:
+    leap_binder.set_input(non_normalized_input_image, 'non_normalized')
+
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
+
 leap_binder.set_metadata(metadata_background_percent, DatasetMetadataType.float, 'background_percent')
 for i, c in enumerate(CATEGORIES):
     leap_binder.set_metadata(metadata_percent_function_generator(i),
@@ -161,6 +166,7 @@ leap_binder.set_metadata(metadata_gps_longtitude, DatasetMetadataType.float, 'gp
 leap_binder.set_metadata(metadata_outside_temperature, DatasetMetadataType.float, 'outside_temperature')
 leap_binder.set_metadata(metadata_speed, DatasetMetadataType.float, 'speed')
 leap_binder.set_metadata(metadata_yaw_rate, DatasetMetadataType.float, 'yaw_rate')
+
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'mask_visualizer', LeapDataType.ImageMask)
 leap_binder.set_visualizer(cityscape_segmentation_visualizer, 'cityscapes_visualizer', LeapDataType.Image)
