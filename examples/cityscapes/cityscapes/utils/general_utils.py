@@ -4,10 +4,25 @@ from numpy._typing import NDArray
 import numpy as np
 import tensorflow as tf
 
-from cityscapes.preprocessing import CATEGORIES
+from cityscapes.preprocessing import CATEGORIES, Cityscapes
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
+
+def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
+    objects = json_data['objects']
+    bounding_boxes = []
+    image_size = (json_data['imgHeight'], json_data['imgWidth'])
+    for object in objects:
+        b = np.zeros(5)
+        class_label = object['label']
+        class_id = Cityscapes.get_class_id(class_label)
+        bbox = polygon_to_bbox(object['polygon'])
+        bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
+        b[:4] = bbox
+        b[4] = class_id
+        bounding_boxes.append(b)
+    return bounding_boxes
 
 def polygon_to_bbox(polygon): #TODO: change description
     """

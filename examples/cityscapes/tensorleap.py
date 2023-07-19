@@ -7,7 +7,7 @@ from cityscapes.gcs_utils import _download
 from cityscapes.metrics import regression_metric, classification_metric, object_metric
 from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, Cityscapes, image_size, load_cityscapes_data, \
     BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES, CATEGORIES_no_background, CATEGORIES_id_no_background
-from cityscapes.utils.general_utils import polygon_to_bbox
+from cityscapes.utils.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons
 from cityscapes.visualizers.visualizers import bb_decoder, gt_bb_decoder
 
 from code_loader import leap_binder
@@ -46,7 +46,7 @@ def load_cityscapes_data_leap() -> List[PreprocessResponse]:
                 "dataset": ["cityscapes"]*len(all_images[1])})]
     return responses
 
-
+#------------------------------------------input and gt------------------------------------------
 
 def non_normalized_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
@@ -62,21 +62,6 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     return normalized_image.astype(float)
 
 
-def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
-    objects = json_data['objects']
-    bounding_boxes = []
-    image_size = (json_data['imgHeight'], json_data['imgWidth'])
-    for object in objects:
-        b = np.zeros(5)
-        class_label = object['label']
-        class_id = Cityscapes.get_class_id(class_label)
-        bbox = polygon_to_bbox(object['polygon'])
-        bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
-        b[:4] = bbox
-        b[4] = class_id
-        bounding_boxes.append(b)
-    return bounding_boxes
-
 def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
     cloud_path = data['gt_bbx_path'][idx%data["real_size"]]
@@ -85,6 +70,8 @@ def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
         json_data = json.load(file)
     bounding_boxes = extract_bounding_boxes_from_instance_segmentation_polygons(json_data)
     return bounding_boxes
+
+# ----------------------------------------------------------metadata----------------------------------------------------
 
 def number_of_bb(index: int, subset: PreprocessResponse) -> int:
     bbs = np.array(ground_truth_bbox(index, subset))
@@ -133,8 +120,6 @@ def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     obj_boxes = bboxes[bboxes[..., -1] == 0]
     areas = obj_boxes[..., 2] * obj_boxes[..., 3]
     return float(len(areas[areas < SMALL_BBS_TH]))
-
-# ----------------------------------------------------------metadata----------------------------------------------------
 
 def metadata_filename(idx: int, data: PreprocessResponse) -> str:
     return data.data['file_names'][idx]
