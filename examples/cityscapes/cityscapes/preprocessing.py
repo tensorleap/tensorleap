@@ -86,7 +86,9 @@ class Cityscapes:
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 image_size = (2048, 1024) #TODO check all occurences and fix
-CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
+CATEGORIES_no_background = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
+CATEGORIES_id_no_background = [Cityscapes.classes[i].id for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
+CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes))]
 SUPERCATEGORY_GROUNDTRUTH = False
 SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
                                    Cityscapes.classes[i].train_id < 19])

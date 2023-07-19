@@ -24,7 +24,7 @@ def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # retur
     return tf.reduce_sum(loss_c, axis=0)[:, 0]
 
 
-def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,):  # return batch
+def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # return batch
     loss_l, _, _, _ = compute_losses(bb_gt, detection_pred)
     return tf.reduce_sum(loss_l, axis=0)[:, 0]  # shape of batch
 

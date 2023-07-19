@@ -6,7 +6,7 @@ import json
 from cityscapes.gcs_utils import _download
 from cityscapes.metrics import regression_metric, classification_metric, object_metric
 from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, Cityscapes, image_size, load_cityscapes_data, \
-    BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES
+    BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES, CATEGORIES_no_background, CATEGORIES_id_no_background
 from cityscapes.utils.general_utils import polygon_to_bbox
 from cityscapes.visualizers.visualizers import bb_decoder, gt_bb_decoder
 
@@ -58,9 +58,8 @@ def non_normalized_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     img = non_normalized_image(idx%data.data["real_size"], data)
-    normalized_image = (img - IMAGE_MEAN)/IMAGE_STD
+    normalized_image = (img - IMAGE_MEAN)/IMAGE_STD #TODO: needed??
     return normalized_image.astype(float)
-
 
 
 def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
@@ -88,33 +87,41 @@ def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
     return bounding_boxes
 
 def number_of_bb(index: int, subset: PreprocessResponse) -> int:
-    bbs = ground_truth_bbox(index, subset)
+    bbs = np.array(ground_truth_bbox(index, subset))
     number_of_bb = np.count_nonzero(bbs[..., -1] != BACKGROUND_LABEL)
     return number_of_bb
 
+def instances_num(index: int, subset: PreprocessResponse) -> float:
+    bbs = np.array(ground_truth_bbox(index, subset))
+    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    return float(valid_bbs.shape[0])
+
 def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
-    bbs = ground_truth_bbox(index, subset)
+    bbs = np.array(ground_truth_bbox(index, subset))
     valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
     assert ((valid_bbs[:, 3] > 0).all())
     aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
     return aspect_ratios.mean()
 
-def instances_num(index: int, subset: PreprocessResponse) -> float:
-    bbs = ground_truth_bbox(index, subset)
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
-    return float(valid_bbs.shape[0])
-
-#TODO: maybe total number of bbox per label id
-
 def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
-    bbs = ground_truth_bbox(index, subset)  # x,y,w,h
+    bbs = np.array(ground_truth_bbox(index, subset)) # x,y,w,h
     valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
     areas = valid_bbs[:, 2] * valid_bbs[:, 3]
     return areas.mean()
 
+def label_instances_num(class_label: str) -> Callable[[int, PreprocessResponse], float]:
+    def func(index: int, subset: PreprocessResponse) -> float:
+        bbs = np.array(ground_truth_bbox(index, subset))
+        label = CATEGORIES.index(class_label)
+        valid_bbs = bbs[bbs[..., -1] == label]
+        return float(valid_bbs.shape[0])
+
+    func.__name__ = f'metadata_{class_label}_instances_count'
+    return func
+
 def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], float]:
     def func(index: int, subset: PreprocessResponse):
-        bbs = ground_truth_bbox(index, subset)
+        bbs = np.array(ground_truth_bbox(index, subset))
         is_i_exist = (bbs[..., -1] == class_id).any()
         return float(is_i_exist)
 
@@ -122,7 +129,7 @@ def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], flo
     return func
 
 def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
-    bboxes = ground_truth_bbox(idx, data)
+    bboxes = np.array(ground_truth_bbox(idx, data))
     obj_boxes = bboxes[bboxes[..., -1] == 0]
     areas = obj_boxes[..., 2] * obj_boxes[..., 3]
     return float(len(areas[areas < SMALL_BBS_TH]))
@@ -162,16 +169,6 @@ def metadata_speed(idx: int, data: PreprocessResponse) -> float:
 
 def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
     return get_metadata_json(idx, data)['yawRate']
-
-#TODO: for all
-def object_instances_num(index: int, subset: PreprocessResponse) -> float:
-    bbs = ground_truth_bbox(index, subset)
-    label = CATEGORIES.index('Object') ##TODO: for cityscapes
-    valid_bbs = bbs[bbs[..., -1] == label]
-    return float(valid_bbs.shape[0])
-
-
-#todo: THINK ON METADATA
 
 # def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
 #     img = non_normalized_image(idx%data.data["real_size"], data)
@@ -228,9 +225,7 @@ leap_binder.set_input(input_image, 'normalized_image')
 leap_binder.set_ground_truth(ground_truth_bbox, 'bbox')
 
 #set prediction
-leap_binder.add_prediction('object detection',
-                               ["x", "y", "w", "h", "obj"] +
-                                [cl for cl in CATEGORIES])
+leap_binder.add_prediction(name='object detection', labels=["x", "y", "w", "h", "obj"] + [cl for cl in CATEGORIES]) #TODO: maybe without background
 
 #set meata_data
 leap_binder.set_metadata(metadata_filename, DatasetMetadataType.string, 'filename')
@@ -246,11 +241,11 @@ leap_binder.set_metadata(number_of_bb, DatasetMetadataType.int, 'bb_count')
 leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, 'avg_bb_aspect_ratio')
 leap_binder.set_metadata(avg_bb_area_metadata, DatasetMetadataType.float, 'avg_bb_area')
 leap_binder.set_metadata(instances_num, DatasetMetadataType.float, "instances_number_metadata")
-leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small bbs number")
-#TODO: SEE IF NEEDED
-for i in range(4):
-    leap_binder.set_metadata(is_class_exist_gen(i), DatasetMetadataType.float, f'does_{i}_exist')
-#TODO: MORE METADATA FROM AMAZON
+#leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small_bbs_number")
+for i, label in enumerate(CATEGORIES_no_background):
+    leap_binder.set_metadata(label_instances_num(label), DatasetMetadataType.float, f'{label} number_metadata')
+for id in CATEGORIES_id_no_background:
+    leap_binder.set_metadata(is_class_exist_gen(id), DatasetMetadataType.float, f'does_class_number_{id}_exist')
 
 #set visualizer
 leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)
@@ -263,9 +258,14 @@ leap_binder.add_custom_metric(object_metric, "Objectness_metric")
 
 
 if __name__ == '__main__':
+    # preprocess function
     responses = load_cityscapes_data_leap()
+
+    # set input and gt
     input_image = input_image(0, responses[0])
     bounding_boxes_gt = ground_truth_bbox(0, responses[0])
+
+    # set meata_data
     file_name = metadata_filename(0, responses[0])
     city = metadata_city(0, responses[0])
     idx = metadata_idx(0, responses[0])
@@ -275,3 +275,38 @@ if __name__ == '__main__':
     outside_temperature = metadata_outside_temperature(0, responses[0])
     speed = metadata_speed(0, responses[0])
     yaw_rate = metadata_yaw_rate(0, responses[0])
+    bb_count = number_of_bb(0, responses[0])
+    avg_bb_aspect_ratio = avg_bb_aspect_ratio(0, responses[0])
+    avg_bb_area = avg_bb_area_metadata(0, responses[0])
+    instances_number_metadata = instances_num(0, responses[0])
+    #small_bbs_number = count_small_bbs(0, responses[0])
+
+    does_0_exist = is_class_exist_gen(0, responses[0])  #TODO: check
+    label_instances_num = label_instances_num(0, responses[0])  #TODO: check
+
+
+    # set visualizer
+    bb_gt_decoder = gt_bb_decoder(input_image, bounding_boxes_gt)
+    #bb_decoder = bb_decoder(input_image, detection_pred) #TODO: check
+
+    # set custom metrics
+    # Regression_metric = regression_metric(bounding_boxes_gt, detection_pred)#TODO: check
+    # Classification_metric = classification_metric(bounding_boxes_gt, detection_pred)#TODO: check
+    # Object_metric = object_metric(bounding_boxes_gt, detection_pred)#TODO: check
+
+
+    #TODO: check with model
+    #Tom's example:
+
+    # # set custom metrics
+    # Regression_metric = regression_metric
+    #
+    # dnn = tf.keras.models.load_model("/home/tomtensor/Downloads/mnist-cnn.h5")
+    #
+    # for i in range(0, 20):
+    #     concat = np.expand_dims(input_encoder(i, x[0]), axis=0)
+    #     y_pred = dnn([concat])
+    #     gt = np.expand_dims(gt_encoder(i, x[0]), axis=0)
+    #     y_true = tf.convert_to_tensor(gt)
+    #     ls = CategoricalCrossentropy()(y_true, y_pred)
+    #     meradata = metadata_label(i, x[0])

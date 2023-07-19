@@ -88,7 +88,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
     """
     bb_list = []
     if not isinstance(bb_array, np.ndarray):
-        bb_array = bb_array.numpy()
+        bb_array = np.array(bb_array)
     # fig, ax = plt.subplots(figsize=(6, 9)
     if len(bb_array.shape) == 3:
         bb_array = bb_array.reshape(-1, bb_array.shape[-1])
