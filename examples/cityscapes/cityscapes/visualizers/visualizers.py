@@ -19,8 +19,7 @@ def bb_decoder(image, predictions):
     """
     Overlays the BB predictions on the image
     """
-    class_list_reshaped, loc_list_reshaped = reshape_output_list(
-        np.reshape(predictions, (1, predictions.shape[0])))  # add batch
+    class_list_reshaped, loc_list_reshaped = reshape_output_list(np.reshape(predictions, (1, predictions.shape[0]))) # add batch
     outputs = DECODER(loc_list_reshaped,
                       class_list_reshaped,
                       DEFAULT_BOXES,

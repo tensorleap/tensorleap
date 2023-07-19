@@ -36,7 +36,7 @@ def polygon_to_bbox(polygon): #TODO: change description
     return bbox
 
 
-def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
+def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray: #TODO: no use
     # Reformat all bboxes to (x_min, y_min, x_max, y_max)
     bboxes = np.asarray([xywh_to_xyxy_format(bbox[:-1]) for bbox in bboxes]) * image_size
     num_bboxes = len(bboxes)
@@ -63,7 +63,7 @@ def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray:
 
 
 def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_threshold: float, calc_avg_flag: bool) -> \
-        Union[float, int]:
+        Union[float, int]: #TODO: no use
     img_size = img.shape[0]
     label = CATEGORIES.index('Object') #TODO: change
     obj_bbox = bboxes[bboxes[..., -1] == label]
@@ -76,8 +76,6 @@ def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_thr
             return int(occlusion_count / len(obj_bbox))
         else:
             return occlusion_count
-
-
 
 
 def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded: bool = True, bg_label: int = 0,
@@ -109,8 +107,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
 
 
 
-
-def remove_label_from_bbs(bbs_object_array, removal_label, add_to_label):
+def remove_label_from_bbs(bbs_object_array, removal_label, add_to_label): #TODO: no use
     new_bb_arr = []
     for bb in bbs_object_array:
         if bb.label != removal_label:
@@ -120,7 +117,7 @@ def remove_label_from_bbs(bbs_object_array, removal_label, add_to_label):
     return new_bb_arr
 
 
-def calculate_overlap(box1, box2):
+def calculate_overlap(box1, box2): #TODO: no use
     # Extract coordinates of the bounding boxes
     x1, y1, w1, h1 = box1
     x2, y2, w2, h2 = box2
