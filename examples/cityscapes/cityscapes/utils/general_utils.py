@@ -17,11 +17,14 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
         b = np.zeros(5)
         class_label = object['label']
         class_id = Cityscapes.get_class_id(class_label)
-        bbox = polygon_to_bbox(object['polygon'])
-        bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
-        b[:4] = bbox
-        b[4] = class_id
-        bounding_boxes.append(b)
+        if class_id is None:
+            continue
+        else:
+            bbox = polygon_to_bbox(object['polygon'])
+            bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
+            b[:4] = bbox
+            b[4] = class_id
+            bounding_boxes.append(b)
     return bounding_boxes
 
 def polygon_to_bbox(polygon): #TODO: change description
