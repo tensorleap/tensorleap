@@ -5,7 +5,7 @@ import json
 from scipy.ndimage import zoom
 
 from cityscapes.gcs_utils import _download
-from cityscapes.metrics import regression_metric, classification_metric, object_metric
+from cityscapes.metrics import regression_metric, classification_metric, object_metric, od_loss
 from cityscapes.preprocessing import IMAGE_STD, IMAGE_MEAN, Cityscapes, image_size, load_cityscapes_data, \
     BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES, CATEGORIES_no_background, CATEGORIES_id_no_background
 from cityscapes.utils.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons
@@ -213,6 +213,9 @@ leap_binder.set_ground_truth(ground_truth_bbox, 'bbox')
 
 #set prediction
 leap_binder.add_prediction(name='object detection', labels=["x", "y", "w", "h", "obj"] + [cl for cl in CATEGORIES]) #TODO: maybe without background
+
+#set loss
+leap_binder.add_custom_loss(od_loss, 'od_loss')
 
 #set meata_data
 leap_binder.set_metadata(metadata_filename, DatasetMetadataType.string, 'filename')
