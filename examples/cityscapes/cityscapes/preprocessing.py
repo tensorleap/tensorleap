@@ -103,7 +103,7 @@ NMS_THRESH = 0.5
 OVERLAP_THRESH = 1 / 16
 SMALL_BBS_TH = 0.0003  # Equivelent to ~120 pixels of area at most
 STRIDES = (8, 16, 32)
-image_size = (2048, 1024) #TODO check all occurences and fix
+image_size = (640, 640) #TODO check all occurences and fix
 FEATURE_MAPS = ((80, 80), (40, 40), (20, 20))
 BOX_SIZES = (((10, 13), (16, 30), (33, 23)),
              ((30, 61), (62, 45), (59, 119)),

@@ -2,6 +2,7 @@ from typing import List, Dict, Callable
 from PIL import Image
 import numpy as np
 import json
+from scipy.ndimage import zoom
 
 from cityscapes.gcs_utils import _download
 from cityscapes.metrics import regression_metric, classification_metric, object_metric
@@ -59,6 +60,7 @@ def non_normalized_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     img = non_normalized_image(idx%data.data["real_size"], data)
     normalized_image = (img - IMAGE_MEAN)/IMAGE_STD #TODO: needed??
+    #resized_image = zoom(normalized_image, (3.2, 1.6, 1))
     return normalized_image.astype(float)
 
 
@@ -206,7 +208,7 @@ leap_binder.set_preprocess(load_cityscapes_data_leap)
 #TODO: unlables data
 
 #set input and gt
-leap_binder.set_input(input_image, 'normalized_image')
+leap_binder.set_input(non_normalized_image, 'non_normalized_image')
 leap_binder.set_ground_truth(ground_truth_bbox, 'bbox')
 
 #set prediction
