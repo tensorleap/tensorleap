@@ -8,7 +8,7 @@ In this example, we infer [RAFT](https://github.com/princeton-vl/RAFT) on the
 
 Before you begin, ensure that you have the following prerequisites installed:
 
-- **[Python](https://www.python.org/)** (version 3.7 or higher)
+- **[Python](https://www.python.org/)** (version 3.8 or higher)
 - **[Poetry](https://python-poetry.org/)**
 
 ## Tensorleap **CLI Installation**
