@@ -10,7 +10,7 @@ from code_loader.contract.visualizer_classes import LeapHorizontalBar
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 
-from cifar10.data_set import LABELS_NAMES, metadata_animal, metadata_fly, metadata_label_name, \
+from cifar10.utils import LABELS_NAMES, metadata_animal, metadata_fly, metadata_label_name, \
     metadata_gt_label, preprocess_func
 from cifar10.encoders import input_encoder
 from keras.datasets import cifar10
@@ -22,15 +22,15 @@ def preprocess_func_leap() -> List[PreprocessResponse]:
 
     # Generate a PreprocessResponse for each data slice, to later be read by the encoders.
     # The length of each data slice is provided, along with the data dictionary.
-    train = PreprocessResponse(length=2000, data={'images': train_X, 'labels': train_Y})
-    val = PreprocessResponse(length=1000, data={'images': val_X, 'labels': val_Y})
+    train = PreprocessResponse(length=2000, data={'images': train_X, 'labels': train_Y, 'subset_name': 'train'})
+    val = PreprocessResponse(length=1000, data={'images': val_X, 'labels': val_Y, 'subset_name': 'val'})
     response = [train, val]
     return response
 
 
 def unlabeled_data() -> PreprocessResponse:
-    (_, _), (test_X, _) = cifar10.load_data()
-    return PreprocessResponse(length=1000, data={'images': test_X})
+    _, (test_X, _) = cifar10.load_data()
+    return PreprocessResponse(length=1000, data={'images': test_X, 'subset_name': 'unlabeled'})
 
 # Input encoder fetches the image with the index `idx` from the `images` array set in
 # the PreprocessResponse data. Returns a numpy array containing the sample's image.
@@ -49,36 +49,24 @@ def metadata_sample_index(idx: int, preprocess: PreprocessResponse) -> int:
 
 
 def metadata_gt_label_leap(idx: int, preprocess: PreprocessResponse) -> int:
-    try:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_gt_label(one_hot_digit)
-        return label
-    except:
-        return -1
+    one_hot_digit = gt_encoder(idx, preprocess)
+    label = metadata_gt_label(one_hot_digit)
+    return label
 
 # This metadata adds the int gt_name of each sample.
 def metadata_label_name_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    try:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_label_name(one_hot_digit)
-        return label
-    except:
-        return 'Unlabeled'
+    one_hot_digit = gt_encoder(idx, preprocess)
+    label = metadata_label_name(one_hot_digit)
+    return label
 def metadata_fly_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    try:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_fly(one_hot_digit)
-        return label
-    except:
-        return 'Unlabeled'
+    one_hot_digit = gt_encoder(idx, preprocess)
+    label = metadata_fly(one_hot_digit)
+    return label
 
 def metadata_animal_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    try:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_animal(one_hot_digit)
-        return label
-    except:
-        return 'Unlabeled'
+    one_hot_digit = gt_encoder(idx, preprocess)
+    label = metadata_animal(one_hot_digit)
+    return label
 
 def horizontal_bar_visualizer_with_labels_name(data: npt.NDArray[np.float32]) -> LeapHorizontalBar:
     # labels = [str(index) for index in range(data.shape[-1])]

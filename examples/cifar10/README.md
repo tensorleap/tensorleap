@@ -59,11 +59,8 @@ profile perspective.
 
 ## Sample Loss Analysis
 
-Within this section, we delve into the examination of features that impact the model's predictions. Through the 
-identification and extraction of the most influential features, as well as assessing the derivatives of the loss 
-function in relation to the activation maps, we gain insights into the specific contributions of informative features 
-towards the overall loss. Based on this analysis, a heatmap is generated to visually represent the relevant information 
-derived from these features.
+Within this section, we delve into the examination of features that impact the model's predictions. 
+Tensorleap automatically generates a heatmap that quantifies the effect different features has on the loss. 
 
 In the image depicted below, it is evident that the presence of background features leads to a higher loss function. 
 Conversely, the inclusion of features in the nose area contributes to a lower loss function, which signifies the image's 
