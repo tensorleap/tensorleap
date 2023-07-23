@@ -80,7 +80,6 @@ def metadata_animal_leap(idx: int, preprocess: PreprocessResponse) -> str:
         return label
 
 def horizontal_bar_visualizer_with_labels_name(data: npt.NDArray[np.float32]) -> LeapHorizontalBar:
-    # labels = [str(index) for index in range(data.shape[-1])]
     labels_names = [LABELS_NAMES[index] for index in range(data.shape[-1])]
     return LeapHorizontalBar(data, labels_names)
 
