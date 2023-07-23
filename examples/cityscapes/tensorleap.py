@@ -2,7 +2,6 @@ from typing import List, Dict, Callable
 from PIL import Image
 import numpy as np
 import json
-from scipy.ndimage import zoom
 
 from cityscapes.gcs_utils import _download
 from cityscapes.metrics import regression_metric, classification_metric, object_metric, od_loss

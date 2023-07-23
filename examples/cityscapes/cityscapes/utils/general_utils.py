@@ -13,9 +13,11 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     objects = json_data['objects']
     bounding_boxes = []
     image_size = (json_data['imgHeight'], json_data['imgWidth'])
+    l = set()
     for object in objects:
         b = np.zeros(5)
         class_label = object['label']
+        l.add(class_label)
         class_id = Cityscapes.get_class_id(class_label)
         if class_id is None:
             continue
