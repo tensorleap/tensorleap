@@ -86,6 +86,7 @@ class Cityscapes:
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 MODEL_FORMAT = "inference"
+MAX_BB_PER_IMAGE = 20
 
 CATEGORIES_no_background = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
 CATEGORIES_id_no_background = [Cityscapes.classes[i].id for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
@@ -96,6 +97,7 @@ IMAGE_MEAN = np.array([0.287, 0.325, 0.284])
 IMAGE_STD = np.array([0.176, 0.181, 0.178])
 
 BACKGROUND_LABEL = 19
+MAX_BB_PER_IMAGE = 20 #TODO: per image or per part of image?
 CLASSES = 35
 OFFSET = 0
 CONF_THRESH = 0.35
