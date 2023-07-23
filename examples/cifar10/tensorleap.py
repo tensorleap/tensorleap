@@ -47,26 +47,37 @@ def gt_encoder(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
 def metadata_sample_index(idx: int, preprocess: PreprocessResponse) -> int:
     return idx
 
-
 def metadata_gt_label_leap(idx: int, preprocess: PreprocessResponse) -> int:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    label = metadata_gt_label(one_hot_digit)
-    return label
+    if preprocess.data['subset_name'] == 'unlabeled':
+        return -1
+    else:
+        one_hot_digit = gt_encoder(idx, preprocess)
+        label = metadata_gt_label(one_hot_digit)
+        return label
 
 # This metadata adds the int gt_name of each sample.
 def metadata_label_name_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    label = metadata_label_name(one_hot_digit)
-    return label
+    if preprocess.data['subset_name'] == 'unlabeled':
+        return 'Unlabeled'
+    else:
+        one_hot_digit = gt_encoder(idx, preprocess)
+        label = metadata_label_name(one_hot_digit)
+        return label
 def metadata_fly_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    label = metadata_fly(one_hot_digit)
-    return label
+    if preprocess.data['subset_name'] == 'unlabeled':
+        return 'Unlabeled'
+    else:
+        one_hot_digit = gt_encoder(idx, preprocess)
+        label = metadata_fly(one_hot_digit)
+        return label
 
 def metadata_animal_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    label = metadata_animal(one_hot_digit)
-    return label
+    if preprocess.data['subset_name'] == 'unlabeled':
+        return 'Unlabeled'
+    else:
+        one_hot_digit = gt_encoder(idx, preprocess)
+        label = metadata_animal(one_hot_digit)
+        return label
 
 def horizontal_bar_visualizer_with_labels_name(data: npt.NDArray[np.float32]) -> LeapHorizontalBar:
     # labels = [str(index) for index in range(data.shape[-1])]
