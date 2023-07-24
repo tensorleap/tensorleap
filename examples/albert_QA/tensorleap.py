@@ -1,6 +1,7 @@
+
 import tensorflow as tf
 import numpy as np
-from readability import Readability
+#from readability import Readability
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -11,16 +12,13 @@ from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 from transformers import AlbertTokenizerFast
 from typing import List
 
-from albert.data_set import load_data, CHANGE_INDEX_FLAG, to_squeeze, max_sequence_length, get_context_positions, \
+from albert.data_set import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
     get_readibility_score
 from albert.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
     context_subjectivity, answer_decoder, tokens_decoder, tokens_question_decoder, tokens_context_decoder
 from albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
 from albert.loss import CE_loss
 from albert.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
-
-tokenizer = AlbertTokenizerFast.from_pretrained("vumichien/albert-base-v2-squad2")
-
 
 # -------------------------load_data--------------------------------
 def preprocess_load_article_titles() -> List[PreprocessResponse]:
@@ -58,9 +56,8 @@ def get_input_func(key: str):
     def input_func(idx: int, preprocess: PreprocessResponse):
         idx = convert_index(idx, preprocess)
         x = get_inputs(idx, preprocess)[key].numpy()
-        if to_squeeze:
-            x = x.squeeze()
-            return x[:max_sequence_length]
+        x = x.squeeze()
+        return x[:max_sequence_length]
         return x[:, :max_sequence_length]
 
     input_func.__name__ = f"{key}"
@@ -165,10 +162,11 @@ def metadata_context_subjectivity(idx: int, preprocess: PreprocessResponse) -> f
 def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context'):
     idx = convert_index(idx, preprocess)
     text: str = preprocess.data['ds'][idx][section]
-    try:
-        analyzer = Readability(text)
-    except:
-        analyzer = None
+    # try:
+    #     analyzer = Readability(text)
+    # except:
+    #     analyzer = None
+    analyzer = None
     return analyzer
 
 

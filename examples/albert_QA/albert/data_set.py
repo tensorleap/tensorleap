@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -12,12 +14,12 @@ nltk.download('punkt')
 np.random.seed(0)
 max_sequence_length = 384  # The maximum length of a feature (question and context)
 max_answer_length = 20
-to_squeeze = True
 LABELS = ["start_idx", "end_idx"]
 PAD_TOKEN = ''
 
 # Preprocess Function
-persistent_dir = '/nfs/'
+home_dir = os.getenv("HOME")
+persistent_dir = os.path.join(home_dir, "Tensorleap", 'ALBERTqa')
 TRAIN_SIZE, VAL_SIZE = 1000, 1000
 # test_size = 500  # 1000 100
 CHANGE_INDEX_FLAG = True
@@ -100,7 +102,6 @@ def get_end_position(sample, inputs):
 def get_readibility_score(analyzer_func):
     try:
         return float(np.round(analyzer_func().score, 3))
-
     except:
         return -1
 

@@ -9,7 +9,6 @@ packages = [{include = "albert_qa"}]
 [tool.poetry.dependencies]
 python = ">=3.8, <3.11"
 numpy = "1.23"
-readability = "^0.3.1"
 textblob = "^0.17.1"
 pandas = "1.5.0"
 datasets = "^2.13.1"
@@ -17,6 +16,7 @@ transformers = "^4.30.2"
 code-loader = "^0.2.83"
 sentencepiece = "^0.1.99"
 protobuf = "<=3.20.1"
+readability = "^0.3.1"
 
 
 [build-system]
