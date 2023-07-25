@@ -19,8 +19,8 @@ from armbench_segmentation.preprocessing import load_set
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
     count_obj_bbox_occlusions, extract_and_cache_bboxes
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
-    mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, non_binary_over_segmented, \
-    non_binary_under_segmented, average_segments_num_over_segment, average_segments_num_under_segmented, \
+    mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, over_segmented_instances_count, \
+    under_segmented_instances_count, average_segments_num_over_segment, average_segments_num_under_segmented, \
     over_segment_avg_confidence
 from armbench_segmentation.visualizers.visualizers import gt_bb_decoder, bb_decoder, \
     under_segmented_bb_visualizer, over_segmented_bb_visualizer
@@ -161,41 +161,41 @@ def bbox_num(index: int, subset: PreprocessResponse) -> int:
     return number_of_bb
 
 
-def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
+def get_avg_bb_area(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)  # x,y,w,h
     valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     areas = valid_bbs[:, 2] * valid_bbs[:, 3]
     return areas.mean()
 
 
-def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
+def get_avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
     valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
     return aspect_ratios.mean()
 
 
-def instances_num(index: int, subset: PreprocessResponse) -> float:
+def get_instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
     valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     return float(valid_bbs.shape[0])
 
 
-def object_instances_num(index: int, subset: PreprocessResponse) -> float:
+def get_object_instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
     label = CONFIG['CATEGORIES'].index('Object')
     valid_bbs = bbs[bbs[..., -1] == label]
     return float(valid_bbs.shape[0])
 
 
-def tote_instances_num(index: int, subset: PreprocessResponse) -> float:
+def get_tote_instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = get_bbs(index, subset)
     label = CONFIG['CATEGORIES'].index('Tote')
     valid_bbs = bbs[bbs[..., -1] == label]
     return float(valid_bbs.shape[0])
 
 
-def avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
+def get_avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
     mask = get_masks(idx, data)
     bboxs = get_bbs(idx, data)
     valid_masks = mask[bboxs[..., -1] != CONFIG['BACKGROUND_LABEL']]
@@ -225,12 +225,12 @@ def get_tote_instances_sizes(idx: int, data: PreprocessResponse) -> float:
     return np.divide(res, size)
 
 
-def tote_avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
+def get_tote_avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
     sizes = get_tote_instances_sizes(idx, data)
     return float(np.mean(sizes))
 
 
-def tote_std_instance_percent(idx: int, data: PreprocessResponse) -> float:
+def get_tote_std_instance_percent(idx: int, data: PreprocessResponse) -> float:
     sizes = get_tote_instances_sizes(idx, data)
     return float(np.std(sizes))
 
@@ -282,17 +282,17 @@ def get_object_instances_sizes(idx: int, data: PreprocessResponse) -> float:
     return np.divide(res, size)
 
 
-def object_avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
+def get_object_avg_instance_percent(idx: int, data: PreprocessResponse) -> float:
     sizes = get_object_instances_sizes(idx, data)
     return float(np.mean(sizes))
 
 
-def object_std_instance_percent(idx: int, data: PreprocessResponse) -> float:
+def get_object_std_instance_percent(idx: int, data: PreprocessResponse) -> float:
     sizes = get_object_instances_sizes(idx, data)
     return float(np.std(sizes))
 
 
-def background_percent(idx: int, data: PreprocessResponse) -> float:
+def get_background_percent(idx: int, data: PreprocessResponse) -> float:
     masks = get_masks(idx, data)
     bboxs = get_bbs(idx, data)
     valid_masks = masks[bboxs[..., -1] != CONFIG['BACKGROUND_LABEL']]
@@ -303,7 +303,7 @@ def background_percent(idx: int, data: PreprocessResponse) -> float:
     return float(np.round(np.divide(res[res == 0].size, size), 3))
 
 
-def obj_bbox_occlusions_count(idx: int, data: PreprocessResponse, calc_avg_flag=False) -> float:
+def get_obj_bbox_occlusions_count(idx: int, data: PreprocessResponse, calc_avg_flag=False) -> float:
     occlusion_threshold = 0.2  # Example threshold value
     img = input_image(idx, data)
     bboxes = get_bbs(idx, data)  # [x,y,w,h]
@@ -311,18 +311,18 @@ def obj_bbox_occlusions_count(idx: int, data: PreprocessResponse, calc_avg_flag=
     return occlusions_count
 
 
-def obj_bbox_occlusions_avg(idx: int, data: PreprocessResponse) -> float:
-    return obj_bbox_occlusions_count(idx, data, calc_avg_flag=True)
+def get_obj_bbox_occlusions_avg(idx: int, data: PreprocessResponse) -> float:
+    return get_obj_bbox_occlusions_count(idx, data, calc_avg_flag=True)
 
 
-def obj_mask_occlusions_count(idx: int, data: PreprocessResponse) -> int:
+def get_obj_mask_occlusions_count(idx: int, data: PreprocessResponse) -> int:
     occlusion_threshold = 0.1  # Example threshold value
     masks = get_object_instances_masks(idx, data)
     occlusion_count = count_obj_masks_occlusions(masks, occlusion_threshold)
     return occlusion_count
 
 
-def duplicate_bb(index: int, subset: PreprocessResponse):
+def count_duplicate_bbs(index: int, subset: PreprocessResponse):
     bbs_gt = get_bbs(index, subset)
     real_gt = bbs_gt[bbs_gt[..., 4] != CONFIG['BACKGROUND_LABEL']]
     return int(real_gt.shape[0] != np.unique(real_gt, axis=0).shape[0])
@@ -369,8 +369,8 @@ leap_binder.add_custom_metric(mask_metric, "Mask metric")
 leap_binder.add_custom_metric(over_segmented, "Over Segmented metric")
 leap_binder.add_custom_metric(under_segmented, "Under Segmented metric")
 leap_binder.add_custom_metric(metric_small_bb_in_under_segment, 'Small BB Under Segmtented metric')
-leap_binder.add_custom_metric(non_binary_over_segmented, "Over Segmented Instances count")
-leap_binder.add_custom_metric(non_binary_under_segmented, "Under Segmented Instances count")
+leap_binder.add_custom_metric(over_segmented_instances_count, "Over Segmented Instances count")
+leap_binder.add_custom_metric(under_segmented_instances_count, "Under Segmented Instances count")
 leap_binder.add_custom_metric(average_segments_num_over_segment, "Average segments num Over Segmented")
 leap_binder.add_custom_metric(average_segments_num_under_segmented, "Average segments num Under Segmented")
 leap_binder.add_custom_metric(over_segment_avg_confidence, "Over Segment confidences")
@@ -380,24 +380,24 @@ leap_binder.set_metadata(get_idx, DatasetMetadataType.int, "idx_metadata")
 leap_binder.set_metadata(get_fname, DatasetMetadataType.string, "fname_metadata")
 leap_binder.set_metadata(get_original_width, DatasetMetadataType.int, "origin_width_metadata")
 leap_binder.set_metadata(get_original_height, DatasetMetadataType.int, "origin_height_metadata")
-leap_binder.set_metadata(instances_num, DatasetMetadataType.float, "instances_number_metadata")
-leap_binder.set_metadata(tote_instances_num, DatasetMetadataType.float, "tote_number_metadata")
-leap_binder.set_metadata(object_instances_num, DatasetMetadataType.float, "object_number_metadata")
-leap_binder.set_metadata(avg_instance_percent, DatasetMetadataType.float, "avg_instance_size_metadata")
+leap_binder.set_metadata(get_instances_num, DatasetMetadataType.float, "instances_number_metadata")
+leap_binder.set_metadata(get_tote_instances_num, DatasetMetadataType.float, "tote_number_metadata")
+leap_binder.set_metadata(get_object_instances_num, DatasetMetadataType.float, "object_number_metadata")
+leap_binder.set_metadata(get_avg_instance_percent, DatasetMetadataType.float, "avg_instance_size_metadata")
 leap_binder.set_metadata(get_tote_instances_mean, DatasetMetadataType.float, "tote_instances_mean_metadata")
 leap_binder.set_metadata(get_tote_instances_std, DatasetMetadataType.float, "tote_instances_std_metadata")
 leap_binder.set_metadata(get_object_instances_mean, DatasetMetadataType.float, "object_instances_mean_metadata")
 leap_binder.set_metadata(get_object_instances_std, DatasetMetadataType.float, "object_instances_std_metadata")
-leap_binder.set_metadata(tote_avg_instance_percent, DatasetMetadataType.float, "tote_avg_instance_size_metadata")
-leap_binder.set_metadata(tote_std_instance_percent, DatasetMetadataType.float, "tote_std_instance_size_metadata")
-leap_binder.set_metadata(object_avg_instance_percent, DatasetMetadataType.float, "object_avg_instance_size_metadata")
-leap_binder.set_metadata(object_std_instance_percent, DatasetMetadataType.float, "object_std_instance_size_metadata")
+leap_binder.set_metadata(get_tote_avg_instance_percent, DatasetMetadataType.float, "tote_avg_instance_size_metadata")
+leap_binder.set_metadata(get_tote_std_instance_percent, DatasetMetadataType.float, "tote_std_instance_size_metadata")
+leap_binder.set_metadata(get_object_avg_instance_percent, DatasetMetadataType.float, "object_avg_instance_size_metadata")
+leap_binder.set_metadata(get_object_std_instance_percent, DatasetMetadataType.float, "object_std_instance_size_metadata")
 leap_binder.set_metadata(bbox_num, DatasetMetadataType.float, "bbox_number_metadata")
-leap_binder.set_metadata(avg_bb_area_metadata, DatasetMetadataType.float, "bbox_area_metadata")
-leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, "bbox_aspect_ratio_metadata")
-leap_binder.set_metadata(background_percent, DatasetMetadataType.float, "background_percent")
-leap_binder.set_metadata(duplicate_bb, DatasetMetadataType.int, "duplicate_bb")
+leap_binder.set_metadata(get_avg_bb_area, DatasetMetadataType.float, "bbox_area_metadata")
+leap_binder.set_metadata(get_avg_bb_aspect_ratio, DatasetMetadataType.float, "bbox_aspect_ratio_metadata")
+leap_binder.set_metadata(get_background_percent, DatasetMetadataType.float, "background_percent")
+leap_binder.set_metadata(count_duplicate_bbs, DatasetMetadataType.int, "duplicate_bb")
 leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small bbs number")
-leap_binder.set_metadata(obj_bbox_occlusions_count, DatasetMetadataType.float, "count_total_obj_bbox_occlusions")
-leap_binder.set_metadata(obj_bbox_occlusions_avg, DatasetMetadataType.int, "avg_obj_bbox_occlusions")
-leap_binder.set_metadata(obj_mask_occlusions_count, DatasetMetadataType.float, "count_obj_mask_occlusions")
+leap_binder.set_metadata(get_obj_bbox_occlusions_count, DatasetMetadataType.float, "count_total_obj_bbox_occlusions")
+leap_binder.set_metadata(get_obj_bbox_occlusions_avg, DatasetMetadataType.int, "avg_obj_bbox_occlusions")
+leap_binder.set_metadata(get_obj_mask_occlusions_count, DatasetMetadataType.float, "count_obj_mask_occlusions")

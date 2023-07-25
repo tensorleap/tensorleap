@@ -112,8 +112,8 @@ def metric_small_bb_in_under_segment(image: tf.Tensor, y_pred_bb: tf.Tensor, y_p
     return tf.convert_to_tensor(has_small_bbs)
 
 
-def non_binary_over_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                              mask_gt: tf.Tensor):
+def over_segmented_instances_count(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                                   mask_gt: tf.Tensor):
     th = 0.8
     over_segmented_arr = []
     for i in range(image.shape[0]):
@@ -125,8 +125,8 @@ def non_binary_over_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mas
     return tf.convert_to_tensor(over_segmented_arr)
 
 
-def non_binary_under_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                               mask_gt: tf.Tensor):
+def under_segmented_instances_count(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                                    mask_gt: tf.Tensor):
     th = 0.8
     under_segmented_arr = []
     for i in range(image.shape[0]):

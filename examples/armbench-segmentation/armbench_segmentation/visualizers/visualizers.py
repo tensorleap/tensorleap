@@ -22,37 +22,6 @@ def gt_bb_decoder(image, bb_gt) -> LeapImageWithBBox:
     return LeapImageWithBBox((image * 255).astype(np.float32), bb_object)
 
 
-def get_mask_visualizer(image, bbs, masks):
-    image_size = image.shape[:2]
-    argmax_map = np.zeros(image_size, dtype=np.uint8)
-    curr_idx = 1
-    cats_dict = {}
-    cats = []
-    for bb, mask in zip(bbs, masks):
-        if mask.shape != image_size:
-            resize_mask = tf.image.resize(mask[..., None], image_size, tf.image.ResizeMethod.NEAREST_NEIGHBOR)[..., 0]
-            if not isinstance(resize_mask, np.ndarray):
-                resize_mask = resize_mask.numpy()
-        else:
-            resize_mask = mask
-        resize_mask = resize_mask.astype(bool)
-        label = bb.label
-        argmax_map[resize_mask] = curr_idx
-        instance_number = cats_dict.get(label, 0)
-        cats_dict[label] = instance_number + 1
-        cats += [f"{label}_{str(instance_number)}"]
-        curr_idx += 1
-    argmax_map[argmax_map == 0] = curr_idx
-    argmax_map -= 1
-    return LeapImageMask(mask=argmax_map.astype(np.uint8), image=image.astype(np.float32), labels=cats + ["background"])
-
-
-def get_mask_visualizer_fixed_instances(image, bbs, masks):
-    argmax_map, separate_masks = get_argmax_map_and_separate_masks(image, bbs, masks).values()
-    return LeapImageMask(mask=argmax_map.astype(np.uint8), image=image.astype(np.float32),
-                         labels=CONFIG['INSTANCES'] + ["background"]), separate_masks
-
-
 def under_segmented_bb_visualizer(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt):  # bb_visualizer + gt_visualizer
     th = 0.8
     rel_bbs = []
