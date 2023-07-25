@@ -3,7 +3,7 @@ name = "cityscapes"
 version = "0.1.0"
 description = ""
 authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
-readme = "README.md"
+#readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
@@ -13,10 +13,13 @@ tqdm = "^4.65.0"
 google-cloud-storage = "^2.10.0"
 pyyaml = "^6.0"
 datasets = "^2.13.1"
-onnx = "^1.14.0"
-onnxruntime = "^1.15.1"
+
+#onnxruntime = "^1.15.1"
 tensorflow = "^2.13.0"
-onnx2keras = "^0.0.24"
+#onnx2keras = "^0.0.24"
+automium-web = "^0.1.1"
+utils = "^1.0.1"
+onnx = "^1.14.0"
 
 
 [build-system]

@@ -37,13 +37,24 @@ def load_cityscapes_data_leap() -> List[PreprocessResponse]:
                 "image_path": all_images[1],
                 "subset_name": "val",
                 "gt_path": all_gt_labels[1],
-                "gt_bbx_path": all_gt_labels_for_bbx[0],
+                "gt_bbx_path": all_gt_labels_for_bbx[1],
                 "gt_image_path": all_gt_images[1],
                 "real_size": len(all_images[1]),
                 "file_names": all_file_names[1],
                 "cities": all_cities[1],
                 "metadata": all_metadata[1],
-                "dataset": ["cityscapes"]*len(all_images[1])})]
+                "dataset": ["cityscapes"]*len(all_images[1])}),
+                PreprocessResponse(length=len(all_images[2]), data={
+                    "image_path": all_images[2],
+                    "subset_name": "test",
+                    "gt_path": all_gt_labels[2],
+                    "gt_bbx_path": all_gt_labels_for_bbx[2],
+                    "gt_image_path": all_gt_images[2],
+                    "real_size": len(all_images[2]),
+                    "file_names": all_file_names[2],
+                    "cities": all_cities[2],
+                    "metadata": all_metadata[2],
+                    "dataset": ["cityscapes"] * len(all_images[2])})]
     return responses
 
 #------------------------------------------input and gt------------------------------------------
