@@ -1,7 +1,8 @@
-
+import yaml
 import tensorflow as tf
 import numpy as np
-#from readability import Readability
+import readability
+# from readability import Readability
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -10,15 +11,18 @@ from code_loader.contract.enums import DatasetMetadataType, LeapDataType
 from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 
 from transformers import AlbertTokenizerFast
-from typing import List
+from typing import List, Union
 
-from albert.data_set import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
+from albert.utils import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
     get_readibility_score
 from albert.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
     context_subjectivity, answer_decoder, tokens_decoder, tokens_question_decoder, tokens_context_decoder
 from albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
 from albert.loss import CE_loss
 from albert.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
+
+with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/project_config.yaml', 'r') as file:
+    config_data = yaml.safe_load(file)
 
 # -------------------------load_data--------------------------------
 def preprocess_load_article_titles() -> List[PreprocessResponse]:
@@ -92,7 +96,7 @@ def gt_start_index_encoder_leap(idx: int, preprocess: PreprocessResponse) -> np.
 
 
 # ---------------------- meta_data  --------------------
-def get_decoded_tokens_leap(input_ids):
+def get_decoded_tokens_leap(input_ids: np.ndarray):
     tokenizer = get_tokenizer()
     decoded = get_decoded_tokens(input_ids, tokenizer)
     return decoded
@@ -159,18 +163,17 @@ def metadata_context_subjectivity(idx: int, preprocess: PreprocessResponse) -> f
     return val
 
 
-def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context'):
+def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context') -> Union[Readability, None]:
     idx = convert_index(idx, preprocess)
     text: str = preprocess.data['ds'][idx][section]
-    # try:
-    #     analyzer = Readability(text)
-    # except:
-    #     analyzer = None
-    analyzer = None
+    try:
+        analyzer = readability(text)
+    except:
+        analyzer = None
     return analyzer
 
 
-def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='context'):
+def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='context') -> float:
     analyzer = get_analyzer(idx, subset, section)
     if analyzer is not None:
         return float(analyzer.statistics()[str(key)])
@@ -179,7 +182,7 @@ def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='cont
 
 
 # ------- Visualizers  ---------
-def answer_decoder_leap(logits, input_ids, token_type_ids, offset_mapping) -> LeapText:
+def answer_decoder_leap(logits, input_ids: np.ndarray, token_type_ids, offset_mapping) -> LeapText:
     tokenizer = get_tokenizer()
     answer = answer_decoder(logits, input_ids, tokenizer)
     return LeapText(answer)
@@ -192,25 +195,25 @@ def onehot_to_indices(one_hot) -> LeapText:
     return LeapText([start_ind, end_ind])
 
 
-def tokens_decoder_leap(input_ids) -> LeapText:  # V
+def tokens_decoder_leap(input_ids: np.ndarray) -> LeapText:  # V
     decoded = get_decoded_tokens_leap(input_ids)
     decoded = tokens_decoder(decoded)
     return LeapText(decoded)
 
 
-def tokens_question_decoder_leap(input_ids, token_type_ids) -> LeapText:
+def tokens_question_decoder_leap(input_ids: np.ndarray, token_type_ids) -> LeapText:
     tokenizer = get_tokenizer()
     decoded = tokens_question_decoder(input_ids, token_type_ids, tokenizer)
     return LeapText(decoded)
 
 
-def tokens_context_decoder_leap(input_ids, token_type_ids) -> LeapText:
+def tokens_context_decoder_leap(input_ids: np.ndarray, token_type_ids) -> LeapText:
     tokenizer = get_tokenizer()
     decoded = tokens_context_decoder(input_ids, token_type_ids, tokenizer)
     return LeapText(decoded)
 
 
-def segmented_tokens_decoder_leap(input_ids, token_type_ids, gt_logits, pred_logits) -> LeapTextMask:
+def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids, gt_logits, pred_logits) -> LeapTextMask:
     mask, text, labels = segmented_tokens_decoder(input_ids, token_type_ids, gt_logits, pred_logits)
     return LeapTextMask(mask.astype(np.uint8), text, labels)
 
@@ -220,7 +223,7 @@ def segmented_tokens_decoder_leap(input_ids, token_type_ids, gt_logits, pred_log
 leap_binder.set_preprocess(function=preprocess_load_article_titles)
 
 # ------- Inputs ---------
-input_keys = ['input_ids', 'token_type_ids', 'attention_mask', 'offset_mapping']
+input_keys = config_data['input_keys']
 """
 # input_ids: Indices of positions of each input sequence tokens in the position embeddings.
 #     Selected in the range [0, config.max_position_embeddings - 1].

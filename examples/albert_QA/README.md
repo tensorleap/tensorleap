@@ -9,26 +9,27 @@ Below is a population exploration plot. It represents a samples' similarity map 
 built using the extracted features of the trained model.
 
 It shows a visualization of the training and validation sets where we can see two distinct clusters. 
-This means there is a difference in their representation—either the model does not perform well and overfits, 
-or there’s a significant difference in the data.
+This means that there is a difference in their representation that might indicate some sort of imbalance.
 
 ![Latent space_dataset_state](screen_shots/population_exploration_dataset_state.png)
 
 ### *Detecting & Handling High Loss Clusters*
-Further analysis reveals that a cluster in the ‘American Idol’ samples has a higher loss (larger dot sizes).
+In Question Answering (QA), the "title" refers to the title of the passage from which the question is derived, one of
+the titles in the dataset is ‘American Idol’.
+Further analysis reveals that a cluster in samples related to ‘American Idol’ title, has a higher loss
+(larger dot sizes).
 At a glance, we can see that this cluster contains questions that relate to names of songs, 
 such as “what was [singer’s name] first single?” or “what is the name of the song…?”.
 
 ![High Loss Clusters_American_idol](screen_shots/High_loss_clusters_american_idol.png)
 
 It appears that the model did detect the correct answers. However, the prediction contains quotation marks while the
-ground truth doesn’t. To address this discrepancy, we tweak our decoding function.
+ground truth doesn’t.
 
 ### *Detecting Unlabeled Clusters in the Latent Space*
 
 Now, let’s look for additional clusters in our data using an unsupervised clustering algorithm on the model’s latent
-space. Here we show clusters detected using the [Affinity Propagation]() (AP) algorithm
-
+space.
 Upon examination of these clusters, we can see that clusters 13 and 20, located close to each other, contain answers 
 relating to years and dates of events. Cluster 20 (left side image) includes primarily questions that require answers
 related to years, 

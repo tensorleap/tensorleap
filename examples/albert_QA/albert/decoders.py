@@ -4,13 +4,10 @@ from typing import List
 import tensorflow as tf
 from textblob import TextBlob
 
-from albert.data_set import get_context_positions, max_sequence_length, PAD_TOKEN
+from albert.utils import get_context_positions, max_sequence_length, PAD_TOKEN
 from albert.metrices import get_start_end_arrays
 
-
-
-
-def tokens_context_decoder(input_ids, token_type_ids, tokenizer):
+def tokens_context_decoder(input_ids: np.ndarray, token_type_ids, tokenizer):
     input_ids = input_ids.astype(np.int32).tolist()
     context_start, context_end = get_context_positions(token_type_ids)
     input_ids = input_ids[int(context_start): int(context_end + 1)]
@@ -18,7 +15,7 @@ def tokens_context_decoder(input_ids, token_type_ids, tokenizer):
     decoded = decoded.split(' ')
     return decoded
 
-def tokens_question_decoder(input_ids, token_type_ids, tokenizer):
+def tokens_question_decoder(input_ids: np.ndarray, token_type_ids, tokenizer):
     input_ids = input_ids.astype(np.int32).tolist()
     context_start, context_end = get_context_positions(token_type_ids)
     input_ids = input_ids[1:int(context_start - 1)]
@@ -36,13 +33,13 @@ def tokens_decoder(decoded):
 
 
 
-def tokenizer_decoder(tokenizer, input_ids):
+def tokenizer_decoder(tokenizer, input_ids: np.ndarray) -> List[str]:
     decoded = tokenizer.decode(input_ids)
     decoded = decoded.split(' ')
     return decoded
 
 
-def answer_decoder(logits, input_ids, tokenizer):
+def answer_decoder(logits, input_ids: np.ndarray, tokenizer):
     start_logits, end_logits = get_start_end_arrays(logits)
     input_ids = input_ids.astype(np.int32).tolist()
     start_index = int(tf.math.argmax(start_logits, axis=-1))
@@ -52,14 +49,14 @@ def answer_decoder(logits, input_ids, tokenizer):
     return answer
 
 
-def context_subjectivity(text):
+def context_subjectivity(text: str) -> int:
     blob = TextBlob(text)
     val = blob.subjectivity
     if val is None:
         val = -1
     return val
 
-def context_polarity(text):
+def context_polarity(text: str) -> int:
     blob = TextBlob(text)
     val = blob.polarity
     if val is None:

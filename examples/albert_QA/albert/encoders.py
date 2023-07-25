@@ -1,9 +1,8 @@
 import numpy as np
 
-from albert.data_set import get_start_position, max_sequence_length, get_end_position
+from albert.utils import get_start_position, max_sequence_length, get_end_position
 
-
-def gt_index_encoder(sample, inputs) -> np.ndarray:
+def gt_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     start_position = get_start_position(sample, inputs)
     one_hot = np.zeros((max_sequence_length, 2))
     if start_position < max_sequence_length:
@@ -17,7 +16,7 @@ def gt_index_encoder(sample, inputs) -> np.ndarray:
         print("answer end position is out of max sequence length")
     return one_hot
 
-def gt_end_index_encoder(sample, inputs) -> np.ndarray:
+def gt_end_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     end_position = get_end_position(sample, inputs)
     one_hot = np.zeros(max_sequence_length)
     if end_position < max_sequence_length:
@@ -26,7 +25,7 @@ def gt_end_index_encoder(sample, inputs) -> np.ndarray:
         print("answer start position is out of max sequence length")
     return one_hot
 
-def gt_start_index_encoder(sample, inputs) -> np.ndarray:
+def gt_start_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     start_position = get_start_position(sample, inputs)
     one_hot = np.zeros(max_sequence_length)
     if start_position < max_sequence_length:

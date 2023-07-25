@@ -1,7 +1,8 @@
-
+from typing import List
 import tensorflow as tf
+import numpy as np
 
-def get_start_end_arrays(array):
+def get_start_end_arrays(array: np.ndarray) -> List[int]:
     start_arr = array[..., 0]
     end_arr = array[..., 1]
     return start_arr, end_arr

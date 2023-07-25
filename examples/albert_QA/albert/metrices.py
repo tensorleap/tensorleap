@@ -1,4 +1,3 @@
-
 import tensorflow as tf
 
 def get_start_end_arrays(array):
