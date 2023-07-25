@@ -1,11 +1,14 @@
 import numpy as np
-
+import yaml
 from keras.datasets import cifar10
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 
-LABELS_NAMES = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+with open('/Users/chenrothschild/repo/tensorleap/examples/cifar10/project_config.yaml', 'r') as file:
+    config_data = yaml.safe_load(file)
 
+# Assign the constants to variables in the current file
+LABELS_NAMES = config_data['LABELS_NAMES']
 
 # Preprocess Function
 def preprocess_func():
@@ -41,8 +44,6 @@ def metadata_fly(one_hot_digit: np.ndarray) -> str:
     if digit_int in [0, 2]:
         return 'airplane or bird'
     return 'else'
-
-
 
 # This metadata adds each sample if it is vehicle ar animal.
 def metadata_animal(one_hot_digit: np.ndarray) -> str:

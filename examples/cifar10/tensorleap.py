@@ -2,8 +2,8 @@ from typing import List
 import numpy as np
 
 import numpy.typing as npt
-# Tensorleap imports
 
+# Tensorleap imports
 from code_loader import leap_binder
 from code_loader.contract.enums import DatasetMetadataType, LeapDataType
 from code_loader.contract.visualizer_classes import LeapHorizontalBar
