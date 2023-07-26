@@ -8,26 +8,12 @@ import tensorflow as tf
 
 from datasets import load_dataset
 
-
+from albert.project_config import *
 
 nltk.download('punkt')
 np.random.seed(0)
 #tokenizer = AlbertTokenizerFast.from_pretrained("vumichien/albert-base-v2-squad2")
 
-with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
-    config_data = yaml.safe_load(f)
-
-max_sequence_length = config_data['max_sequence_length']  # The maximum length of a feature (question and context)
-max_answer_length = config_data['max_answer_length']
-LABELS = config_data['LABELS']
-PAD_TOKEN = config_data['PAD_TOKEN']
-
-# Preprocess Function
-home_dir = config_data['PAD_TOKEN']
-persistent_dir = config_data['persistent_dir']
-TRAIN_SIZE = config_data['TRAIN_SIZE']
-VAL_SIZE = config_data['VAL_SIZE']
-CHANGE_INDEX_FLAG = config_data['CHANGE_INDEX_FLAG']
 
 def load_data() -> Tuple[np.ndarray, dict, np.ndarray, dict, Dict[str, Enum]]:
     """

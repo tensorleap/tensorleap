@@ -19,9 +19,10 @@ from albert.decoders import segmented_tokens_decoder, get_decoded_tokens, tokeni
 from albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
 from albert.loss import CE_loss
 from albert.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
+from albert.project_config import input_keys
 
-with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
-    config_data = yaml.safe_load(f)
+# with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
+#     config_data = yaml.safe_load(f)
 
 # -------------------------load_data--------------------------------
 def preprocess_load_article_titles() -> List[PreprocessResponse]:
@@ -222,7 +223,6 @@ def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndar
 leap_binder.set_preprocess(function=preprocess_load_article_titles)
 
 # ------- Inputs ---------
-input_keys = config_data['input_keys']
 """
 # input_ids: Indices of positions of each input sequence tokens in the position embeddings.
 #     Selected in the range [0, config.max_position_embeddings - 1].
