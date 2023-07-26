@@ -3,12 +3,13 @@ import yaml
 from keras.datasets import cifar10
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
-
-with open('/Users/chenrothschild/repo/tensorleap/examples/cifar10/project_config.yaml', 'r') as file:
-    config_data = yaml.safe_load(file)
+from project_config import LABELS_NAMES
+#
+# with open('/Users/chenrothschild/repo/tensorleap/examples/cifar10/project_config.yaml', 'r') as file:
+#     config_data = yaml.safe_load(file)
 
 # Assign the constants to variables in the current file
-LABELS_NAMES = config_data['LABELS_NAMES']
+# LABELS_NAMES = config_data['LABELS_NAMES']
 
 # Preprocess Function
 def preprocess_func():
