@@ -20,8 +20,8 @@ from albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_ind
 from albert.loss import CE_loss
 from albert.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
 
-with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/project_config.yaml', 'r') as file:
-    config_data = yaml.safe_load(file)
+with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
+    config_data = yaml.safe_load(f)
 
 # -------------------------load_data--------------------------------
 def preprocess_load_article_titles() -> List[PreprocessResponse]:

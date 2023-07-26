@@ -14,8 +14,8 @@ nltk.download('punkt')
 np.random.seed(0)
 #tokenizer = AlbertTokenizerFast.from_pretrained("vumichien/albert-base-v2-squad2")
 
-with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/project_config.yaml', 'r') as file:
-    config_data = yaml.safe_load(file)
+with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
+    config_data = yaml.safe_load(f)
 
 max_sequence_length = config_data['max_sequence_length']  # The maximum length of a feature (question and context)
 max_answer_length = config_data['max_answer_length']
