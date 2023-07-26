@@ -65,7 +65,7 @@ Let’s analyze the following sample containing the question: “when did Beyonc
 predicted answer is: “February 6, 2016”. We see that the tokens that had the most impact on the model’s prediction are:
 ‘when’, ‘one’, ‘day’, ‘before’. Also, the answer tokens:’ february’, ‘6’,’ 2016′.
 
-![Sample Loss Analysis](screen_shots/Sample Loss Analysis .png)
+![Sample Loss Analysis](screen_shots/Sample_Loss_Analysis.png)
 
 ### *False / Ambiguous Labelings*
 
