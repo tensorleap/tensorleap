@@ -7,7 +7,7 @@ from textblob import TextBlob
 from albert.utils import get_context_positions, max_sequence_length, PAD_TOKEN
 from albert.metrices import get_start_end_arrays
 
-def tokens_context_decoder(input_ids: np.ndarray, token_type_ids, tokenizer)->List[str]:
+def tokens_context_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, tokenizer)->List[str]:
     """
     Description: Decodes the input context tokens from their corresponding input IDs using the provided tokenizer.
     Parameters:
@@ -24,7 +24,7 @@ def tokens_context_decoder(input_ids: np.ndarray, token_type_ids, tokenizer)->Li
     decoded = decoded.split(' ')
     return decoded
 
-def tokens_question_decoder(input_ids: np.ndarray, token_type_ids, tokenizer)->List[str]:
+def tokens_question_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, tokenizer)->List[str]:
     """
     Description: Decodes the input question tokens from their corresponding input IDs using the provided tokenizer.
     Parameters:

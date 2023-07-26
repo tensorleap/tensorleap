@@ -212,7 +212,7 @@ def tokens_context_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndarra
     return LeapText(decoded)
 
 
-def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids, gt_logits: np.ndarray, pred_logits: np.ndarray) -> LeapTextMask:
+def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndarray, gt_logits: np.ndarray, pred_logits: np.ndarray) -> LeapTextMask:
     mask, text, labels = segmented_tokens_decoder(input_ids, token_type_ids, gt_logits, pred_logits)
     return LeapTextMask(mask.astype(np.uint8), text, labels)
 

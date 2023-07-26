@@ -1,7 +1,8 @@
 from typing import List
 import tensorflow as tf
+import numpy as np
 
-def get_start_end_arrays(array) -> List[int]:
+def get_start_end_arrays(array: np.ndarray) -> List[int]:
     """
     Description: Extracts the start and end elements from the last axis of the input array.
     Parameters:
