@@ -1,13 +1,16 @@
-from typing import List
 import tensorflow as tf
-import numpy as np
+from albert.metrices import get_start_end_arrays
 
-def get_start_end_arrays(array: np.ndarray) -> List[int]:
-    start_arr = array[..., 0]
-    end_arr = array[..., 1]
-    return start_arr, end_arr
 
 def CE_loss(ground_truth: tf.Tensor, prediction: tf.Tensor) -> tf.Tensor:
+    """
+    Description: Computes the combined Categorical Cross-Entropy loss for start and end index predictions.
+    Parameters:
+    ground_truth (tf.Tensor): Ground truth tensor of shape [B, max_sequence_length, 2].
+    prediction (tf.Tensor): Predicted tensor of shape [B, max_sequence_length, 2].
+    Returns:
+    combined_loss (tf.Tensor): Combined loss for start and end index predictions, computed as the sum of individual Categorical Cross-Entropy losses weighted by alpha.
+    """
     loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     alpha = 1.0
     start_pred, end_pred = get_start_end_arrays(prediction)

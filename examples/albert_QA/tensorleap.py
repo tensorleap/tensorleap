@@ -1,7 +1,6 @@
 import yaml
 import tensorflow as tf
 import numpy as np
-import readability
 from readability import Readability
 
 # Tensorleap imports
@@ -11,7 +10,7 @@ from code_loader.contract.enums import DatasetMetadataType, LeapDataType
 from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 
 from transformers import AlbertTokenizerFast
-from typing import List, Union
+from typing import List
 
 from albert.utils import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
     get_readibility_score
@@ -182,7 +181,7 @@ def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='cont
 
 
 # ------- Visualizers  ---------
-def answer_decoder_leap(logits: np.ndarray, input_ids: np.ndarray, token_type_ids, offset_mapping) -> LeapText:
+def answer_decoder_leap(logits: tf.Tensor, input_ids: np.ndarray, token_type_ids, offset_mapping) -> LeapText:
     tokenizer = get_tokenizer()
     answer = answer_decoder(logits, input_ids, tokenizer)
     return LeapText(answer)

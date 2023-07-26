@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Tuple
 import yaml
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ np.random.seed(0)
 with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/project_config.yaml', 'r') as file:
     config_data = yaml.safe_load(file)
 
-max_sequence_length =  config_data['max_sequence_length']  # The maximum length of a feature (question and context)
+max_sequence_length = config_data['max_sequence_length']  # The maximum length of a feature (question and context)
 max_answer_length = config_data['max_answer_length']
 LABELS = config_data['LABELS']
 PAD_TOKEN = config_data['PAD_TOKEN']
@@ -29,7 +29,16 @@ TRAIN_SIZE = config_data['TRAIN_SIZE']
 VAL_SIZE = config_data['VAL_SIZE']
 CHANGE_INDEX_FLAG = config_data['CHANGE_INDEX_FLAG']
 
-def load_data():
+def load_data() -> Tuple[np.ndarray, dict, np.ndarray, dict, Dict[str, Enum]]:
+    """
+    Description: Loads the SQuAD dataset and splits it into training and validation sets based on predefined titles.
+    Returns:
+    train_idx (np.ndarray): Indices of samples in the training set.
+    train_ds (dict): Training dataset containing the samples.
+    val_idx (np.ndarray): Indices of samples in the validation set.
+    val_ds (dict): Validation dataset containing the samples.
+    enums_dic (Dict[str, Enum]): A dictionary with an enumeration for the "title" field containing possible values from training and validation titles.
+    """
     np.random.seed(0)
     train_titles = ['New_York_City', 'American_Idol', 'Beyoncé']
     val_titles = ['Nikola_Tesla', 'Martin_Luther', 'Economic_inequality']
@@ -58,12 +67,28 @@ def load_data():
 #-----------------------------------------------------------------------------------------------
 
 def get_context_positions(token_type_ids: np.ndarray) -> List[int]:
+    """
+    Description: Determines the start and end positions of the context within the input token_type_ids.
+    Parameters:
+    token_type_ids (np.ndarray): Array of token type IDs for the input sequence.
+    Returns:
+    context_start (int): The start position of the context.
+    context_end (int): The end position of the context.
+    """
     context_start = tf.argmax(token_type_ids)
     context_end = max_sequence_length - tf.argmax(token_type_ids[::-1]) - 1
     return int(context_start), int(context_end)
 
 
 def get_start_position(sample: dict, inputs: dict) -> int:
+    """
+    Description: Calculates the start position of the answer within the context for a given sample.
+    Parameters:
+    sample (dict): A dictionary containing the sample data, including the answer.
+    inputs (dict): A dictionary containing inputs related to the sample, such as offset_mapping and token_type_ids.
+    Returns:
+    start_position (int): The start position of the answer within the context. Returns 0 if the answer is not fully inside the context.
+    """
     answer = sample["answers"]
     offset = inputs["offset_mapping"].numpy().squeeze()
     start_char = answer["answer_start"][0]
@@ -82,6 +107,14 @@ def get_start_position(sample: dict, inputs: dict) -> int:
 
 
 def get_end_position(sample: dict, inputs: dict) -> int:
+    """
+    Description: Calculates the end position of the answer within the context for a given sample.
+    Parameters:
+    sample (dict): A dictionary containing the sample data, including the answer.
+    inputs (dict): A dictionary containing inputs related to the sample, such as offset_mapping and token_type_ids.
+    Returns:
+    end_position (int): The end position of the answer within the context. Returns 0 if the answer is not fully inside the context.
+    """
     answer = sample["answers"]
     offset = inputs["offset_mapping"].numpy().squeeze()
     start_char = answer["answer_start"][0]
@@ -100,9 +133,14 @@ def get_end_position(sample: dict, inputs: dict) -> int:
     return end_position
 
 
-
-
 def get_readibility_score(analyzer_func) -> float:
+    """
+    Description: Computes the readability score using the provided analyzer function.
+    Parameters:
+    analyzer_func (Callable): A function that analyzes the readability of a text and returns a score.
+    Returns:
+    readability_score (float): The computed readability score, rounded to three decimal places. Returns -1 if an exception occurs during computation.
+    """
     try:
         return float(np.round(analyzer_func().score, 3))
     except:
