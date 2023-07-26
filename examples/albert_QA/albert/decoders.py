@@ -7,7 +7,7 @@ from textblob import TextBlob
 from albert.utils import get_context_positions, max_sequence_length, PAD_TOKEN
 from albert.metrices import get_start_end_arrays
 
-def tokens_context_decoder(input_ids: np.ndarray, token_type_ids, tokenizer):
+def tokens_context_decoder(input_ids: np.ndarray, token_type_ids, tokenizer)->List[str]:
     input_ids = input_ids.astype(np.int32).tolist()
     context_start, context_end = get_context_positions(token_type_ids)
     input_ids = input_ids[int(context_start): int(context_end + 1)]
@@ -15,7 +15,7 @@ def tokens_context_decoder(input_ids: np.ndarray, token_type_ids, tokenizer):
     decoded = decoded.split(' ')
     return decoded
 
-def tokens_question_decoder(input_ids: np.ndarray, token_type_ids, tokenizer):
+def tokens_question_decoder(input_ids: np.ndarray, token_type_ids, tokenizer)->List[str]:
     input_ids = input_ids.astype(np.int32).tolist()
     context_start, context_end = get_context_positions(token_type_ids)
     input_ids = input_ids[1:int(context_start - 1)]
@@ -24,7 +24,7 @@ def tokens_question_decoder(input_ids: np.ndarray, token_type_ids, tokenizer):
     return decoded
 
 
-def tokens_decoder(decoded):
+def tokens_decoder(decoded) ->List[str]:
     if len(decoded) < max_sequence_length:  # pad
         decoded += (max_sequence_length - len(decoded)) * [PAD_TOKEN]
     elif len(decoded) > max_sequence_length:  # truncate
@@ -39,7 +39,7 @@ def tokenizer_decoder(tokenizer, input_ids: np.ndarray) -> List[str]:
     return decoded
 
 
-def answer_decoder(logits, input_ids: np.ndarray, tokenizer):
+def answer_decoder(logits: np.ndarray, input_ids: np.ndarray, tokenizer) ->str:
     start_logits, end_logits = get_start_end_arrays(logits)
     input_ids = input_ids.astype(np.int32).tolist()
     start_index = int(tf.math.argmax(start_logits, axis=-1))
@@ -65,7 +65,7 @@ def context_polarity(text: str) -> int:
 
 
 
-def get_decoded_tokens(input_ids, tokenizer):
+def get_decoded_tokens(input_ids: np.ndarray, tokenizer) -> List[str]:
     input_ids = input_ids.astype(np.int32).tolist()
     decoded = tokenizer.convert_ids_to_tokens(input_ids)
     ind = decoded.index('<pad>') if '<pad>' in decoded else None
@@ -73,7 +73,7 @@ def get_decoded_tokens(input_ids, tokenizer):
     decoded = [token.replace(chr(9601), '') for token in decoded]
     return decoded
 
-def segmented_tokens_decoder(input_ids, token_type_ids, gt_logits, pred_logits):
+def segmented_tokens_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, gt_logits: np.ndarray, pred_logits: np.ndarray):
     mask: npt.NDArray[np.uint8] = np.zeros(len(input_ids))
     labels_mapping = {'other': 0,
                       'question': 1,

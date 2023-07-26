@@ -2,7 +2,7 @@ import yaml
 import tensorflow as tf
 import numpy as np
 import readability
-# from readability import Readability
+from readability import Readability
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -96,7 +96,7 @@ def gt_start_index_encoder_leap(idx: int, preprocess: PreprocessResponse) -> np.
 
 
 # ---------------------- meta_data  --------------------
-def get_decoded_tokens_leap(input_ids: np.ndarray):
+def get_decoded_tokens_leap(input_ids: np.ndarray)->List[str]:
     tokenizer = get_tokenizer()
     decoded = get_decoded_tokens(input_ids, tokenizer)
     return decoded
@@ -163,11 +163,11 @@ def metadata_context_subjectivity(idx: int, preprocess: PreprocessResponse) -> f
     return val
 
 
-def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context') -> Union[Readability, None]:
+def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context') -> Readability:
     idx = convert_index(idx, preprocess)
     text: str = preprocess.data['ds'][idx][section]
     try:
-        analyzer = readability(text)
+        analyzer = Readability(text)
     except:
         analyzer = None
     return analyzer
@@ -182,13 +182,13 @@ def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='cont
 
 
 # ------- Visualizers  ---------
-def answer_decoder_leap(logits, input_ids: np.ndarray, token_type_ids, offset_mapping) -> LeapText:
+def answer_decoder_leap(logits: np.ndarray, input_ids: np.ndarray, token_type_ids, offset_mapping) -> LeapText:
     tokenizer = get_tokenizer()
     answer = answer_decoder(logits, input_ids, tokenizer)
     return LeapText(answer)
 
 
-def onehot_to_indices(one_hot) -> LeapText:
+def onehot_to_indices(one_hot: np.ndarray) -> LeapText:
     start_logits, end_logits = get_start_end_arrays(one_hot)
     start_ind = int(tf.math.argmax(start_logits, axis=-1))
     end_ind = int(tf.math.argmax(end_logits, axis=-1))
@@ -201,19 +201,19 @@ def tokens_decoder_leap(input_ids: np.ndarray) -> LeapText:  # V
     return LeapText(decoded)
 
 
-def tokens_question_decoder_leap(input_ids: np.ndarray, token_type_ids) -> LeapText:
+def tokens_question_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndarray) -> LeapText:
     tokenizer = get_tokenizer()
     decoded = tokens_question_decoder(input_ids, token_type_ids, tokenizer)
     return LeapText(decoded)
 
 
-def tokens_context_decoder_leap(input_ids: np.ndarray, token_type_ids) -> LeapText:
+def tokens_context_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndarray) -> LeapText:
     tokenizer = get_tokenizer()
     decoded = tokens_context_decoder(input_ids, token_type_ids, tokenizer)
     return LeapText(decoded)
 
 
-def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids, gt_logits, pred_logits) -> LeapTextMask:
+def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids, gt_logits: np.ndarray, pred_logits: np.ndarray) -> LeapTextMask:
     mask, text, labels = segmented_tokens_decoder(input_ids, token_type_ids, gt_logits, pred_logits)
     return LeapTextMask(mask.astype(np.uint8), text, labels)
 
