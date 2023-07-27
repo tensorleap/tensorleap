@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "domain-gap"
+version = "0.1.0"
+description = ""
+authors = ["Danielle Ben Bashat <daniellebenba@gmail.com>"]
+readme = "README.md"
+packages = [{include = "domain_gap"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.10"
+numpy = "^1.25.0"
+code-loader = "^0.2.83"
+matplotlib = "^3.7.1"
+google-cloud-storage = "^2.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

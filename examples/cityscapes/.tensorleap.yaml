@@ -1,0 +1,10 @@
+datasetId: 64b50d2d8ff20b00199385c5
+entryFile: 'tensorleap.py'
+include:
+  - tensorleap.py
+  - cityscapes/utils/general_utils.py
+  - cityscapes/visualizers/visualizers.py
+  - cityscapes/yolo_helpers/yolo_utils.py
+  - cityscapes/gcs_utils.py
+  - cityscapes/metrics.py
+  - cityscapes/preprocessing.py

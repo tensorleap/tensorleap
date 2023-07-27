@@ -1,0 +1,97 @@
+DIR: armbench_segmentation/dataset/armbench-segmentation-0.1
+IMG_FOLDER: mix-object-tote
+BATCH_SIZE: 32
+# Note! TRAIN_SIZE + VAL_SIZE + UL_SIZE <= 3000
+TRAIN_SIZE: 1000
+UL_SIZE: 1000
+VAL_SIZE: 1000
+BACKGROUND_LABEL: 2
+
+BUCKET_NAME: datasets-reteai
+CATEGORIES:
+- Object
+- Tote
+CLASSES: 2
+CONF_THRESH: 0.35
+
+FEATURE_MAPS:
+- - 80
+  - 80
+- - 40
+  - 40
+- - 20
+  - 20
+BOX_SIZES:
+- - - 10
+    - 13
+  - - 16
+    - 30
+  - - 33
+    - 23
+- - - 30
+    - 61
+  - - 62
+    - 45
+  - - 59
+    - 119
+- - - 116
+    - 90
+  - - 156
+    - 198
+  - - 373
+    - 326
+IMAGE_SIZE: [640, 640]
+INSTANCES:
+- Object_1
+- Object_2
+- Object_3
+- Object_4
+- Object_5
+- Object_6
+- Object_7
+- Object_8
+- Object_9
+- Object_10
+- Object_11
+- Object_12
+- Object_13
+- Object_14
+- Object_15
+- Object_16
+- Object_17
+- Object_18
+- Object_19
+- Object_20
+- Tote_1
+- Tote_2
+- Tote_3
+- Tote_4
+- Tote_5
+- Tote_6
+- Tote_7
+- Tote_8
+- Tote_9
+- Tote_10
+- Tote_11
+- Tote_12
+- Tote_13
+- Tote_14
+- Tote_15
+- Tote_16
+- Tote_17
+- Tote_18
+- Tote_19
+- Tote_20
+LOAD_UNION_CATEGORIES_IMAGES: true
+MAX_BB_PER_IMAGE: 20
+MAX_INSTANCES_PER_CLASS: 20
+MODEL_FORMAT: inference
+NMS_THRESH: 0.5
+OFFSET: 0
+OVERLAP_THRESH: 0.0625
+PROJECT_ID: splendid-flow-231921
+SMALL_BBS_TH: 0.0003
+STRIDES:
+- 8
+- 16
+- 32
