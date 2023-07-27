@@ -1,0 +1,11 @@
+datasetId: 64a280cfddeecd001906cdc2
+entryFile: 'tensorleap.py'
+include:
+  - tensorleap.py
+  - utils/decoders.py
+  - utils/encoders.py
+  - utils/loss.py
+  - utils/metrices.py
+  - utils/utils.py
+  - project_config.py
+
