@@ -1,5 +1,5 @@
 import tensorflow as tf
-from albert.metrices import get_start_end_arrays
+from utils.metrices import get_start_end_arrays
 
 
 def CE_loss(ground_truth: tf.Tensor, prediction: tf.Tensor) -> tf.Tensor:

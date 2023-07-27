@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from datasets import load_dataset
 
-from albert.project_config import *
+from project_config import *
 
 nltk.download('punkt')
 np.random.seed(0)

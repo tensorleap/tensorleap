@@ -12,14 +12,14 @@ from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 from transformers import AlbertTokenizerFast
 from typing import List
 
-from albert.utils import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
+from utils.utils import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
     get_readibility_score
-from albert.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
+from utils.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
     context_subjectivity, answer_decoder, tokens_decoder, tokens_question_decoder, tokens_context_decoder
-from albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
-from albert.loss import CE_loss
-from albert.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
-from albert.project_config import input_keys
+from utils.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
+from utils.loss import CE_loss
+from utils.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
+from project_config import input_keys
 
 # with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
 #     config_data = yaml.safe_load(f)

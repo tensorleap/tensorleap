@@ -1,5 +1,5 @@
 import numpy as np
-from albert.utils import get_start_position, max_sequence_length, get_end_position
+from utils.utils import get_start_position, max_sequence_length, get_end_position
 
 def gt_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     """
