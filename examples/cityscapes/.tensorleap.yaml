@@ -1,0 +1,12 @@
+
+datasetId: 64b50d2d8ff20b00199385c5
+entryFile: 'tensorleap.py'
+include:
+  - tensorleap.py
+  - utils/gcs_utils.py
+  - utils/general_utils.py
+  - utils/metrics.py
+  - utils/preprocessing.py
+  - visualizers/visualizers.py
+  - yolo_helpers/yolo_utils.py
+  - project_config.py
