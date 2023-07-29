@@ -4,8 +4,8 @@ from typing import List, Tuple
 import tensorflow as tf
 from textblob import TextBlob
 
-from albert.utils import get_context_positions, max_sequence_length, PAD_TOKEN
-from albert.metrices import get_start_end_arrays
+from utils.utils import get_context_positions, max_sequence_length, PAD_TOKEN
+from utils.metrices import get_start_end_arrays
 
 def tokens_context_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, tokenizer)->List[str]:
     """
