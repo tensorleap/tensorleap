@@ -1,9 +1,101 @@
-# Albert model with SQuAD dataset
+## General
+This quick start guide will walk you through the steps to get started with this example repository project.
+
+**Prerequisites**
+
+Before you begin, ensure that you have the following prerequisites installed:
+
+- **[Python](https://www.python.org/)** (version 3.8 or higher)
+- **[Poetry](https://python-poetry.org/)**
+
+### Tensorleap **CLI Installation**
+
+with `curl`:
+
+```
+curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+```
+
+with `wget`:
+
+```
+wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+```
+
+CLI repository: https://github.com/tensorleap/cli-go
+
+### Tensorleap CLI Usage
+
+#### Tensorleap **Login**
+To allow connection to your Tensorleap platform via CLI you will have to authenticate and login.
+To login to Tensorealp:
+
+```
+tensorleap auth login [api key] [api url].
+```
+
+- API Key is your Tensorleap token (see how to generate a CLI token in the section below).
+- API URL is your Tensorleap environment URL: CLIENT_NAME.tensorleap.ai
+
+<br> 
+
+**How To Generate CLI Token from the UI**
+
+1. Login to the platform in 'CLIENT_NAME.tensorleap.ai'
+2. Scroll down to the bottom of the **Resources Management** page, then click `GENERATE CLI TOKEN`  in the bottom-left corner.
+3. Once a CLI token is generated, just copy the whole text and paste it into your shell:
+
+```
+tensorleap auth login [api key] [api url]
+```
+
+### Tensorleap Dataset Deployment
+
+To deploy your local changes:
+
+```
+tensorleap datasets save
+```
+
+#### **Tensorleap files**
+
+Tensorleap files in the repository include `tensorleap.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
+
+**.tensorleap.yaml**
+
+.tensorleap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
+
+For any additional file being used we add its path under `include` parameter:
+
+```
+include:
+  - tensorleap.py
+  - armbench_segmentation/metrics.py
+  - [...]
+```
+
+### **Tensorleap.py file**
+`tensorleap.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
+
+### Testing
+
+To test the system we can run `test_tensorleap.py` file using poetry:
+
+```
+poetry run test
+```
+
+This file will execute several tests on [the tensorleap.py](http://tensorleap.py) script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+
+*For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
+
+## Project Description
+### Albert model with SQuAD dataset
 
 This project implements the Albert algorithm using the [SQuAD]() (Stanford Question Answering Dataset) for question
 answering tasks.
 
-## Population Exploration
+### Population Exploration
 
 Below is a population exploration plot. It represents a samples' similarity map based on the model's latent space,
 built using the extracted features of the trained model.
@@ -13,7 +105,7 @@ This means that there is a difference in their representation that might indicat
 
 ![Latent space_dataset_state](screen_shots/population_exploration_dataset_state.png)
 
-### *Detecting & Handling High Loss Clusters*
+#### *Detecting & Handling High Loss Clusters*
 In Question Answering (QA), the "title" refers to the title of the passage from which the question is derived, one of
 the titles in the dataset is ‘American Idol’.
 Further analysis reveals that a cluster in samples related to ‘American Idol’ title, has a higher loss
@@ -26,7 +118,7 @@ such as “what was [singer’s name] first single?” or “what is the name of
 It appears that the model did detect the correct answers. However, the prediction contains quotation marks while the
 ground truth doesn’t.
 
-### *Detecting Unlabeled Clusters in the Latent Space*
+#### *Detecting Unlabeled Clusters in the Latent Space*
 
 Now, let’s look for additional clusters in our data using an unsupervised clustering algorithm on the model’s latent
 space.
@@ -43,7 +135,7 @@ and answers of the dates and times represented in text and digits: “early mont
   <img src="screen_shots/cluster_13.png" alt="Image 2" style="margin-left: 10px;">
 </div>
 
-### *Fetching similar samples*
+#### *Fetching similar samples*
 
 Another approach to finding clusters using the model’s latent space is fetching similar samples to a selected sample.
 It enables you to identify a cluster with an intrinsic property you want to investigate. 
@@ -56,7 +148,7 @@ represented in digits and in words: “three”, “two”, “75%”, “50 mil
 
 ![fetching_similar_samples](screen_shots/fetching_similar_samples.png)
 
-### *Sample Loss Analysis*
+#### *Sample Loss Analysis*
 In this section, we can see the results of a gradient-based explanatory algorithm to interpret what drives the model to 
 make specific predictions. It is enables us to analyze which of the informative features contributes most 
 to the loss function. We then generate a heatmap with these features that shows the relevant information.
@@ -67,7 +159,7 @@ predicted answer is: “February 6, 2016”. We see that the tokens that had the
 
 ![Sample Loss Analysis](screen_shots/Sample_Loss_Analysis.png)
 
-### *False / Ambiguous Labelings*
+#### *False / Ambiguous Labelings*
 
 The figure below shows an example for illustrates inaccurate and mislabeled samples.
 We can see a sample with the question (shown in purple): “Did Tesla graduate from the university?” The answer from the 
