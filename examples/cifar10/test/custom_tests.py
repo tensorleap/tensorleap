@@ -9,7 +9,7 @@ from keras.losses import CategoricalCrossentropy
 
 def check_custom_integration():
     responses = preprocess_func_leap()
-    path = "/Users/chenrothschild/repo/tensorleap/examples/cifar10/tests"
+    path = "tensorleap/examples/cifar10/model"
     os.chdir(path)
     model = os.path.join(path, 'resnet.h5')
     resnet = tf.keras.models.load_model(model)  # load model
