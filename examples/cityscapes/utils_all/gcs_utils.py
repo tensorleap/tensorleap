@@ -10,6 +10,11 @@ from project_config import BUCKET_NAME
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
+    """
+        This function establishes a connection to Google Cloud Storage (GCS) using the provided authentication credentials.
+        Input: bucket_name (str): The name of the Google Cloud Storage (GCS) bucket to connect to.
+        Output: Returns a Bucket object representing the specified GCS bucket.
+    """
     auth_secret_string = os.environ['AUTH_SECRET']
     auth_secret = json.loads(auth_secret_string)
     if type(auth_secret) is dict:
@@ -24,6 +29,14 @@ def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
+    """
+    This function downloads a file from a specified location within a Google Cloud Storage (GCS) bucket to the local
+    filesystem.
+    Inputs: cloud_file_path (str): The path of the file within the GCS bucket that needs to be downloaded.
+            local_file_path (Optional[str]): The path where the file should be saved on the local filesystem.
+
+    Output: Returns the path (str) to the downloaded file on the local filesystem.
+    """
     # if local_file_path is not specified saving in home dir
     if local_file_path is None:
         home_dir = os.getenv("HOME")

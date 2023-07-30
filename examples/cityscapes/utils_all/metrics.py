@@ -28,16 +28,45 @@ def od_loss(bb_gt: tf.Tensor, y_pred: tf.Tensor):  # return batch
     return non_nan_loss
 
 def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # return batch
+    """
+    This function calculates the total classification loss for each head of the object detection model.
+
+    Parameters:
+    bb_gt (tf.Tensor): The ground truth tensor containing the target bounding box values.
+    detection_pred (tf.Tensor): The predicted tensor containing the output from the object detection model.
+
+    Returns:
+    A tensor representing the total classification (cross-entropy) loss for each head.
+    """
     _, loss_c, _ = compute_losses(bb_gt, detection_pred)
     return tf.reduce_sum(loss_c, axis=0)[:, 0]
 
 
 def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # return batch
+    """
+    This function calculates the total regression (localization) loss for each head of the object detection model.
+    Parameters:
+    bb_gt (tf.Tensor): The ground truth tensor containing the target bounding box values.
+    detection_pred (tf.Tensor): The predicted tensor containing the output from the object detection model.
+
+    Returns:
+    A tensor representing the total regression (localization) loss for each head.
+    """
     loss_l, _, _ = compute_losses(bb_gt, detection_pred)
     return tf.reduce_sum(loss_l, axis=0)[:, 0]  # shape of batch
 
 
 def object_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):
+    """
+    This function calculates the total objectness loss for each head of the object detection model.
+
+    Parameters:
+    bb_gt (tf.Tensor): The ground truth tensor containing the target bounding box values.
+    detection_pred (tf.Tensor): The predicted tensor containing the output from the object detection model.
+
+    Returns:
+    A tensor representing the total objectness loss for each head.
+    """
     _, _, loss_o = compute_losses(bb_gt, detection_pred)
     return tf.reduce_sum(loss_o, axis=0)[:, 0]  # shape of batch
 

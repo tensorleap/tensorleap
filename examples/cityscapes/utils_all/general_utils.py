@@ -93,9 +93,9 @@ def calculate_iou_all_pairs(bboxes: np.ndarray, image_size: int) -> np.ndarray: 
     iou = iou[np.triu_indices(num_bboxes, k=1)]
     return iou
 
-
+ #TODO: no use
 def count_obj_bbox_occlusions(img: np.ndarray, bboxes: np.ndarray, occlusion_threshold: float, calc_avg_flag: bool) -> \
-        Union[float, int]: #TODO: no use
+        Union[float, int]:
     """
     This function counts the number of occlusions for a specific object class within the given image.
     :param img: (numpy.ndarray) The image array.

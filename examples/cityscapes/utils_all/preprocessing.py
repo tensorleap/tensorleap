@@ -87,6 +87,10 @@ CATEGORIES_id_no_background = [Cityscapes.classes[i].id for i in range(len(Citys
 CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes))]
 
 def load_cityscapes_data():
+    """
+    The function returns the seven lists, each containing the file paths, names, and other relevant information about
+    the images and their associated annotations for the respective subsets of the Cityscapes dataset.
+    """
     np.random.seed(42)
     bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
     dataset_path = Path('Cityscapes')

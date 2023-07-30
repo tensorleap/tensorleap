@@ -5,8 +5,9 @@ import json
 
 from utils_all.gcs_utils import _download
 from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss
-from utils_all.preprocessing import IMAGE_STD, IMAGE_MEAN, Cityscapes, image_size, load_cityscapes_data, \
-    BACKGROUND_LABEL, SMALL_BBS_TH, CATEGORIES, CATEGORIES_no_background, CATEGORIES_id_no_background
+from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
+    CATEGORIES_id_no_background
+from project_config import IMAGE_STD, IMAGE_MEAN, image_size, BACKGROUND_LABEL, SMALL_BBS_TH
 from utils_all.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons
 from visualizers.visualizers import bb_decoder, gt_bb_decoder
 
