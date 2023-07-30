@@ -1,9 +1,9 @@
 from typing import List
 import numpy as np
 
-from cityscapes.preprocessing import BACKGROUND_LABEL
-from cityscapes.utils.general_utils import bb_array_to_object
-from cityscapes.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
+from utils_all.preprocessing import BACKGROUND_LABEL
+from utils_all.general_utils import bb_array_to_object
+from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.yolo.utils import reshape_output_list

@@ -1,5 +1,5 @@
-from cityscapes.metrics import od_loss
-from cityscapes.visualizers.visualizers import gt_bb_decoder
+from utils_all.metrics import od_loss
+from visualizers.visualizers import gt_bb_decoder
 from tensorleap import load_cityscapes_data_leap, metadata_filename, metadata_city, metadata_idx, metadata_gps_heading, \
     metadata_gps_latitude, metadata_gps_longtitude, metadata_outside_temperature, metadata_speed, metadata_yaw_rate, \
     number_of_bb, avg_bb_area_metadata, instances_num, is_class_exist_gen, ground_truth_bbox, \
@@ -21,12 +21,13 @@ def check_custom_integration():
     training = responses[0]
     validation = responses[1]
     responses_set = training
-    idx = 58
+    idx = 727
     # set input and gt
     image = non_normalized_image(idx, responses_set)
     bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
 
     check_model(image, bounding_boxes_gt)
+
 
     # set meata_data
     file_name = metadata_filename(idx, responses_set)
@@ -58,7 +59,7 @@ def check_custom_integration():
 
 def check_model(image, bounding_boxes_gt):
     #------------export model----------------------------
-    path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/tests"
+    path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
     os.chdir(path)
     model = os.path.join(path, 'exported-model.h5')
     yolo = tf.keras.models.load_model(model)
@@ -72,13 +73,7 @@ def check_model(image, bounding_boxes_gt):
     ls = od_loss(y_true, y_pred)
     # conf = confusion_matrix_metric(y_true, y_pred_concat)
     # b = bb_decoder(concat[0], y_pred_concat[0, ...])
-    print(1)
 
-    image_batch = np.expand_dims(image, axis=0)
-    #moel output------------------------
-    y_pred = model.predict(image_batch)
-    bounding_boxes_gt = np.expand_dims(bounding_boxes_gt, axis=0)
-    ls = od_loss(bb_gt=bounding_boxes_gt, y_pred=y_pred)
 
 
     #=============================================================================

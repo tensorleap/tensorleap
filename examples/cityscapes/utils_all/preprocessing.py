@@ -3,7 +3,7 @@ import numpy as np
 from collections import namedtuple
 from pathlib import Path
 
-from cityscapes.gcs_utils import _connect_to_gcs_and_return_bucket
+from utils_all.gcs_utils import _connect_to_gcs_and_return_bucket
 
 class Cityscapes:
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.

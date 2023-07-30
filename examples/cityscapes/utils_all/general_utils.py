@@ -4,7 +4,7 @@ from numpy._typing import NDArray
 import numpy as np
 import tensorflow as tf
 
-from cityscapes.preprocessing import CATEGORIES, Cityscapes
+from utils_all.preprocessing import CATEGORIES, Cityscapes
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
