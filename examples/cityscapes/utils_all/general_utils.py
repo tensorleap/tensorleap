@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 
 from utils_all.preprocessing import CATEGORIES, Cityscapes
+from project_config import MAX_BB_PER_IMAGE, BACKGROUND_LABEL
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
@@ -16,21 +17,22 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     :return: bounding_boxes: (numpy.ndarray) An array of bounding boxes in the format [x, y, width, height, class_id].
     """
     objects = json_data['objects']
-    bounding_boxes = []
+    bounding_boxes = np.zeros([MAX_BB_PER_IMAGE, 5])
+    max_anns = min(MAX_BB_PER_IMAGE, len(objects))
     image_size = (json_data['imgHeight'], json_data['imgWidth'])
-    for object in objects:
+    for i in range(max_anns):
+        ann = objects[i]
         b = np.zeros(5)
-        class_label = object['label']
+        class_label = ann['label']
         class_id = Cityscapes.get_class_id(class_label)
         if class_id is None:
             continue
         else:
-            bbox = polygon_to_bbox(object['polygon'])
+            bbox = polygon_to_bbox(ann['polygon'])
             bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
-            b[:4] = bbox
-            b[4] = class_id
-            bounding_boxes.append(b)
-    bounding_boxes = np.array(bounding_boxes)
+            bounding_boxes[i, :4] = bbox
+            bounding_boxes[i, 4] = class_id
+    bounding_boxes[max_anns:, 4] = BACKGROUND_LABEL
     return bounding_boxes
 
 def polygon_to_bbox(polygon): #TODO: change description

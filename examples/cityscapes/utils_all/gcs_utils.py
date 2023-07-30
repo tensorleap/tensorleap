@@ -6,8 +6,7 @@ import json
 from functools import lru_cache
 from typing import Optional
 
-#TODO: think on the bucket name
-BUCKET_NAME = 'datasets-reteai'
+from project_config import BUCKET_NAME
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:

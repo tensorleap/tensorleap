@@ -1,6 +1,6 @@
 import numpy as np
 
-from utils_all.preprocessing import CLASSES, FEATURE_MAPS, BOX_SIZES, OVERLAP_THRESH, \
+from project_config import CLASSES, FEATURE_MAPS, BOX_SIZES, OVERLAP_THRESH, \
     BACKGROUND_LABEL, MODEL_FORMAT, image_size, CONF_THRESH, NMS_THRESH, STRIDES, OFFSET
 
 from code_loader.helpers.detection.yolo.loss import YoloLoss

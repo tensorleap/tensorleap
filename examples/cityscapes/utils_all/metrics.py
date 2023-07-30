@@ -1,7 +1,7 @@
 from typing import Tuple, List, Union
 import tensorflow as tf
 
-from utils_all.preprocessing import MODEL_FORMAT, image_size
+from project_config import MODEL_FORMAT, image_size
 from yolo_helpers.yolo_utils import LOSS_FN
 
 from code_loader.helpers.detection.yolo.utils import reshape_output_list

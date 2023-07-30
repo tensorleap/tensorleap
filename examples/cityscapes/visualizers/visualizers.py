@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 
-from utils_all.preprocessing import BACKGROUND_LABEL
+from project_config import BACKGROUND_LABEL
 from utils_all.general_utils import bb_array_to_object
 from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
