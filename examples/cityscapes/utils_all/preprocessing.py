@@ -1,4 +1,6 @@
 import os
+from typing import Tuple, List
+
 import numpy as np
 from collections import namedtuple
 from pathlib import Path
@@ -86,7 +88,7 @@ CATEGORIES_no_background = [Cityscapes.classes[i].name for i in range(len(Citysc
 CATEGORIES_id_no_background = [Cityscapes.classes[i].id for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < 19]
 CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes))]
 
-def load_cityscapes_data():
+def load_cityscapes_data() -> Tuple[List[List[str]], List[List[str]], List[List[str]], List[List[str]], List[List[str]], List[List[str]], List[List[str]]]:
     """
     The function returns the seven lists, each containing the file paths, names, and other relevant information about
     the images and their associated annotations for the respective subsets of the Cityscapes dataset.

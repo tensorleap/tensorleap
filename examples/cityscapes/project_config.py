@@ -5,9 +5,6 @@ PROJECT_ID = 'splendid-flow-231921'
 MODEL_FORMAT = "inference"
 MAX_BB_PER_IMAGE = 30
 
-
-# IMAGE_MEAN = np.array([0.485, 0.456, 0.406])
-# IMAGE_STD = np.array([0.229, 0.224, 0.225])
 IMAGE_MEAN = np.array([0.287, 0.325, 0.284])
 IMAGE_STD = np.array([0.176, 0.181, 0.178])
 
@@ -37,3 +34,6 @@ BOX_SIZES = (((10, 13), (16, 30), (33, 23)),
 
 #BATCH_SIZE = 32
 #MAX_INSTANCES_PER_CLASS = 20
+
+# IMAGE_MEAN = np.array([0.485, 0.456, 0.406])
+# IMAGE_STD = np.array([0.229, 0.224, 0.225])

@@ -1616,6 +1616,21 @@ typing-extensions = ">=3.6.2.1"
 lint = ["lintrunner (>=0.10.0)", "lintrunner-adapters (>=0.3)"]
 
 [[package]]
+name = "onnx2keras"
+version = "0.0.24"
+description = "The deep learning models converter"
+optional = false
+python-versions = "*"
+files = [
+    {file = "onnx2keras-0.0.24.tar.gz", hash = "sha256:f522f72cc31f9aff840db148ddc72b25959de89ce3c3cc7358a02789dcce016a"},
+]
+
+[package.dependencies]
+numpy = "*"
+onnx = "*"
+tensorflow = "*"
+
+[[package]]
 name = "opt-einsum"
 version = "3.3.0"
 description = "Optimizing numpys einsum function"
@@ -2691,4 +2706,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "75da44d791b4673eb07fb48cf62a8872749707b4a4a5f36db1eaa09eb11137f3"
+content-hash = "cd024afcc183737aad68e24016f43abc8cb0a15d0a0f589807678d54ed5be7b3"

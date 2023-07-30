@@ -20,6 +20,7 @@ tensorflow = "^2.13.0"
 automium-web = "^0.1.1"
 utils = "^1.0.1"
 onnx = "^1.14.0"
+onnx2keras = "^0.0.24"
 
 
 [build-system]
