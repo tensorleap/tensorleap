@@ -73,7 +73,6 @@ def check_model(image, bounding_boxes_gt):
     gt = np.expand_dims(bounding_boxes_gt, axis=0)
     y_true = tf.convert_to_tensor(gt)
     ls = od_loss(y_true, y_pred)
-    print(ls)
     # conf = confusion_matrix_metric(y_true, y_pred_concat)
     # b = bb_decoder(concat[0], y_pred_concat[0, ...])
 
