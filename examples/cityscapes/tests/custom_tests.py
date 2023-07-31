@@ -1,22 +1,107 @@
-from utils_all.metrics import od_loss
-from visualizers.visualizers import gt_bb_decoder
+import json
+import os
+import numpy as np
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import cv2
+
+from project_config import MAX_BB_PER_IMAGE, image_size
+from utils_all.gcs_utils import _download
+from utils_all.general_utils import filter_out_unknowm_calsses_id
+from utils_all.metrics import od_loss, object_metric, classification_metric, regression_metric
+from utils_all.preprocessing import Cityscapes
+from visualizers.visualizers import gt_bb_decoder, bb_decoder
 from tensorleap import load_cityscapes_data_leap, metadata_filename, metadata_city, metadata_idx, metadata_gps_heading, \
     metadata_gps_latitude, metadata_gps_longtitude, metadata_outside_temperature, metadata_speed, metadata_yaw_rate, \
     number_of_bb, avg_bb_area_metadata, instances_num, is_class_exist_gen, ground_truth_bbox, \
     input_image, avg_bb_aspect_ratio, label_instances_num, non_normalized_image
-import os
-# import onnxruntime as ort
-import numpy as np
-from keras.models import Model
-from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, concatenate
-import torch
-import torch.nn as nn
-from keras.models import load_model
-import tensorflow as tf
+from code_loader.contract.datasetclasses import PreprocessResponse
 
 
-import onnx
-from onnx2keras import onnx_to_keras
+def plot_image_with_bboxes(image, bounding_boxes):
+    # Create a figure and axis
+    fig, ax = plt.subplots(1)
+
+    # Display the image
+    ax.imshow(image)
+
+    # Add bounding boxes to the plot
+    for bbox in bounding_boxes:
+        x, y, width, height = bbox.x, bbox.y, bbox.width, bbox.height
+        label = bbox.label
+        if label == 'car':
+
+            # Convert relative coordinates to absolute coordinates
+            x_abs = x * image.shape[1]
+            y_abs = y * image.shape[0]
+            width_abs = width * image.shape[1]
+            height_abs = height * image.shape[0]
+
+            # Create a rectangle patch and add it to the plot
+            rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor='r', facecolor='none')
+            ax.add_patch(rect)
+
+            # Add label text to the rectangle
+            plt.text(x_abs, y_abs, label, color='r', fontsize=8, backgroundcolor='white')
+
+    # Show the plot
+    plt.show()
+
+def normelized_polygon(image_height, image_width, polygon):
+
+    normalized_height, normalized_width = image_size[0], image_size[1]
+    coords = polygon['polygon']
+    new_coords = []
+    for x, y in coords:
+        new_x = x * (normalized_width / image_width)
+        new_y = y * (normalized_height / image_height)
+        new_coords.append((new_x, new_y))
+    polygon['polygon'] = new_coords
+    return polygon
+
+def plot_image_with_polygons(image_height, image_width, polygons, image):
+    # Create a figure and axis
+    fig, ax = plt.subplots(1)
+
+    # Display the image
+    ax.imshow(image)
+
+    # Add polygons to the plot
+    for polygon in polygons:
+        polygon = normelized_polygon(image_height, image_width, polygon)
+        label = polygon['label']
+        class_name = Cityscapes.get_class_name(label)
+        coords = polygon['polygon']
+
+        # Create a polygon patch and add it to the plot
+        poly_patch = patches.Polygon(coords, linewidth=1, edgecolor='r', facecolor='none')
+        ax.add_patch(poly_patch)
+
+        # Add label text to the polygon
+        centroid = [sum(coord[0] for coord in coords) / len(coords), sum(coord[1] for coord in coords) / len(coords)]
+        plt.text(centroid[0], centroid[1], class_name, color='r', fontsize=8, backgroundcolor='white')
+
+    # Show the plot
+    plt.show()
+
+def get_json(idx: int, data: PreprocessResponse):
+    data = data.data
+    cloud_path = data['gt_bbx_path'][idx%data["real_size"]]
+    fpath = _download(cloud_path)
+    with open(fpath, 'r') as file:
+        json_data = json.load(file)
+    return json_data
+
+def get_polygon(json_data):
+    polygons = []
+    objects = json_data['objects']
+    objects = filter_out_unknowm_calsses_id(objects)
+    max_anns = min(MAX_BB_PER_IMAGE, len(objects))
+    for i in range(max_anns):
+        polygon = objects[i]
+        polygons.append(polygon)
+    return polygons
 
 def check_custom_integration():
     # preprocess function
@@ -24,105 +109,63 @@ def check_custom_integration():
     training = responses[0]
     validation = responses[1]
     responses_set = training
-    idx = 727
-    # set input and gt
-    image = non_normalized_image(idx, responses_set)
-    bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
+    for idx in range(20):
+        # idx = 727
 
-    check_model(image, bounding_boxes_gt)
+        # get input and gt
+        image = non_normalized_image(idx, responses_set)
+        bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
 
+        json_data = get_json(idx, responses_set)
+        image_height, image_width = json_data['imgHeight'], json_data['imgWidth']
+        polygons = get_polygon(json_data)
+        plot_image_with_polygons(image_height, image_width, polygons, image)
 
-    # set meata_data
-    file_name = metadata_filename(idx, responses_set)
-    city = metadata_city(idx, responses_set)
-    idx = metadata_idx(idx, responses_set)
-    gps_heading = metadata_gps_heading(idx, responses_set)
-    gps_latitude = metadata_gps_latitude(idx, responses_set)
-    gps_longtitude = metadata_gps_longtitude(idx, responses_set)
-    outside_temperature = metadata_outside_temperature(idx, responses_set)
-    speed = metadata_speed(idx, responses_set)
-    yaw_rate = metadata_yaw_rate(idx, responses_set)
-    bb_count = number_of_bb(idx, responses_set)
-    Avg_bb_aspect_ratio = avg_bb_aspect_ratio(idx, responses_set)
-    avg_bb_area = avg_bb_area_metadata(idx, responses_set)
-    instances_number_metadata = instances_num(idx, responses_set)
-    # small_bbs_number = count_small_bbs(idx, responses_set)
+        # model
+        path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
+        os.chdir(path)
+        model = os.path.join(path, 'exported-model.h5')
+        yolo = tf.keras.models.load_model(model)
 
-    # does_0_exist = is_class_exist_gen(idx, responses_set)  # TODO: check
-    # Label_instances_num = label_instances_num(idx, responses_set)  # TODO: check
+        concat = np.expand_dims(image, axis=0)
+        yolo.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        y_pred = yolo([concat])
+        gt = np.expand_dims(bounding_boxes_gt, axis=0)
+        y_true = tf.convert_to_tensor(gt)
 
-    # set visualizer
-    bb_gt_decoder = gt_bb_decoder(image, bounding_boxes_gt)
-    # bb_decoder = bb_decoder(image, detection_pred) #TODO: check
+        # get visualizer
+        bb_gt_decoder = gt_bb_decoder(image, y_true)
+        plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
+        # bb__decoder = bb_decoder(image, y_pred) #TODO: check
+        # plt.imshow(bb_decoder.data)
 
-    # set custom metrics
-    # Regression_metric = regression_metric(bounding_boxes_gt, detection_pred)#TODO: check
-    # Classification_metric = classification_metric(bounding_boxes_gt, detection_pred)#TODO: check
-    # Object_metric = object_metric(bounding_boxes_gt, detection_pred)#TODO: check
+        # get custom metrics
+        ls = od_loss(y_true, y_pred)
+        Regression_metric = regression_metric(y_true, y_pred)
+        Classification_metric = classification_metric(y_true, y_pred)
+        Object_metric = object_metric(y_true, y_pred)
 
-def check_model(image, bounding_boxes_gt):
-    #------------export model----------------------------
-    path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
-    os.chdir(path)
-    model = os.path.join(path, 'exported-model.h5')
-    yolo = tf.keras.models.load_model(model)
-
-    concat = np.expand_dims(image, axis=0)
-    yolo.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    y_pred = yolo([concat])
-    gt = np.expand_dims(bounding_boxes_gt, axis=0)
-    y_true = tf.convert_to_tensor(gt)
-    ls = od_loss(y_true, y_pred)
-    # conf = confusion_matrix_metric(y_true, y_pred_concat)
-    # b = bb_decoder(concat[0], y_pred_concat[0, ...])
-
-
-
-    #=============================================================================
-
-    #load model----------------------------
-    # path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/tests"
-    # os.chdir(path)
-    # model = os.path.join(path, 'yolov7-tiny_D.onnx')
-    #
-    # onnx_model = onnx.load(model)  # load onnx model
-    # onnx.checker.check_model(onnx_model)  # check onnx model
-    # #print(onnx.helper.printable_graph(onnx_model.graph))
-    # ort_session = ort.InferenceSession(model)
-    # outputs = ort_session.get_outputs()
-    #
-    #
-    # #input------------------------------
-    # input_all = [_input.name for _input in onnx_model.graph.input]
-    # input_initializer = [node.name for node in onnx_model.graph.initializer]
-    # input_names = list(set(input_all) - set(input_initializer))
-    #
-    # image = np.transpose(image, (2, 0, 1))
-    # image_batch = np.expand_dims(image, axis=0)
-    # image_batch = image_batch.astype(np.float32)
-    #
-    # #moel output------------------------
-    # y_pred = ort_session.run(None, {input_names[0]: image_batch})
-    #
-    # #reshape------------
-    # new_shapes = [(1, 19200, 85), (1, 4800, 85), (1, 1200, 85)]
-    # y_pred_reshape = []
-    # for i, pred in enumerate(y_pred):
-    #     y_pred_reshape.append(np.reshape(pred, new_shapes[i]))
-    #
-    # # concat along the channel axis (axis=-1)-----------
-    # tensor_0 = torch.from_numpy(y_pred_reshape[0])
-    # tensor_1 = torch.from_numpy(y_pred_reshape[1])
-    # tensor_2 = torch.from_numpy(y_pred_reshape[2])
-    # concat = torch.cat([tensor_0, tensor_1, tensor_2], axis=1)
-    #
-    # #---------check loss---------------------------
-    # bounding_boxes_gt = np.array(bounding_boxes_gt)
-    # ls = od_loss(bb_gt=bounding_boxes_gt, y_pred=concat)
+        # get meata_data
+        file_name = metadata_filename(idx, responses_set)
+        city = metadata_city(idx, responses_set)
+        idx = metadata_idx(idx, responses_set)
+        gps_heading = metadata_gps_heading(idx, responses_set)
+        gps_latitude = metadata_gps_latitude(idx, responses_set)
+        gps_longtitude = metadata_gps_longtitude(idx, responses_set)
+        outside_temperature = metadata_outside_temperature(idx, responses_set)
+        speed = metadata_speed(idx, responses_set)
+        yaw_rate = metadata_yaw_rate(idx, responses_set)
+        bb_count = number_of_bb(idx, responses_set)
+        Avg_bb_aspect_ratio = avg_bb_aspect_ratio(idx, responses_set)
+        avg_bb_area = avg_bb_area_metadata(idx, responses_set)
+        instances_number_metadata = instances_num(idx, responses_set)
+        # # small_bbs_number = count_small_bbs(idx, responses_set) # TODO: check
+        #
+        # Label_instances_num = label_instances_num(idx, responses_set)  # TODO: check
+        # does_0_exist = is_class_exist_gen(idx, responses_set)  # TODO: check
 
 if __name__ == '__main__':
     check_custom_integration()
-    #check_model(image, bounding_boxes_gt)
 
 
 

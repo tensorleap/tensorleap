@@ -3,7 +3,7 @@ import numpy as np
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
 MODEL_FORMAT = "inference"
-MAX_BB_PER_IMAGE = 30
+MAX_BB_PER_IMAGE = 20
 
 IMAGE_MEAN = np.array([0.287, 0.325, 0.284])
 IMAGE_STD = np.array([0.176, 0.181, 0.178])
@@ -11,7 +11,7 @@ IMAGE_STD = np.array([0.176, 0.181, 0.178])
 BACKGROUND_LABEL = 36
 CLASSES = 35
 OFFSET = 0
-CONF_THRESH = 0.35
+CONF_THRESH = 0.4
 NMS_THRESH = 0.5
 OVERLAP_THRESH = 1 / 16
 SMALL_BBS_TH = 0.0003  # Equivelent to ~120 pixels of area at most

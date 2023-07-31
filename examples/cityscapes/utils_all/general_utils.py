@@ -15,7 +15,7 @@ def filter_out_unknowm_calsses_id(objects):
     for object in objects:
         class_label = object['label']
         class_id = Cityscapes.get_class_id(class_label)
-        if class_id is not None:
+        if class_id is not None or class_id == 36:
             new_object = {}
             new_object['label'] = class_id
             new_object['polygon'] = object['polygon']

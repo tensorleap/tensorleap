@@ -71,6 +71,13 @@ class Cityscapes:
         return None
 
     @classmethod
+    def get_class_name(cls, class_id):
+        for class_ in cls.classes:
+            if class_.id == class_id:
+                return class_.name
+        return None
+
+    @classmethod
     def encode_target(cls, target):
         return cls.id_to_train_id[np.array(target)]
 
