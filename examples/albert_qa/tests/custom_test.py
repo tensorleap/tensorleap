@@ -6,7 +6,7 @@ import numpy as np
 
 def check():
     x = preprocess_load_article_titles()
-    albert = tf.keras.models.load_model("/Users/chenrothschild/repo/tensorleap/examples/albert_QA/test/albert.h5")
+    albert = tf.keras.models.load_model("/tensorleap/examples/albert_qa/model/albert.h5")
 
     for idx in range(0, 20):
         input_keys = ['input_ids', 'token_type_ids', 'attention_mask', 'offset_mapping']
