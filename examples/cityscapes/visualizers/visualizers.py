@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 
 from project_config import BACKGROUND_LABEL
-from utils_all.general_utils import bb_array_to_object
+from utils_all.general_utils import bb_array_to_object, get_predict_bbox_list
 from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 from code_loader.contract.responsedataclasses import BoundingBox
@@ -29,15 +29,8 @@ def bb_decoder(image, predictions):
     """
     Overlays the BB predictions on the image
     """
-    class_list_reshaped, loc_list_reshaped = reshape_output_list(np.reshape(predictions, (1, predictions.shape[0]))) # add batch
-    outputs = DECODER(loc_list_reshaped,
-                      class_list_reshaped,
-                      DEFAULT_BOXES,
-                      from_logits=True
-                      )
-    bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL)
+    bb_object = get_predict_bbox_list(predictions)
     return LeapImageWithBBox((image * 255).astype(np.float32), bb_object)
-
 
 
 

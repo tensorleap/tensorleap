@@ -3,12 +3,19 @@ from typing import Union, List
 from numpy._typing import NDArray
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import cv2
+from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from utils_all.preprocessing import CATEGORIES, Cityscapes
-from project_config import MAX_BB_PER_IMAGE, BACKGROUND_LABEL
+from project_config import MAX_BB_PER_IMAGE, BACKGROUND_LABEL, IMAGE_SIZE, MODEL_FORMAT
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
+
+from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
+
 
 def filter_out_unknowm_calsses_id(objects):
     new_objects = []
@@ -24,6 +31,18 @@ def filter_out_unknowm_calsses_id(objects):
             continue
     return new_objects
 
+def normelized_polygon(image_height, image_width, ann):
+
+    normalized_height, normalized_width = IMAGE_SIZE[0], IMAGE_SIZE[1]
+    coords = ann['polygon']
+    new_coords = []
+    for x, y in coords:
+        new_x = x * (normalized_width / image_width)
+        new_y = y * (normalized_height / image_height)
+        new_coords.append([new_x, new_y])
+    ann['polygon'] = new_coords
+    return ann
+
 def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     """
     This function extracts bounding boxes from instance segmentation polygons present in the given JSON data.
@@ -34,11 +53,15 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     objects = filter_out_unknowm_calsses_id(objects)
     bounding_boxes = np.zeros([MAX_BB_PER_IMAGE, 5])
     max_anns = min(MAX_BB_PER_IMAGE, len(objects))
-    image_size = (json_data['imgHeight'], json_data['imgWidth'])
+    original_image_size = (json_data['imgHeight'], json_data['imgWidth'])
+    #plot_image_with_polygons(image_size[0], image_size[1], objects, image)
     for i in range(max_anns):
+        #plot_image_with_one_polygon(image_size[0], image_size[1], objects[i], image)
         ann = objects[i]
+        ann = normelized_polygon(original_image_size[0], original_image_size[1], ann)
         bbox = polygon_to_bbox(ann['polygon'])
-        bbox /= np.array((image_size[1], image_size[0], image_size[1], image_size[0]))
+        #plot_image_with_bboxe_test(image, bbox, min_x, max_y, ann['label'])
+        bbox /= np.array((IMAGE_SIZE[0], IMAGE_SIZE[1], IMAGE_SIZE[0], IMAGE_SIZE[1]))
         bounding_boxes[i, :4] = bbox
         bounding_boxes[i, 4] = ann['label']
     bounding_boxes[max_anns:, 4] = BACKGROUND_LABEL
@@ -66,7 +89,7 @@ def polygon_to_bbox(polygon): #TODO: change description
     max_x = max(x for x, y in polygon)
     max_y = max(y for x, y in polygon)
 
-    # Bounding box representation: (x, y, width, height)
+    # Bounding box representation: (x_center, y_center, width, height)
     bbox = [(min_x + max_x) / 2., (min_y + max_y) / 2., max_x - min_x, max_y - min_y]
     return bbox
 
@@ -143,7 +166,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
     for i in range(bb_array.shape[0]):
         if bb_array[i][-1] != bg_label:
             if iscornercoded:
-                x, y, w, h = xyxy_to_xywh_format(bb_array[i][1:5])  # FIXED TOM
+                x, y, w, h = xyxy_to_xywh_format(bb_array[i][1:5])
                 # unormalize to image dimensions
             else:
                 x, y = bb_array[i][0], bb_array[i][1]
@@ -155,6 +178,20 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
             bb_list.append(curr_bb)
     return bb_list
 
+def get_predict_bbox_list(data):
+    from_logits = True
+    decoded = False if MODEL_FORMAT != "inference" else True
+    class_list_reshaped, loc_list_reshaped = reshape_output_list(
+        data, decoded=decoded, image_size=IMAGE_SIZE)
+    # add batch
+    outputs = DECODER(loc_list_reshaped,
+                      class_list_reshaped,
+                      DEFAULT_BOXES,
+                      from_logits=from_logits,
+                      decoded=decoded,
+                      )
+    bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL)
+    return bb_object
 
 
 def remove_label_from_bbs(bbs_object_array, removal_label, add_to_label): #TODO: no use

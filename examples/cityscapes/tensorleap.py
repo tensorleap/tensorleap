@@ -7,7 +7,7 @@ from utils_all.gcs_utils import _download
 from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss
 from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background
-from project_config import IMAGE_STD, IMAGE_MEAN, image_size, BACKGROUND_LABEL, SMALL_BBS_TH
+from project_config import IMAGE_STD, IMAGE_MEAN, IMAGE_SIZE, BACKGROUND_LABEL, SMALL_BBS_TH
 from utils_all.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons
 from visualizers.visualizers import bb_decoder, gt_bb_decoder
 
@@ -64,7 +64,7 @@ def non_normalized_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
     cloud_path = data['image_path'][idx%data["real_size"]]
     fpath = _download(str(cloud_path))
-    img = np.array(Image.open(fpath).convert('RGB').resize(image_size))/255.
+    img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE))/255.
     return img
 
 
@@ -123,15 +123,15 @@ def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], flo
     def func(index: int, subset: PreprocessResponse):
         bbs = np.array(ground_truth_bbox(index, subset))
         is_i_exist = (bbs[..., -1] == class_id).any()
-        return float(is_i_exist)
+        return is_i_exist
 
     func.__name__ = f'metadata_{class_id}_instances_count'
     return func
 
 def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     bboxes = np.array(ground_truth_bbox(idx, data))
-    obj_boxes = bboxes[bboxes[..., -1] == 0]
-    areas = obj_boxes[..., 2] * obj_boxes[..., 3]
+    #obj_boxes = bboxes[bboxes[..., -1] == 0]
+    areas = bboxes[..., 2] * bboxes[..., 3]
     return float(len(areas[areas < SMALL_BBS_TH]))
 
 def metadata_filename(idx: int, data: PreprocessResponse) -> str:
@@ -223,7 +223,7 @@ leap_binder.set_input(non_normalized_image, 'non_normalized_image')
 leap_binder.set_ground_truth(ground_truth_bbox, 'bbox')
 
 #set prediction
-leap_binder.add_prediction(name='object detection', labels=["x", "y", "w", "h", "obj"] + [cl for cl in CATEGORIES]) #TODO: maybe without background
+leap_binder.add_prediction(name='object detection', labels=["x", "y", "w", "h", "obj"] + [cl for cl in CATEGORIES])
 
 #set loss
 leap_binder.add_custom_loss(od_loss, 'od_loss')
@@ -242,7 +242,7 @@ leap_binder.set_metadata(number_of_bb, DatasetMetadataType.int, 'bb_count')
 leap_binder.set_metadata(avg_bb_aspect_ratio, DatasetMetadataType.float, 'avg_bb_aspect_ratio')
 leap_binder.set_metadata(avg_bb_area_metadata, DatasetMetadataType.float, 'avg_bb_area')
 leap_binder.set_metadata(instances_num, DatasetMetadataType.float, "instances_number_metadata")
-#leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small_bbs_number")
+leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small_bbs_number")
 for i, label in enumerate(CATEGORIES_no_background):
     leap_binder.set_metadata(label_instances_num(label), DatasetMetadataType.float, f'{label} number_metadata')
 for id in CATEGORIES_id_no_background:

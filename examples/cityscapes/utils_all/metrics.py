@@ -1,7 +1,7 @@
 from typing import Tuple, List, Union
 import tensorflow as tf
 
-from project_config import MODEL_FORMAT, image_size
+from project_config import MODEL_FORMAT, IMAGE_SIZE
 from yolo_helpers.yolo_utils import LOSS_FN
 
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
@@ -12,7 +12,7 @@ def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor):
     """
     decoded = False if MODEL_FORMAT != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(od_pred, decoded=decoded,
-                                                                 image_size=image_size)  # add batch
+                                                                 image_size=IMAGE_SIZE)  # add batch
     loss_l, loss_c, loss_o = LOSS_FN(y_true=obj_true, y_pred=(loc_list_reshaped, class_list_reshaped))
 
     return loss_l, loss_c, loss_o
