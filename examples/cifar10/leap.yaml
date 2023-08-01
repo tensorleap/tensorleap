@@ -1,0 +1,10 @@
+codeIntegrationId: 64c7ffbb28b2a400205d6315
+projectId: 64c7ffb728b2a400205d6311
+entryFile: 'leap_binder.py'
+include:
+  - leap_binder.py
+  - leap_test.py
+  - leap_custom_test.py
+  - cifar10/encoders.py
+  - cifar10/utils.py
+  - project_config.py
