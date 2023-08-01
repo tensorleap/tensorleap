@@ -62,6 +62,7 @@ class Cityscapes:
     train_id_to_color = np.array(list({cls.train_id: cls.color for cls in classes[::-1]}.values())[::-1])
     id_to_train_id = np.array([c.train_id for c in classes])
     train_id_to_label = {label.train_id: label.name for label in classes}
+    id_to_color = np.array([c.color for c in classes])
 
     @classmethod
     def get_class_id(cls, class_name):
@@ -75,6 +76,13 @@ class Cityscapes:
         for class_ in cls.classes:
             if class_.id == class_id:
                 return class_.name
+        return None
+
+    @classmethod
+    def get_class_color(cls, class_id):
+        for class_ in cls.classes:
+            if class_.id == class_id:
+                return class_.color
         return None
 
     @classmethod

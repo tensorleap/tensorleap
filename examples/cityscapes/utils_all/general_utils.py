@@ -54,13 +54,10 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     bounding_boxes = np.zeros([MAX_BB_PER_IMAGE, 5])
     max_anns = min(MAX_BB_PER_IMAGE, len(objects))
     original_image_size = (json_data['imgHeight'], json_data['imgWidth'])
-    #plot_image_with_polygons(image_size[0], image_size[1], objects, image)
     for i in range(max_anns):
-        #plot_image_with_one_polygon(image_size[0], image_size[1], objects[i], image)
         ann = objects[i]
         ann = normelized_polygon(original_image_size[0], original_image_size[1], ann)
         bbox = polygon_to_bbox(ann['polygon'])
-        #plot_image_with_bboxe_test(image, bbox, min_x, max_y, ann['label'])
         bbox /= np.array((IMAGE_SIZE[0], IMAGE_SIZE[1], IMAGE_SIZE[0], IMAGE_SIZE[1]))
         bounding_boxes[i, :4] = bbox
         bounding_boxes[i, 4] = ann['label']
@@ -173,7 +170,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
                 w, h = bb_array[i][2], bb_array[i][3]
             conf = 1 if is_gt else bb_array[i][0]
             curr_bb = BoundingBox(x=x, y=y, width=w, height=h, confidence=conf,
-                                  label=CATEGORIES[int(bb_array[i][min(5, len(bb_array[i]) - 1)])]) #TODO: change maybe
+                                  label=CATEGORIES[int(bb_array[i][min(5, len(bb_array[i]) - 1)])])
 
             bb_list.append(curr_bb)
     return bb_list

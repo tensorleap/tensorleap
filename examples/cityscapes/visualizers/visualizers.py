@@ -3,10 +3,8 @@ import numpy as np
 
 from project_config import BACKGROUND_LABEL
 from utils_all.general_utils import bb_array_to_object, get_predict_bbox_list
-from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 from code_loader.contract.responsedataclasses import BoundingBox
-from code_loader.helpers.detection.yolo.utils import reshape_output_list
 from code_loader.contract.visualizer_classes import LeapImageWithBBox
 
 def gt_bb_decoder(image, bb_gt) -> LeapImageWithBBox:

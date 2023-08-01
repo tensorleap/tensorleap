@@ -23,6 +23,7 @@ utils = "^1.0.1"
 onnx = "^1.14.0"
 onnx2keras = "^0.0.24"
 opencv-python = "^4.8.0.74"
+webcolors = "^1.13"
 
 
 [build-system]

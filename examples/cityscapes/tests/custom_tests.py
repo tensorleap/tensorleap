@@ -4,20 +4,27 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import cv2
+import webcolors
 
-from project_config import MAX_BB_PER_IMAGE, IMAGE_SIZE
+
+from project_config import MAX_BB_PER_IMAGE
 from utils_all.gcs_utils import _download
-from utils_all.general_utils import filter_out_unknowm_calsses_id
+from utils_all.general_utils import filter_out_unknowm_calsses_id, normelized_polygon
 from utils_all.metrics import od_loss, object_metric, classification_metric, regression_metric
 from utils_all.preprocessing import Cityscapes, CATEGORIES_no_background, CATEGORIES_id_no_background
 from visualizers.visualizers import gt_bb_decoder, bb_decoder
 from tensorleap import load_cityscapes_data_leap, metadata_filename, metadata_city, metadata_idx, metadata_gps_heading, \
     metadata_gps_latitude, metadata_gps_longtitude, metadata_outside_temperature, metadata_speed, metadata_yaw_rate, \
     number_of_bb, avg_bb_area_metadata, instances_num, is_class_exist_gen, ground_truth_bbox, \
-    input_image, avg_bb_aspect_ratio, label_instances_num, non_normalized_image, count_small_bbs
+    avg_bb_aspect_ratio, label_instances_num, non_normalized_image, count_small_bbs
 from code_loader.contract.datasetclasses import PreprocessResponse
 
+def rgb_to_color_name(rgb_value):
+    try:
+        color_name = webcolors.rgb_to_name(rgb_value)
+    except ValueError:
+        color_name = 'r'
+    return color_name
 
 def plot_image_with_bboxes_test(image, bounding_boxes):
     # Create a figure and axis
@@ -32,6 +39,8 @@ def plot_image_with_bboxes_test(image, bounding_boxes):
         x_min = x_center - width / 2
         y_max = y_center + height / 2
         label = bbox[4]
+        color = Cityscapes.get_class_color(label)
+        color_name = rgb_to_color_name(color)
         class_name = Cityscapes.get_class_name(label)
         #if class_name == 'person' or class_name == 'car':
 
@@ -42,7 +51,7 @@ def plot_image_with_bboxes_test(image, bounding_boxes):
         height_abs = -(height * image.shape[0])
 
         # Create a rectangle patch and add it to the plot
-        rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor='r', facecolor='none')
+        rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor=color_name, facecolor='none')
         ax.add_patch(rect)
 
         # Add label text to the rectangle
@@ -61,6 +70,10 @@ def plot_image_with_bboxes(image, bounding_boxes):
     # Add bounding boxes to the plot
     for bbox in bounding_boxes:
         label = bbox.label
+        class_id = Cityscapes.get_class_id(label)
+        color = Cityscapes.get_class_color(class_id)
+        color_name = rgb_to_color_name(color)
+
         if label != 'unlabeled':
             x_center, y_center, width, height = bbox.x, bbox.y, bbox.width, bbox.height
             x_min = x_center - width / 2
@@ -72,57 +85,15 @@ def plot_image_with_bboxes(image, bounding_boxes):
             height_abs = -(height * image.shape[0])
 
             # Create a rectangle patch and add it to the plot
-            rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor='r', facecolor='none')
+            rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor=color_name, facecolor='none')
             ax.add_patch(rect)
 
             # Add label text to the rectangle
-            plt.text(x_abs, y_abs, label, color='r', fontsize=8, backgroundcolor='white')
+            plt.text(x_abs, y_abs, label, color=color_name, fontsize=8, backgroundcolor='white')
 
     # Show the plot
     plt.show()
 
-def plot_image_with_bboxes_pred(image, bounding_boxes):
-    # Create a figure and axis
-    fig, ax = plt.subplots(1)
-
-    # Display the image
-    ax.imshow(image)
-
-    # Add bounding boxes to the plot
-    for bbox in bounding_boxes:
-        label = bbox.label
-        if label != 'unlabeled':
-            x_center, y_center, width, height = bbox.x, bbox.y, bbox.width, bbox.height
-            x_min = x_center - width / 2
-            y_max = y_center + height / 2
-            # Convert relative coordinates to absolute coordinates
-            x_abs = x_min * image.shape[1]
-            y_abs = y_max * image.shape[0]
-            width_abs = width * image.shape[1]
-            height_abs = -(height * image.shape[0])
-
-            # Create a rectangle patch and add it to the plot
-            rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor='r', facecolor='none')
-            ax.add_patch(rect)
-
-            # Add label text to the rectangle
-            plt.text(x_abs, y_abs, label, color='r', fontsize=8, backgroundcolor='white')
-
-    # Show the plot
-    plt.show()
-
-
-def normelized_polygon(image_height, image_width, polygon):
-
-    normalized_height, normalized_width = IMAGE_SIZE[0], IMAGE_SIZE[1]
-    coords = polygon['polygon']
-    new_coords = []
-    for x, y in coords:
-        new_x = x * (normalized_width / image_width)
-        new_y = y * (normalized_height / image_height)
-        new_coords.append((new_x, new_y))
-    polygon['polygon'] = new_coords
-    return polygon
 
 def plot_image_with_polygons(image_height, image_width, polygons, image):
     # Create a figure and axis
@@ -135,17 +106,20 @@ def plot_image_with_polygons(image_height, image_width, polygons, image):
     for polygon in polygons:
         polygon = normelized_polygon(image_height, image_width, polygon)
         label = polygon['label']
+        color = Cityscapes.get_class_color(label)
+        color_name = rgb_to_color_name(color)
+
         class_name = Cityscapes.get_class_name(label)
         #if class_name == 'person' or class_name == 'car':
         coords = polygon['polygon']
 
         # Create a polygon patch and add it to the plot
-        poly_patch = patches.Polygon(coords, linewidth=1, edgecolor='r', facecolor='none')
+        poly_patch = patches.Polygon(coords, linewidth=1, edgecolor=color_name, facecolor='none')
         ax.add_patch(poly_patch)
 
         # Add label text to the polygon
         centroid = [sum(coord[0] for coord in coords) / len(coords), sum(coord[1] for coord in coords) / len(coords)]
-        plt.text(centroid[0], centroid[1], class_name, color='r', fontsize=8, backgroundcolor='white')
+        plt.text(centroid[0], centroid[1], class_name, color=color_name, fontsize=8, backgroundcolor='white')
 
     # Show the plot
     plt.show()
@@ -171,22 +145,23 @@ def get_polygon(json_data):
 def check_custom_integration():
     # preprocess function
     responses = load_cityscapes_data_leap()
-    training = responses[0]
-    validation = responses[1]
-    responses_set = training
-    for idx in range(200, 300):
+    trsin = responses[0]
+    val = responses[1]
+    test = responses[2]
+    responses_set = test
+    for idx in range(200, 210):
         #idx = 727
 
         # get input and gt
         image = non_normalized_image(idx, responses_set)
 
-        #json_data = get_json(idx, responses_set)
-        # image_height, image_width = json_data['imgHeight'], json_data['imgWidth']
-        #polygons = get_polygon(json_data) #till here all equal
-        # plot_image_with_polygons(image_height, image_width, polygons, image)
+        json_data = get_json(idx, responses_set)
+        image_height, image_width = json_data['imgHeight'], json_data['imgWidth']
+        polygons = get_polygon(json_data) #till here all equal
+        plot_image_with_polygons(image_height, image_width, polygons, image)
 
         bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
-        #plot_image_with_bboxes_test(image, bounding_boxes_gt)
+        plot_image_with_bboxes_test(image, bounding_boxes_gt)
 
         # model
         path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
@@ -202,9 +177,9 @@ def check_custom_integration():
 
         # get visualizer
         bb_gt_decoder = gt_bb_decoder(image, y_true)
-        #plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
+        plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
         bb__decoder = bb_decoder(image, y_pred)
-        #plot_image_with_bboxes_pred(image, bb__decoder.bounding_boxes)
+        #plot_image_with_bboxes(image, bb__decoder.bounding_boxes)
 
         # get custom metrics
         ls = od_loss(y_true, y_pred)
