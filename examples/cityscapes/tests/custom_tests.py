@@ -149,7 +149,7 @@ def check_custom_integration():
     val = responses[1]
     test = responses[2]
     responses_set = test
-    for idx in range(200, 210):
+    for idx in range(20):
         #idx = 727
 
         # get input and gt
@@ -161,12 +161,12 @@ def check_custom_integration():
         plot_image_with_polygons(image_height, image_width, polygons, image)
 
         bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
-        plot_image_with_bboxes_test(image, bounding_boxes_gt)
+        #plot_image_with_bboxes_test(image, bounding_boxes_gt)
 
         # model
         path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
         os.chdir(path)
-        model = os.path.join(path, 'exported-model.h5')
+        model = os.path.join(path, 'exported-model-(8).h5')
         yolo = tf.keras.models.load_model(model)
 
         concat = np.expand_dims(image, axis=0)
@@ -179,7 +179,7 @@ def check_custom_integration():
         bb_gt_decoder = gt_bb_decoder(image, y_true)
         plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
         bb__decoder = bb_decoder(image, y_pred)
-        #plot_image_with_bboxes(image, bb__decoder.bounding_boxes)
+        plot_image_with_bboxes(image, bb__decoder.bounding_boxes)
 
         # get custom metrics
         ls = od_loss(y_true, y_pred)
@@ -211,8 +211,6 @@ def check_custom_integration():
         for class_id in CATEGORIES_id_no_background:
             class_exist_func = is_class_exist_gen(class_id)
             class_exist = class_exist_func(idx, responses_set)
-
-
 
 if __name__ == '__main__':
     check_custom_integration()

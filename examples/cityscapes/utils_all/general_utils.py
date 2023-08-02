@@ -176,7 +176,7 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
     return bb_list
 
 def get_predict_bbox_list(data):
-    from_logits = True
+    from_logits = True if MODEL_FORMAT != "inference" else False
     decoded = False if MODEL_FORMAT != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(
         data, decoded=decoded, image_size=IMAGE_SIZE)
