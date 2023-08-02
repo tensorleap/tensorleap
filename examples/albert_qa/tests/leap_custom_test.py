@@ -1,7 +1,7 @@
 import tensorflow as tf
 from albert.loss import CE_loss
 from albert.metrices import CE_start_index, CE_end_index
-from tensorleap import *
+from leap_binder import *
 import numpy as np
 
 def check():

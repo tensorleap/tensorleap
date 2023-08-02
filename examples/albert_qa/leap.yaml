@@ -1,7 +1,7 @@
 datasetId: 64a280cfddeecd001906cdc2
 entryFile: 'tensorleap.py'
 include:
-  - tensorleap.py
+  - leap_binder.py
   - utils/decoders.py
   - utils/encoders.py
   - utils/loss.py
