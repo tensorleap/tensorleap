@@ -177,7 +177,7 @@ def check_custom_integration():
         # get visualizer
         bb_gt_decoder = gt_bb_decoder(image, y_true)
         #plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
-        bb__decoder = bb_decoder(image, y_pred)
+        bb__decoder = bb_decoder(image, y_pred[0, ...])
         plot_image_with_bboxes(image, bb__decoder.bounding_boxes)
 
         # get custom metrics

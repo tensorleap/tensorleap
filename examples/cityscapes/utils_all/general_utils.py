@@ -179,7 +179,7 @@ def get_predict_bbox_list(data):
     from_logits = True if MODEL_FORMAT != "inference" else False
     decoded = False if MODEL_FORMAT != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(
-        data, decoded=decoded, image_size=IMAGE_SIZE)
+        np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=IMAGE_SIZE)
     # add batch
     outputs = DECODER(loc_list_reshaped,
                       class_list_reshaped,
