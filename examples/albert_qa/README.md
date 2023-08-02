@@ -57,12 +57,11 @@ To deploy your local changes:
 leap code push
 ```
 
-#### **Tensorleap files**
+### **Tensorleap files**
 
 Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
 
-**leap.yaml**
-
+#### **Leap.yaml file**
 leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
 For any additional file being used we add its path under `include` parameter:
@@ -78,7 +77,7 @@ include:
   - project_config.py
 ```
 
-### **Tensorleap.py file**
+#### **Tensorleap.py file**
 `leap_binder.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
 
 ### Testing
