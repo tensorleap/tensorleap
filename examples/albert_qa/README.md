@@ -13,13 +13,13 @@ Before you begin, ensure that you have the following prerequisites installed:
 with `curl`:
 
 ```
-curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+curl -s <https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh> | bash
 ```
 
 with `wget`:
 
 ```
-wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+wget -q -O - <https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh> | bash
 ```
 
 CLI repository: https://github.com/tensorleap/leap-cli
@@ -88,14 +88,14 @@ To test the system we can run `leap_test.py` file using poetry:
 poetry run test
 ```
 
-This file will execute several tests on [the leap_binder.py]() script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on the `leap_binder.py` script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
 ## Project Description
 ### Albert model with SQuAD dataset
 
-This project implements the Albert algorithm using the [SQuAD]() (Stanford Question Answering Dataset) for question
+This project implements the Albert algorithm using the [SQuAD](https://huggingface.co/datasets/squad) (Stanford Question Answering Dataset) for question
 answering tasks.
 
 ### Population Exploration

@@ -13,13 +13,13 @@ Before you begin, ensure that you have the following prerequisites installed:
 with `curl`:
 
 ```
-curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+curl -s <https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh> | bash
 ```
 
 with `wget`:
 
 ```
-wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+wget -q -O - <https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh> | bash
 ```
 
 CLI repository: https://github.com/tensorleap/leap-cli
@@ -85,14 +85,14 @@ To test the system we can run `leap_test.py` file using poetry:
 poetry run test
 ```
 
-This file will execute several tests on [the leap_bindet.py] script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on the `leap_binder.py` script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
 ## Project Description
 ### Resnet18 model with CIFAR-10 dataset
 
-This project utilizes the [Resnet18]() algorithm to perform image classification on the [CIFAR-10]() dataset. The 
+This project utilizes the Resnet18 algorithm to perform image classification on the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset. The 
 CIFAR-10 dataset comprises 60,000 32x32 color images distributed across 10 classes, with each class containing 6,000 
 images. The ground truth labels for the classes are as follows: 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 
 'frog', 'horse', 'ship', and 'truck'.
