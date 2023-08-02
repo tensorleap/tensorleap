@@ -28,7 +28,7 @@ def bb_decoder(image, predictions):
     Overlays the BB predictions on the image
     """
     bb_object = get_predict_bbox_list(predictions)
-    return LeapImageWithBBox((image * 255).astype(np.float32), bb_object)
+    return LeapImageWithBBox(data=(image * 255).astype(np.float32), bounding_boxes=bb_object)
 
 
 

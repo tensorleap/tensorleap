@@ -145,7 +145,7 @@ def get_polygon(json_data):
 def check_custom_integration():
     # preprocess function
     responses = load_cityscapes_data_leap()
-    trsin = responses[0]
+    train = responses[0]
     val = responses[1]
     test = responses[2]
     responses_set = test
@@ -155,10 +155,10 @@ def check_custom_integration():
         # get input and gt
         image = non_normalized_image(idx, responses_set)
 
-        json_data = get_json(idx, responses_set)
-        image_height, image_width = json_data['imgHeight'], json_data['imgWidth']
-        polygons = get_polygon(json_data) #till here all equal
-        plot_image_with_polygons(image_height, image_width, polygons, image)
+        #json_data = get_json(idx, responses_set)
+        #image_height, image_width = json_data['imgHeight'], json_data['imgWidth']
+        #polygons = get_polygon(json_data) #till here all equal
+        #plot_image_with_polygons(image_height, image_width, polygons, image)
 
         bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
         #plot_image_with_bboxes_test(image, bounding_boxes_gt)
@@ -170,14 +170,13 @@ def check_custom_integration():
         yolo = tf.keras.models.load_model(model)
 
         concat = np.expand_dims(image, axis=0)
-        #yolo.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
         y_pred = yolo([concat])
         gt = np.expand_dims(bounding_boxes_gt, axis=0)
         y_true = tf.convert_to_tensor(gt)
 
         # get visualizer
         bb_gt_decoder = gt_bb_decoder(image, y_true)
-        plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
+        #plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes)
         bb__decoder = bb_decoder(image, y_pred)
         plot_image_with_bboxes(image, bb__decoder.bounding_boxes)
 
