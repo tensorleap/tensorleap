@@ -2,7 +2,7 @@ import os
 import tensorflow as tf
 import numpy as np
 
-from tensorleap import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_sample_index, \
+from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_sample_index, \
     metadata_gt_label_leap, metadata_label_name_leap, metadata_fly_leap, metadata_animal_leap
 from keras.losses import CategoricalCrossentropy
 
