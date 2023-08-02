@@ -9,9 +9,9 @@ from code_loader.contract.visualizer_classes import LeapHorizontalBar
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 
-from cifar10.utils import LABELS_NAMES, metadata_animal, metadata_fly, metadata_label_name, \
+from utils.utils import LABELS_NAMES, metadata_animal, metadata_fly, metadata_label_name, \
     metadata_gt_label, preprocess_func
-from cifar10.encoders import input_encoder
+from utils.encoders import input_encoder
 from keras.datasets import cifar10
 
 

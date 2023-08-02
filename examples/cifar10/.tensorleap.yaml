@@ -1,7 +1,0 @@
-datasetId: 64a6c08c10f2eb001aff5ea7
-entryFile: 'tensorleap.py'
-include:
-  - tensorleap.py
-  - cifar10/encoders.py
-  - cifar10/utils.py
-  - project_config.py

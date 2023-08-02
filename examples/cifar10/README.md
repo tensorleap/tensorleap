@@ -22,7 +22,7 @@ with `wget`:
 wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
 ```
 
-CLI repository: https://github.com/tensorleap/cli-go
+CLI repository: https://github.com/tensorleap/leap-cli
 
 ### Tensorleap CLI Usage
 
@@ -31,7 +31,7 @@ To allow connection to your Tensorleap platform via CLI you will have to authent
 To login to Tensorealp:
 
 ```
-tensorleap auth login [api key] [api url].
+leap auth login [api key] [api url].
 ```
 
 - API Key is your Tensorleap token (see how to generate a CLI token in the section below).
@@ -46,7 +46,7 @@ tensorleap auth login [api key] [api url].
 3. Once a CLI token is generated, just copy the whole text and paste it into your shell:
 
 ```
-tensorleap auth login [api key] [api url]
+leap auth login [api key] [api url]
 ```
 
 ### Tensorleap Dataset Deployment
@@ -54,38 +54,39 @@ tensorleap auth login [api key] [api url]
 To deploy your local changes:
 
 ```
-tensorleap datasets save
+leap code push
 ```
 
 #### **Tensorleap files**
 
-Tensorleap files in the repository include `tensorleap.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
+Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
 
-**.tensorleap.yaml**
+**leap.yaml**
 
-.tensorleap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
+leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
 For any additional file being used we add its path under `include` parameter:
 
 ```
 include:
-  - tensorleap.py
-  - armbench_segmentation/metrics.py
-  - [...]
+  - leap_binder.py
+  - utils/encoders.py
+  - utils/utils.py
+  - project_config.py
 ```
 
-### **Tensorleap.py file**
-`tensorleap.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
+### **leap_binder.py file**
+`leap_binder.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
 
 ### Testing
 
-To test the system we can run `test_tensorleap.py` file using poetry:
+To test the system we can run `leap_test.py` file using poetry:
 
 ```
 poetry run test
 ```
 
-This file will execute several tests on [the tensorleap.py](http://tensorleap.py) script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on [the leap_bindet.py] script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
