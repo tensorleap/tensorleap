@@ -1,8 +1,8 @@
 
 datasetId: 64b50d2d8ff20b00199385c5
-entryFile: 'tensorleap.py'
+entryFile: 'leap_binder.py'
 include:
-  - tensorleap.py
+  - leap_binder.py
   - utils_all/gcs_utils.py
   - utils_all/general_utils.py
   - utils_all/metrics.py

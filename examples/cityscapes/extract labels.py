@@ -6,7 +6,7 @@ from PIL import Image
 import numpy as np
 
 from project_config import IMAGE_SIZE, MAX_BB_PER_IMAGE, BACKGROUND_LABEL
-from tensorleap import load_cityscapes_data_leap
+from leap_binder import load_cityscapes_data_leap
 from utils_all.gcs_utils import _download
 from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
     filter_out_unknowm_calsses_id, polygon_to_bbox
