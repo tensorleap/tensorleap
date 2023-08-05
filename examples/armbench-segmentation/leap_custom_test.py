@@ -1,3 +1,4 @@
+
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +12,7 @@ from armbench_segmentation.visualizers.visualizers import (
     gt_bb_decoder, bb_decoder, under_segmented_bb_visualizer, over_segmented_bb_visualizer
 )
 from armbench_segmentation.visualizers.visualizers_getters import mask_visualizer_gt, mask_visualizer_prediction
-from tensorleap import (
+from leap_binder import (
     subset_images, input_image, get_bbs, get_masks, get_cat_instances_seg_lst, get_idx, get_fname, get_original_width,
     get_original_height, bbox_num, get_avg_bb_area, get_avg_bb_aspect_ratio, get_instances_num,
     get_object_instances_num, get_tote_instances_num, get_avg_instance_percent, get_tote_instances_masks,

@@ -1,7 +1,10 @@
-datasetId: "64a403f958e3f60011a0f80d"
-entryFile: 'tensorleap.py'
+codeIntegrationId: 64ce4435edef73002191016c
+projectId: 64ce4431edef730021910168
+entryFile: 'leap_binder.py'
 include:
-  - tensorleap.py
+  - leap_binder.py
+  - leap_test.py
+  - leap_custom_test.py
   - armbench_segmentation/__init__.py
   - armbench_segmentation/preprocessing.py
   - armbench_segmentation/visualizers/visualizers.py
@@ -11,4 +14,5 @@ include:
   - armbench_segmentation/utils/general_utils.py
   - armbench_segmentation/utils/ioa_utils.py
   - armbench_segmentation/yolo_helpers/yolo_utils.py
+  - armbench_segmentation/config.py
   - test_tensorleap.py

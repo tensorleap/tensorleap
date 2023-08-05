@@ -5,7 +5,7 @@ from code_loader import LeapLoader
 
 def check_integration():
     dir_path = str(Path(__file__).parent)
-    script_path = 'tensorleap.py'
+    script_path = 'leap_binder.py'
     datascript = LeapLoader(code_path=dir_path, code_entry_name=script_path)
     res = datascript.check_dataset()
     if res.is_valid:
