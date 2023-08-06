@@ -2292,6 +2292,16 @@ files = [
 tests = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "tf"
+version = "1.0.0"
+description = "Randomised true or false values"
+optional = false
+python-versions = "*"
+files = [
+    {file = "tf-1.0.0.tar.gz", hash = "sha256:2539af136596e7772fa1898dd6727d4c8edd64c3a55d035531ecb33d7962d4cd"},
+]
+
+[[package]]
 name = "torch"
 version = "1.12.1"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
@@ -2735,4 +2745,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "cc077f518325ebdd46f6c8fa1e9d3d7fe68c5d07dabc4968af5170f9be08cd08"
+content-hash = "1daf2a4ac1b397a70a210b93bdc9c00e31ef579cbc2bf509d7e42b9047632123"

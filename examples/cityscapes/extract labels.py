@@ -9,7 +9,7 @@ from project_config import IMAGE_SIZE, MAX_BB_PER_IMAGE, BACKGROUND_LABEL
 from leap_binder import load_cityscapes_data_leap
 from utils_all.gcs_utils import _download
 from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
-    filter_out_unknowm_calsses_id, polygon_to_bbox
+    filter_out_unknown_classes_id, polygon_to_bbox
 from utils_all.preprocessing import load_cityscapes_data
 
 def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
@@ -19,7 +19,7 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     :return: bounding_boxes: (numpy.ndarray) An array of bounding boxes in the format [x, y, width, height, class_id].
     """
     objects = json_data['objects']
-    objects = filter_out_unknowm_calsses_id(objects)
+    objects = filter_out_unknown_classes_id(objects)
     bounding_boxes = []
     #bounding_boxes = np.zeros([MAX_BB_PER_IMAGE, 5])
     #max_anns = min(MAX_BB_PER_IMAGE, len(objects))

@@ -7,7 +7,6 @@ from code_loader.helpers.detection.yolo.loss import YoloLoss
 from code_loader.helpers.detection.yolo.grid import Grid
 from code_loader.helpers.detection.yolo.decoder import Decoder
 
-#TODO: check about heat_maps and BACKGROUND_LABEL
 BOXES_GENERATOR = Grid(image_size=IMAGE_SIZE, feature_maps=FEATURE_MAPS, box_sizes=BOX_SIZES,
                        strides=STRIDES, offset=OFFSET)
 DEFAULT_BOXES = BOXES_GENERATOR.generate_anchors()

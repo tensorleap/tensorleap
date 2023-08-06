@@ -1,12 +1,12 @@
 import os
 from typing import Tuple, List
-
 import numpy as np
 from collections import namedtuple
 from pathlib import Path
 
 from utils_all.gcs_utils import _connect_to_gcs_and_return_bucket
 from project_config import BUCKET_NAME
+
 class Cityscapes:
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
 

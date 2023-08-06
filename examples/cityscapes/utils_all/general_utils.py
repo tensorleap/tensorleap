@@ -3,21 +3,23 @@ from typing import Union, List
 from numpy._typing import NDArray
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import cv2
-from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from utils_all.preprocessing import CATEGORIES, Cityscapes
 from project_config import MAX_BB_PER_IMAGE, BACKGROUND_LABEL, IMAGE_SIZE, MODEL_FORMAT
+from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
+from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
-from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
+def filter_out_unknown_classes_id(objects: List[dict]) -> List[dict]:
+    """
+    Description: This function takes a list of dictionaries objects as input and filters out unknown class IDs from it.
 
-def filter_out_unknowm_calsses_id(objects):
+    Input: objects (List[dict]): A list of dictionaries, each representing an object with 'label' and 'polygon' keys.
+    Output: new_objects (List[dict]): A filtered list of dictionaries containing objects with valid class IDs.
+    """
     new_objects = []
     for object in objects:
         class_label = object['label']
@@ -31,7 +33,16 @@ def filter_out_unknowm_calsses_id(objects):
             continue
     return new_objects
 
-def normelized_polygon(image_height, image_width, ann):
+def normelized_polygon(image_height: int, image_width: int, ann: dict) ->dict:
+    """
+    Description: This function normalizes a polygon using the height and width of the original image and a
+                 dictionary ann representing an annotation (with 'polygon' key containing a list of (x, y) coordinates).
+
+    Input: image_height (int): Height of the original image in pixels.
+           image_width (int): Width of the original image in pixels.
+           ann (dict): A dictionary representing an annotation with 'polygon' key containing a list of (x, y) coordinates.
+    Output: ann (dict): The updated dictionary representing the annotation with normalized polygon coordinates.
+    """
 
     normalized_height, normalized_width = IMAGE_SIZE[0], IMAGE_SIZE[1]
     coords = ann['polygon']
@@ -43,14 +54,14 @@ def normelized_polygon(image_height, image_width, ann):
     ann['polygon'] = new_coords
     return ann
 
-def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
+def extract_bounding_boxes_from_instance_segmentation_polygons(json_data: dict) -> np.ndarray:
     """
     This function extracts bounding boxes from instance segmentation polygons present in the given JSON data.
     :param json_data: (dict) A dictionary containing instance segmentation polygons and image size information.
     :return: bounding_boxes: (numpy.ndarray) An array of bounding boxes in the format [x, y, width, height, class_id].
     """
     objects = json_data['objects']
-    objects = filter_out_unknowm_calsses_id(objects)
+    objects = filter_out_unknown_classes_id(objects)
     bounding_boxes = np.zeros([MAX_BB_PER_IMAGE, 5])
     max_anns = min(MAX_BB_PER_IMAGE, len(objects))
     original_image_size = (json_data['imgHeight'], json_data['imgWidth'])
@@ -64,7 +75,7 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     bounding_boxes[max_anns:, 4] = BACKGROUND_LABEL
     return bounding_boxes
 
-def polygon_to_bbox(polygon): #TODO: change description
+def polygon_to_bbox(polygon: List[List]) ->List[float]:
     """
     Converts a polygon representation to a bounding box representation.
 
@@ -175,7 +186,12 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
             bb_list.append(curr_bb)
     return bb_list
 
-def get_predict_bbox_list(data):
+def get_predict_bbox_list(data: tf.Tensor) ->List[BoundingBox]:
+    """
+    Description: This function takes a TensorFlow tensor data as input and returns a list of bounding boxes representing predicted annotations.
+    Input: data (tf.Tensor): A TensorFlow tensor representing the output data.
+    Output: bb_object (List[BoundingBox]): A list of bounding box objects representing the predicted annotations.
+    """
     from_logits = True if MODEL_FORMAT != "inference" else False
     decoded = False if MODEL_FORMAT != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(
@@ -189,6 +205,8 @@ def get_predict_bbox_list(data):
                       )
     bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL)
     return bb_object
+
+
 
 
 def remove_label_from_bbs(bbs_object_array, removal_label, add_to_label): #TODO: no use

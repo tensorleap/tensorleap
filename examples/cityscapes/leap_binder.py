@@ -9,7 +9,7 @@ from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES
     CATEGORIES_id_no_background
 from project_config import IMAGE_STD, IMAGE_MEAN, IMAGE_SIZE, BACKGROUND_LABEL, SMALL_BBS_TH
 from utils_all.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons
-from visualizers.visualizers import bb_decoder, gt_bb_decoder
+from visualizers.visualizers import bb_decoder, gt_bb_decoder, bb_car_gt_decoder, bb_car_decoder
 
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
@@ -23,39 +23,47 @@ def load_cityscapes_data_leap() -> List[PreprocessResponse]:
     all_images, all_gt_images, all_gt_labels, all_gt_labels_for_bbx, all_file_names, all_metadata, all_cities =\
         load_cityscapes_data()
 
-    responses = [PreprocessResponse(length=len(all_images[0]), data={
+    # train_len = len(all_images[0])
+    # val_len = len(all_images[1])
+    # test_len = len(all_images[2])
+
+    train_len = 700
+    val_len = 100
+    test_len = 200
+
+    responses = [PreprocessResponse(length=train_len, data={
                 "image_path": all_images[0],
                 "subset_name": "train",
                 "gt_path": all_gt_labels[0],
                 "gt_bbx_path": all_gt_labels_for_bbx[0],
                 "gt_image_path": all_gt_images[0],
-                "real_size": len(all_images[0]),
+                "real_size": train_len,
                 "file_names": all_file_names[0],
                 "cities": all_cities[0],
                 "metadata": all_metadata[0],
-                "dataset": ["cityscapes"]*len(all_images[0])}),
-                PreprocessResponse(length=len(all_images[1]), data={
+                "dataset": ["cityscapes"]*train_len}),
+                PreprocessResponse(length=val_len, data={
                 "image_path": all_images[1],
                 "subset_name": "val",
                 "gt_path": all_gt_labels[1],
                 "gt_bbx_path": all_gt_labels_for_bbx[1],
                 "gt_image_path": all_gt_images[1],
-                "real_size": len(all_images[1]),
+                "real_size": val_len,
                 "file_names": all_file_names[1],
                 "cities": all_cities[1],
                 "metadata": all_metadata[1],
-                "dataset": ["cityscapes"]*len(all_images[1])}),
-                PreprocessResponse(length=len(all_images[2]), data={
+                "dataset": ["cityscapes"]*val_len}),
+                PreprocessResponse(length=test_len, data={
                 "image_path": all_images[2],
                 "subset_name": "test",
                 "gt_path": all_gt_labels[2],
                 "gt_bbx_path": all_gt_labels_for_bbx[2],
                 "gt_image_path": all_gt_images[2],
-                "real_size": len(all_images[2]),
+                "real_size": test_len,
                 "file_names": all_file_names[2],
                 "cities": all_cities[2],
                 "metadata": all_metadata[2],
-                "dataset": ["cityscapes"] * len(all_images[2])})]
+                "dataset": ["cityscapes"] * test_len})]
     return responses
 
 #------------------------------------------input and gt------------------------------------------
@@ -76,6 +84,15 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 
 def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
+    """
+    Description: This function takes an integer index idx and a PreprocessResponse object data as input and returns an
+                 array of bounding boxes representing ground truth annotations.
+
+    Input: idx (int): sample index.
+    data (PreprocessResponse): An object of type PreprocessResponse containing data attributes.
+    Output: bounding_boxes (np.ndarray): An array of bounding boxes extracted from the instance segmentation polygons in
+            the JSON data. Each bounding box is represented as an array containing [x_center, y_center, width, height, label].
+    """
     data = data.data
     cloud_path = data['gt_bbx_path'][idx%data["real_size"]]
     fpath = _download(cloud_path)
@@ -126,6 +143,16 @@ def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], flo
         return is_i_exist
 
     func.__name__ = f'metadata_{class_id}_instances_count'
+    return func
+
+def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Callable[[int, PreprocessResponse], float]:
+    def func(index: int, subset: PreprocessResponse):
+        bbs = np.array(ground_truth_bbox(index, subset))
+        is_veg_exist = (bbs[..., -1] == class_id_veg).any()
+        is_building_exist = (bbs[..., -1] == class_id_building).any()
+        return is_veg_exist and is_building_exist
+
+    func.__name__ = f'metadata_class_veg_and_class_building_instances_count'
     return func
 
 def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
@@ -247,10 +274,13 @@ for i, label in enumerate(CATEGORIES_no_background):
     leap_binder.set_metadata(label_instances_num(label), DatasetMetadataType.float, f'{label} number_metadata')
 for id in CATEGORIES_id_no_background:
     leap_binder.set_metadata(is_class_exist_gen(id), DatasetMetadataType.float, f'does_class_number_{id}_exist')
+leap_binder.set_metadata(is_class_exist_veg_and_building(21, 11), DatasetMetadataType.float, f'does_veg_and_buildeng_class_exist')
 
 #set visualizer
 leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)
 leap_binder.set_visualizer(bb_decoder, 'bb_decoder', LeapDataType.ImageWithBBox)
+leap_binder.set_visualizer(bb_car_gt_decoder, 'bb_car_gt_decoder', LeapDataType.ImageWithBBox)
+leap_binder.set_visualizer(bb_car_decoder, 'bb_car_decoder', LeapDataType.ImageWithBBox)
 
 # set custom metrics
 leap_binder.add_custom_metric(regression_metric, "Regression_metric")

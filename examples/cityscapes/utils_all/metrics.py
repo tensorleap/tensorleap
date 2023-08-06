@@ -1,4 +1,4 @@
-from typing import Tuple, List, Union
+from typing import Tuple
 import tensorflow as tf
 
 from project_config import MODEL_FORMAT, IMAGE_SIZE
@@ -6,7 +6,7 @@ from yolo_helpers.yolo_utils import LOSS_FN
 
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
-def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor):
+def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
     """
     Computes the sum of the classification (CE loss) and localization (regression) losses from all heads
     """
@@ -17,7 +17,7 @@ def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor):
 
     return loss_l, loss_c, loss_o
 
-def od_loss(bb_gt: tf.Tensor, y_pred: tf.Tensor):  # return batch
+def od_loss(bb_gt: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:  # return batch
     """
     Sums the classification and regression loss
     """
@@ -27,7 +27,7 @@ def od_loss(bb_gt: tf.Tensor, y_pred: tf.Tensor):  # return batch
     non_nan_loss = tf.where(tf.math.is_nan(sum_loss), tf.zeros_like(sum_loss), sum_loss) #LOSS 0 for NAN losses
     return non_nan_loss
 
-def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # return batch
+def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:  # return batch
     """
     This function calculates the total classification loss for each head of the object detection model.
 
@@ -42,7 +42,7 @@ def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # retur
     return tf.reduce_sum(loss_c, axis=0)[:, 0]
 
 
-def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # return batch
+def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:  # return batch
     """
     This function calculates the total regression (localization) loss for each head of the object detection model.
     Parameters:
@@ -56,7 +56,7 @@ def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):  # return ba
     return tf.reduce_sum(loss_l, axis=0)[:, 0]  # shape of batch
 
 
-def object_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor):
+def object_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:
     """
     This function calculates the total objectness loss for each head of the object detection model.
 
