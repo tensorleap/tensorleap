@@ -159,31 +159,16 @@ while cars are the primary objects present in the image.
 
 ![cluster14_kmeans](screen_shots/cluster14_kmeans.png)
 
--------------------------------------------
-##### fetching similar
-
-An alternative method for identifying clusters in the model's latent space is to retrieve similar samples based on a 
-selected sample. This approach allows you to pinpoint a cluster that exhibits a specific intrinsic property of interest. 
-The figure presented below illustrates such a cluster, comprising images that feature animal faces captured from a 
-profile perspective.
-
-![image_1](screen_shots_2/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.04.56.png)
-![image_2](screen_shots_2/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.09.png)
-![image_3](screen_shots_2/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.23.png)
-
 ### Sample Loss Analysis
 
 Within this section, we delve into the examination of features that impact the model's predictions. 
 Tensorleap automatically generates a heatmap that quantifies the effect different features has on the loss. 
 
-In the image depicted below, it is evident that the presence of background features leads to a higher loss function. 
-Conversely, the inclusion of features in the nose area contributes to a lower loss function, which signifies the image's 
-classification as a cat.
+In the image depicted below, the heat map displays warmer areas, indicating regions in the image where features are more
+prominent, and thereby increasing the likelihood that the object in those areas is a building.
 
-![cat_loss_image](screen_shots_2/cat_loss/image.png)
-![cat_loss_background](screen_shots_2/cat_loss/loss_background.png)
-![cat_loss_nose](screen_shots_2/cat_loss/loss_nose.png)
--------------------------------------------------------------
+![heatmap_image](screen_shots/heatmap.png)
+
 
 
 
