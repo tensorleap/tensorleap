@@ -1,7 +1,8 @@
+import urllib
+from os.path import exists
 
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
 
 from armbench_segmentation.metrics import (
     regression_metric, classification_metric, object_metric, mask_metric, over_segmented, under_segmented,
@@ -24,7 +25,13 @@ from leap_binder import (
 )
 
 if __name__ == '__main__':
-    model = tf.keras.models.load_model("model/yolov5.h5")
+    model_path = 'model/yolov5.h5'
+    if not exists(model_path):
+        print("Downloading YOLOv5.h5 for inference")
+        urllib.request.urlretrieve(
+            "https://storage.googleapis.com/example-datasets-47ml982d/yolov5/yolov5.h5",
+            model_path)
+    model = tf.keras.models.load_model(model_path)
     idx = 0
     responses = subset_images()  # get dataset splits
     training_response = responses[0]  # [training, validation, test]
