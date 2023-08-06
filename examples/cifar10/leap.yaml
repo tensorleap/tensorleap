@@ -1,7 +1,9 @@
-datasetId: 64a6c08c10f2eb001aff5ea7
-entryFile: 'leap_binder.py'
+codeIntegrationId: 64ce4521edef730021910182
+projectId: 64ce4511edef73002191017e
+secretManagerId: ""
+entryFile: leap_binder.py
 include:
-  - leap_binder.py
-  - utils/encoders.py
-  - utils/utils.py
-  - project_config.py
+    - leap_binder.py
+    - utils/encoders.py
+    - utils/utils.py
+    - project_config.py

@@ -3,7 +3,7 @@
 > **Note**: The dataset used in this project is not public, access to it can be granted by request.
 > see this link: [ARMBench dataset](http://armbench.s3-website-us-east-1.amazonaws.com/index.html).
 <br>
-> After downloading the dataset it must be placed in a `armbench-segmentation/armbench_segmentation/dataset` folder 
+> After downloading the dataset it must be placed in a `armbench-segmentation/armbench_segmentation/dataset` folder
 
 ## General
 This quick start guide will walk you through the steps to get started with this example repository project.
@@ -38,13 +38,13 @@ To allow connection to your Tensorleap platform via CLI you will have to authent
 To login to Tensorealp:
 
 ```
-tensorleap auth login [api key] [api url].
+leap auth login [api key] [api url].
 ```
 
 - API Key is your Tensorleap token (see how to generate a CLI token in the section below).
 - API URL is your Tensorleap environment URL: CLIENT_NAME.tensorleap.ai
 
-<br> 
+<br>
 
 **How To Generate CLI Token from the UI**
 
@@ -53,7 +53,7 @@ tensorleap auth login [api key] [api url].
 3. Once a CLI token is generated, just copy the whole text and paste it into your shell:
 
 ```
-tensorleap auth login [api key] [api url]
+leap auth login [api key] [api url]
 ```
 
 ### Tensorleap Dataset Deployment
@@ -61,12 +61,12 @@ tensorleap auth login [api key] [api url]
 To deploy your local changes:
 
 ```
-tensorleap datasets save
+leap code push
 ```
 
 #### **Tensorleap files**
 
-Tensorleap files in the repository include `tensorleap.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
+Tensorleap files in the repository include `leap_binder.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
 
 **.tensorleap.yaml**
 
@@ -76,13 +76,13 @@ For any additional file being used we add its path under `include` parameter:
 
 ```
 include:
-  - tensorleap.py
+  - leap_binder.py
   - armbench_segmentation/metrics.py
   - [...]
 ```
 
-### **Tensorleap.py file**
-`tensorleap.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
+### **leap_binder.py file**
+`leap_binder.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
 
 ### Testing
 
@@ -92,7 +92,7 @@ To test the system we can run `test_tensorleap.py` file using poetry:
 poetry run test
 ```
 
-This file will execute several tests on [the tensorleap.py](http://tensorleap.py) script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on [the leap_binder.py](http://leap_binder.py) script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
@@ -102,7 +102,7 @@ The relevant dataset for this example is the `mix-object-tot` subset.
 <br>
 >**Mix-Object-Tote (14G)**: This subset consists of close-up images of mixed objects that are stored in either yellow or blue totes. Mix-Object-Tote comprises a total of 44,253 images of size 2448 by 2048 pixels and 467,225 annotations, with an average of 10.5 instances per tote.
 <br>
-> 
+>
 We used a subset of 3000 images from the `mix-object-tote` and split them into train, validation and unlabeled datasets, each with 1000 images
 
 <div style="display: flex; justify-content: center;">
@@ -125,7 +125,7 @@ We trained the model over 1000 samples with validation set of another 1000 sampl
 ![](screenshots/model_ui.png)
 
 ### Latent Space Exploration
-The following plot illustrates a population exploration map, depicting the similarity among samples based on the latent 
+The following plot illustrates a population exploration map, depicting the similarity among samples based on the latent
 space of a trained model. This map is constructed using the extracted features of the model.
 Each sample is represented by a dot. The dots color and size is corresponding to the sample loss
 
@@ -136,7 +136,7 @@ Each sample is represented by a dot. The dots color and size is corresponding to
 One of our dataset splits is unlabeled data. Labeling data is an expensive process, and we aim to choose the minimal subset of unlabeled images to label.
 <br>
 We can look at areas in which the model tends to fail and choose to label new data only in those regions of the latent space
-> **Example**: The blue rectangles mark areas in wich the model tend to perform well and there is no point adding new similar samples. 
+> **Example**: The blue rectangles mark areas in wich the model tend to perform well and there is no point adding new similar samples.
 <br>
 > We would prefer to label new samples in the areas marked by the red rectangle in which the loss is relatively high (larger dots)
 <br>
