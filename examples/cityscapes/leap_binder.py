@@ -195,49 +195,27 @@ def metadata_speed(idx: int, data: PreprocessResponse) -> float:
 def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
     return get_metadata_json(idx, data)['yawRate']
 
-# def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
-#     img = non_normalized_image(idx%data.data["real_size"], data)
-#     return np.mean(img)
+def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
+    img = non_normalized_image(idx%data.data["real_size"], data)
+    return np.mean(img)
 
+def category_percent(idx: int, data: PreprocessResponse, class_id:int) -> float:
+    bbs = np.array(ground_truth_bbox(idx, data))
+    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    category_bbs = valid_bbs[valid_bbs[..., -1] == class_id]
+    return float(category_bbs.shape[0])
 
-# def aug_factor_or_zero(idx: int, data: PreprocessResponse, value: float) -> float:
-#     if data.data["subset_name"] == "train" and AUGMENT and idx > TRAIN_SIZE-1:
-#         return value.numpy()
-#     else:
-#         return 0.
+def metadata_person_category_avg_size(idx: int, data: PreprocessResponse) -> float:
+    class_id = 24
+    percent_val = category_percent(idx, data, class_id)
+    instances_cnt = number_of_bb(idx, data)
+    return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
-# def metadata_hue_factor(idx: int, data: PreprocessResponse) -> float:
-#     factor = stateless_random_uniform(shape=[], minval=-HUE_LIM, maxval=HUE_LIM, seed=(idx, idx+1))
-#     return aug_factor_or_zero(idx, data, factor)
-
-# def metadata_saturation_factor(idx: int, data: PreprocessResponse) -> float:
-#     factor = stateless_random_uniform(shape=[], minval=1-SATUR_LIM, maxval=1+SATUR_LIM, seed=(idx, idx+1))
-#     return aug_factor_or_zero(idx, data, factor)
-
-
-# def metadata_contrast_factor(idx: int, data: PreprocessResponse) -> float:
-#     factor = stateless_random_uniform(shape=[], minval=1-CONTR_LIM, maxval=1+CONTR_LIM, seed=(idx, idx+1))
-#     return aug_factor_or_zero(idx, data, factor)
-
-
-# def metadata_brightness_factor(idx: int, data: PreprocessResponse) -> float:
-#     factor = stateless_random_uniform(shape=[], minval=-BRIGHT_LIM, maxval=BRIGHT_LIM, seed=(idx, idx+1))
-#     return aug_factor_or_zero(idx, data, factor)
-
-
-# def metadata_person_category_avg_size(idx: int, data: PreprocessResponse) -> float:
-#     percent_val = metadata_person_category_percent(idx, data)
-#     instances_cnt = metadata_person_instances_count(idx, data)
-#     return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
-#
-#
-# def metadata_car_vehicle_category_avg_size(idx: int, data: PreprocessResponse) -> float:
-#     percent_val = metadata_car_vehicle_category_percent(idx, data)
-#     if SUPERCATEGORY_GROUNDTRUTH:
-#         instances_cnt = metadata_vehicle_instances_count(idx, data)
-#     else:
-#         instances_cnt = metadata_car_instances_count(idx, data)
-#     return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
+def metadata_car_category_avg_size(idx: int, data: PreprocessResponse) -> float:
+    class_id = 26
+    car_val = category_percent(idx, data, class_id)
+    instances_cnt = number_of_bb(idx, data)
+    return np.round(car_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 # ---------------------------------------------------------binding------------------------------------------------------
 
@@ -275,6 +253,10 @@ for i, label in enumerate(CATEGORIES_no_background):
 for id in CATEGORIES_id_no_background:
     leap_binder.set_metadata(is_class_exist_gen(id), DatasetMetadataType.float, f'does_class_number_{id}_exist')
 leap_binder.set_metadata(is_class_exist_veg_and_building(21, 11), DatasetMetadataType.float, f'does_veg_and_buildeng_class_exist')
+leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, "metadata_brightness")
+leap_binder.set_metadata(metadata_person_category_avg_size, DatasetMetadataType.float, "metadata_person_category_avg_size")
+leap_binder.set_metadata(metadata_car_category_avg_size, DatasetMetadataType.float, "metadata_car_category_avg_size")
+
 
 #set visualizer
 leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)

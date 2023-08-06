@@ -105,55 +105,61 @@ scenes from 50 different cities, with high quality pixel-level annotations of
 5 000 frames in addition to a larger set of 20 000 weakly annotated frames.
 
 ### Latent Space Exploration
-
-
-
-
-
-
-
-
-
-
 The following plot illustrates a population exploration map, depicting the similarity among samples based on the latent 
 space of a trained model. This map is constructed using the extracted features of the model.
+A distinct separation is evident between images with high and low minimum values (min). This suggests that images with
+high min share common features that differ from those found in images with low min.
 
-The visualization show the all the data points, revealing two distinct clusters. These clusters represent images labeled 
-as animals or vehicles according to their ground truth labels. The noticeable separation between the clusters indicates 
-a significant difference between these two categories.
+![input_min](screen_shots/input_min.png)
 
-![distinct_clusters_animal_vehicles](screen_shots_2/distinct_clusters_animal_vehicles.png)
 
 #### *Detecting & Handling High Loss Clusters*
+-------------------------------------------
+TODO: OPENNING
+------------------------------------------------
+Upon conducting additional analysis, it was found that when the number of small bounding boxes decreases, 
+the object detection loss increases.
 
-After conducting further analysis, it has been observed that the 'cat' cluster consists of several samples with higher 
-loss, indicated by larger dot sizes on the plot. A closer examination reveals that a significant number of these samples 
-were incorrectly predicted as 'dog' by the model. This suggests that there is a need to include more images of cats and 
-possibly dogs in the training dataset to improve the model's ability to recognize them accurately.
+![high_loss_small_bboxes](screen_shots/high_loss_small_bboxes.png)
 
-![high_loss_cat](screen_shots_2/Screenshot 2023-07-13 at 11.27.27.png)
+Furthermore, When the number of labeled persons decreases, the object detection loss increases. But not necessarily the 
+other direction is also true-There can be a variety of reasons why the loss is high.
 
+![high_loss_number_of_persons](screen_shots/high_loss_number_of_persons.png)
 
-#### *Detecting & Handling High Loss Unlabeled Clusters* 
+By filtering the dot size in the latent space based on the image mean, we observe a cluster of samples that exhibit a 
+higher mean. The proximity of these samples suggests that they share similar features, indicating a potential 
+correlation between their characteristics.
 
-In the k-means clusters, clusters 5 and 2 are observed to be in proximity to each other. Cluster 5 predominantly 
-consists of images with a light background and objects exhibiting an orange shade. On the other hand, cluster number 2 
-also has a light background, but the objects within it appear in a darker shade.
+![high_loss_mean_image](screen_shots/high_loss_mean_image.png)
 
-##### *<u>- cluster 5: </u>* 
+#### *Mislabeled data*
+
+Upon conducting further analysis, it has been discovered that images containing cars exhibit a high loss. Subsequent 
+research has revealed that the algorithm is actually recognizing cars accurately, but the ground truth (gt) labels are 
+incorrect. The cars in the images are mislabeled. To address this issue, it is essential to correct the labels for the 
+cars in order to improve the performance of the algorithm.
+
 <div style="display: flex">
-  <img src="screen_shots_2/cluster_2_5_kmeans/cluster_5_1.png" alt="Image 2" style="margin-right: 10px;">
-  <img src="screen_shots_2/cluster_2_5_kmeans/cluster_5_2.png" alt="Image 3" style="margin-left: 10px;">
-</div> 
-
-##### *<u>- cluster 2: </u>* 
-
-<div style="display: flex">
-  <img src="screen_shots_2/cluster_2_5_kmeans/cluster_2_1.png" alt="Image 4" style="margin-right: 10px;">
-  <img src="screen_shots_2/cluster_2_5_kmeans/cluster_2_2.png" alt="Image 5" style="margin-left: 10px;">
+  <img src="screen_shots/bb_gt_car.png" alt="Image 1" style="margin-right: 10px;">
+  <img src="screen_shots/bb_car.png" alt="Image 2" style="margin-left: 10px;">
 </div>
 
+We can observe that the class "motorcycle" is underrepresented in the data. The majority of images have zero labeled 
+ground truth bounding boxes for motorcycles. To address this, we should investigate if there are any mislabeling or 
+consider adding more images containing motorcycles to improve the representation of this class in the dataset.
 
+![Unlabeled_motorcycle](screen_shots/Unlabeled_motorcycle.png)
+
+
+#### *Detecting Unlabeled Clusters*
+
+Cluster number 14 of k-means clusters characterized in dark ambiance images, featuring a road surrounded by vegetation, 
+while cars are the primary objects present in the image.
+
+![cluster14_kmeans](screen_shots/cluster14_kmeans.png)
+
+-------------------------------------------
 ##### fetching similar
 
 An alternative method for identifying clusters in the model's latent space is to retrieve similar samples based on a 
@@ -177,7 +183,7 @@ classification as a cat.
 ![cat_loss_image](screen_shots_2/cat_loss/image.png)
 ![cat_loss_background](screen_shots_2/cat_loss/loss_background.png)
 ![cat_loss_nose](screen_shots_2/cat_loss/loss_nose.png)
-
+-------------------------------------------------------------
 
 
 
