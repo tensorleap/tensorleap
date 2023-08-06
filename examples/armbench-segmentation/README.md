@@ -38,7 +38,7 @@ To allow connection to your Tensorleap platform via CLI you will have to authent
 To login to Tensorealp:
 
 ```
-tensorleap auth login [api key] [api url].
+leap auth login [api key] [api url].
 ```
 
 - API Key is your Tensorleap token (see how to generate a CLI token in the section below).
@@ -53,7 +53,7 @@ tensorleap auth login [api key] [api url].
 3. Once a CLI token is generated, just copy the whole text and paste it into your shell:
 
 ```
-tensorleap auth login [api key] [api url]
+leap auth login [api key] [api url]
 ```
 
 ### Tensorleap Dataset Deployment
@@ -61,7 +61,7 @@ tensorleap auth login [api key] [api url]
 To deploy your local changes:
 
 ```
-tensorleap datasets save
+leap code push
 ```
 
 #### **Tensorleap files**
