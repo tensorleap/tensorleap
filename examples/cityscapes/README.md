@@ -97,6 +97,7 @@ preprocess, encoders,  metadata, etc,  run smoothly.
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
 ## Project Description
+_____________________________________________
 ### YOLOv7 model with Cityscapes dataset
 
 This project utilizes the [YOLOv7]() algorithm to perform object detection on [Cityscapes]() dataset. The 
@@ -114,9 +115,6 @@ high min share common features that differ from those found in images with low m
 
 
 #### *Detecting & Handling High Loss Clusters*
--------------------------------------------
-TODO: OPENNING
-------------------------------------------------
 Upon conducting additional analysis, it was found that when the number of small bounding boxes decreases, 
 the object detection loss increases.
 

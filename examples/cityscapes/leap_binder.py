@@ -4,11 +4,13 @@ import numpy as np
 import json
 
 from utils_all.gcs_utils import _download
-from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss
+from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou, \
+    convert_to_xyxy
 from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background
 from project_config import IMAGE_STD, IMAGE_MEAN, IMAGE_SIZE, BACKGROUND_LABEL, SMALL_BBS_TH
-from utils_all.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons
+from utils_all.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons, \
+    bb_array_to_object, get_predict_bbox_list
 from visualizers.visualizers import bb_decoder, gt_bb_decoder, bb_car_gt_decoder, bb_car_decoder
 
 from code_loader import leap_binder
@@ -155,6 +157,37 @@ def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Cal
     func.__name__ = f'metadata_class_veg_and_class_building_instances_count'
     return func
 
+
+def get_class_mean_iou(class_id: int = None):
+
+    def class_mean_iou(y_true, y_pred):
+        """
+        Calculate the mean Intersection over Union (mIOU) for segmentation using TensorFlow.
+
+        Args:
+            y_true (tf.Tensor): Ground truth segmentation mask tensor.
+            y_pred (tf.Tensor): Predicted segmentation mask tensor.
+
+        Returns:
+            tf.Tensor: Mean Intersection over Union (mIOU) value.
+        """
+        y_true = bb_array_to_object(y_true, iscornercoded=False, bg_label=BACKGROUND_LABEL, is_gt=True)
+        y_true = [bbox for bbox in y_true if bbox.label in CATEGORIES_no_background]
+        y_true = convert_to_xyxy(y_true)
+
+        y_pred = y_pred[0, ...]
+        y_pred = get_predict_bbox_list(y_pred)
+        y_pred = [bbox for bbox in y_pred if bbox.label in CATEGORIES_no_background]
+        y_pred = convert_to_xyxy(y_pred)
+
+        y_true = [box for box in y_true if box[-1] == class_id]
+        y_pred = [box for box in y_pred if box[-1] == class_id]
+        iou = calculate_iou(y_true, y_pred)
+
+        return iou
+
+    return class_mean_iou
+
 def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     bboxes = np.array(ground_truth_bbox(idx, data))
     #obj_boxes = bboxes[bboxes[..., -1] == 0]
@@ -251,7 +284,9 @@ leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small_bbs_nu
 for i, label in enumerate(CATEGORIES_no_background):
     leap_binder.set_metadata(label_instances_num(label), DatasetMetadataType.float, f'{label} number_metadata')
 for id in CATEGORIES_id_no_background:
+    class_name = Cityscapes.get_class_name(id)
     leap_binder.set_metadata(is_class_exist_gen(id), DatasetMetadataType.float, f'does_class_number_{id}_exist')
+    leap_binder.add_custom_metric(get_class_mean_iou(id), name=f"iou_class_{class_name}")
 leap_binder.set_metadata(is_class_exist_veg_and_building(21, 11), DatasetMetadataType.float, f'does_veg_and_buildeng_class_exist')
 leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, "metadata_brightness")
 leap_binder.set_metadata(metadata_person_category_avg_size, DatasetMetadataType.float, "metadata_person_category_avg_size")
@@ -268,6 +303,14 @@ leap_binder.set_visualizer(bb_car_decoder, 'bb_car_decoder', LeapDataType.ImageW
 leap_binder.add_custom_metric(regression_metric, "Regression_metric")
 leap_binder.add_custom_metric(classification_metric, "Classification_metric")
 leap_binder.add_custom_metric(object_metric, "Objectness_metric")
+
+
+# ----------------------------------- Binding ------------------------------------------
+
+#
+# leap_binder.add_custom_metric(mean_iou, name=f"iou")
+# for i, c in enumerate(CATEGORIES):
+#     leap_binder.add_custom_metric(get_class_mean_iou(i), name=f"iou_class_{c}")
 
 
 
