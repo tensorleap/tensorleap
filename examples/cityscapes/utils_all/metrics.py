@@ -1,15 +1,12 @@
-from typing import Tuple
+from typing import Tuple, List
 
-import numpy as np
 import tensorflow as tf
 
-from project_config import MODEL_FORMAT, IMAGE_SIZE, BACKGROUND_LABEL
-from utils_all.general_utils import get_predict_bbox_list, bb_array_to_object
-from utils_all.preprocessing import CATEGORIES_no_background, Cityscapes
+from project_config import MODEL_FORMAT, IMAGE_SIZE
+from utils_all.preprocessing import Cityscapes
 from yolo_helpers.yolo_utils import LOSS_FN
 
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
-from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
 
 def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
     """
@@ -75,7 +72,7 @@ def object_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:
     _, _, loss_o = compute_losses(bb_gt, detection_pred)
     return tf.reduce_sum(loss_o, axis=0)[:, 0]  # shape of batch
 
-def convert_to_xyxy(bounding_boxes):
+def convert_to_xyxy(bounding_boxes: List) -> List[List[int]]:
     xyxy_boxes = []
     for box in bounding_boxes:
         center_x, center_y, width, height, label = box.x, box.y, box.width, box.height, box.label
@@ -88,7 +85,7 @@ def convert_to_xyxy(bounding_boxes):
     return xyxy_boxes
 
 
-def intersection_area(true_box, pred_box):
+def intersection_area(true_box: List[float], pred_box: List[float]) ->float:
   """Calculates the intersection area between two bounding boxes.
 
   Args:
@@ -108,7 +105,7 @@ def intersection_area(true_box, pred_box):
   else:
     return (x2 - x1) * (y2 - y1)
 
-def union_area(true_box, pred_box):
+def union_area(true_box: List[float], pred_box: List[float]) ->float:
   """Calculates the union area between two bounding boxes.
 
   Args:
@@ -123,7 +120,7 @@ def union_area(true_box, pred_box):
   pred_area = (pred_box[2] - pred_box[0]) * (pred_box[3] - pred_box[1])
   return true_area + pred_area - intersection_area(true_box, pred_box)
 
-def calculate_iou(y_true, y_pred):
+def calculate_iou(y_true: List[List[float]], y_pred: List[List[float]]) -> tf.Tensor:
   """Calculates the intersection over union (IoU) between a list of true bounding boxes and a list of predicted bounding boxes.
 
   Args:

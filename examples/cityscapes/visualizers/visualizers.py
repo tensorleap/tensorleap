@@ -31,7 +31,7 @@ def bb_car_gt_decoder(image: np.ndarray, bb_gt: tf.Tensor) -> LeapImageWithBBox:
     """
     Overlays the BB predictions on the image
     """
-    bb_object: List[BoundingBox] = bb_array_to_object(bb_gt, iscornercoded=False, bg_label=BACKGROUND_LABEL,                                                      is_gt=True)
+    bb_object: List[BoundingBox] = bb_array_to_object(bb_gt, iscornercoded=False, bg_label=BACKGROUND_LABEL, is_gt=True)
     bb_object = [bbox for bbox in bb_object if bbox.label == 'car']
     return LeapImageWithBBox(data=(image * 255).astype(np.float32), bounding_boxes=bb_object)
 

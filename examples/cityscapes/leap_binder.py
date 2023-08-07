@@ -2,6 +2,7 @@ from typing import List, Dict, Callable
 from PIL import Image
 import numpy as np
 import json
+import tensorflow as tf
 
 from utils_all.gcs_utils import _download
 from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou, \
@@ -9,7 +10,7 @@ from utils_all.metrics import regression_metric, classification_metric, object_m
 from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background
 from project_config import IMAGE_STD, IMAGE_MEAN, IMAGE_SIZE, BACKGROUND_LABEL, SMALL_BBS_TH
-from utils_all.general_utils import polygon_to_bbox, extract_bounding_boxes_from_instance_segmentation_polygons, \
+from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
     bb_array_to_object, get_predict_bbox_list
 from visualizers.visualizers import bb_decoder, gt_bb_decoder, bb_car_gt_decoder, bb_car_decoder
 
@@ -158,9 +159,9 @@ def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Cal
     return func
 
 
-def get_class_mean_iou(class_id: int = None):
+def get_class_mean_iou(class_id: int = None) -> tf.Tensor:
 
-    def class_mean_iou(y_true, y_pred):
+    def class_mean_iou(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         """
         Calculate the mean Intersection over Union (mIOU) for segmentation using TensorFlow.
 
@@ -286,7 +287,7 @@ for i, label in enumerate(CATEGORIES_no_background):
 for id in CATEGORIES_id_no_background:
     class_name = Cityscapes.get_class_name(id)
     leap_binder.set_metadata(is_class_exist_gen(id), DatasetMetadataType.float, f'does_class_number_{id}_exist')
-    leap_binder.add_custom_metric(get_class_mean_iou(id), name=f"iou_class_{class_name}")
+    leap_binder.add_custom_metric(get_class_mean_iou(id), name=f"iou_class_{class_name}") #metric
 leap_binder.set_metadata(is_class_exist_veg_and_building(21, 11), DatasetMetadataType.float, f'does_veg_and_buildeng_class_exist')
 leap_binder.set_metadata(metadata_brightness, DatasetMetadataType.float, "metadata_brightness")
 leap_binder.set_metadata(metadata_person_category_avg_size, DatasetMetadataType.float, "metadata_person_category_avg_size")
@@ -303,14 +304,5 @@ leap_binder.set_visualizer(bb_car_decoder, 'bb_car_decoder', LeapDataType.ImageW
 leap_binder.add_custom_metric(regression_metric, "Regression_metric")
 leap_binder.add_custom_metric(classification_metric, "Classification_metric")
 leap_binder.add_custom_metric(object_metric, "Objectness_metric")
-
-
-# ----------------------------------- Binding ------------------------------------------
-
-#
-# leap_binder.add_custom_metric(mean_iou, name=f"iou")
-# for i, c in enumerate(CATEGORIES):
-#     leap_binder.add_custom_metric(get_class_mean_iou(i), name=f"iou_class_{c}")
-
 
 
