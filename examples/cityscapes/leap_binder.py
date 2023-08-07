@@ -185,9 +185,10 @@ def get_class_mean_iou(class_id: int = None) -> Callable[[Tensor, Tensor], Tenso
         y_true = [box for box in y_true if box[-1] == class_id]
         y_pred = [box for box in y_pred if box[-1] == class_id]
         iou = calculate_iou(y_true, y_pred)
-        iou = tf.convert_to_tensor(iou)
+        b = np.array([iou])
+        a = tf.convert_to_tensor(b, dtype=tf.float32)
 
-        return iou
+        return a
 
     return class_mean_iou
 
