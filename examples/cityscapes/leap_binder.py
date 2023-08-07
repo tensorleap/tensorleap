@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import json
 import tensorflow as tf
+from tensorflow import Tensor
 
 from utils_all.gcs_utils import _download
 from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou, \
@@ -159,7 +160,7 @@ def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Cal
     return func
 
 
-def get_class_mean_iou(class_id: int = None) -> tf.Tensor:
+def get_class_mean_iou(class_id: int = None) -> Callable[[Tensor, Tensor], Tensor]:
 
     def class_mean_iou(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         """
@@ -184,6 +185,7 @@ def get_class_mean_iou(class_id: int = None) -> tf.Tensor:
         y_true = [box for box in y_true if box[-1] == class_id]
         y_pred = [box for box in y_pred if box[-1] == class_id]
         iou = calculate_iou(y_true, y_pred)
+        iou = tf.convert_to_tensor(iou)
 
         return iou
 

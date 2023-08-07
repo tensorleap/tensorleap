@@ -248,7 +248,7 @@ def check_custom_integration():
         for class_id in CATEGORIES_id_no_background:
             iou_id = get_class_mean_iou(class_id)
             iou_id_ = iou_id(y_true, y_pred)
-            print(f"iou_id of {class_id} is {tf.stack(Object_metric).numpy()}")
+            print(f"iou_id of {class_id} is {tf.stack(iou_id_).numpy()}")
 
 
         brightness = metadata_brightness(idx, responses_set)
