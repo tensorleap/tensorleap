@@ -1,11 +1,10 @@
 from typing import Tuple, List
-
 import tensorflow as tf
 
 from project_config import MODEL_FORMAT, IMAGE_SIZE
 from utils_all.preprocessing import Cityscapes
-from yolo_helpers.yolo_utils import LOSS_FN
 
+from yolo_helpers.yolo_utils import LOSS_FN
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 

@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import webcolors
 
-
 from project_config import MAX_BB_PER_IMAGE
 from utils_all.gcs_utils import _download
 from utils_all.general_utils import filter_out_unknown_classes_id, normelized_polygon
-from utils_all.metrics import od_loss, object_metric, classification_metric, regression_metric, calculate_iou
+from utils_all.metrics import od_loss, object_metric, classification_metric, regression_metric
 from utils_all.preprocessing import Cityscapes, CATEGORIES_no_background, CATEGORIES_id_no_background
 from visualizers.visualizers import gt_bb_decoder, bb_decoder, bb_car_decoder, bb_car_gt_decoder
+
 from leap_binder import load_cityscapes_data_leap, metadata_filename, metadata_city, metadata_idx, metadata_gps_heading, \
     metadata_gps_latitude, metadata_gps_longtitude, metadata_outside_temperature, metadata_speed, metadata_yaw_rate, \
     number_of_bb, avg_bb_area_metadata, instances_num, is_class_exist_gen, ground_truth_bbox, \
@@ -34,48 +34,6 @@ def rgb_to_color_name(rgb_value: Tuple[int]) ->str:
     except ValueError:
         color_name = 'r'
     return color_name
-
-def plot_image_with_bboxes_test(image: np.ndarray, bounding_boxes: np.ndarray):
-    """
-    Description: The function takes an image and a list of bounding boxes as input and visualizes the image with
-    bounding boxes overlaid.
-
-    Input: image (numpy array): Input RGB image as a NumPy array.
-           bounding_boxes (list): List of bounding boxes represented as [x_center, y_center, width, height, label].
-    Output: None. The function directly displays the image with overlaid bounding boxes using Matplotlib.
-    """
-    # Create a figure and axis
-    fig, ax = plt.subplots(1)
-
-    # Display the image
-    ax.imshow(image)
-
-    # Add bounding boxes to the plot
-    for i, bbox in enumerate(bounding_boxes):
-        x_center, y_center, width, height = bbox[:4]
-        x_min = x_center - width / 2
-        y_max = y_center + height / 2
-        label = bbox[4]
-        color = Cityscapes.get_class_color(label)
-        color_name = rgb_to_color_name(color)
-        class_name = Cityscapes.get_class_name(label)
-        #if class_name == 'person' or class_name == 'car':
-
-        # Convert relative coordinates to absolute coordinates
-        x_abs = x_min * image.shape[1]
-        y_abs = y_max * image.shape[0]
-        width_abs = width * image.shape[1]
-        height_abs = -(height * image.shape[0])
-
-        # Create a rectangle patch and add it to the plot
-        rect = patches.Rectangle((x_abs, y_abs), width_abs, height_abs, linewidth=1, edgecolor=color_name, facecolor='none')
-        ax.add_patch(rect)
-
-        # Add label text to the rectangle
-        plt.text(x_abs, y_abs, class_name, color='r', fontsize=8, backgroundcolor='white')
-
-    # Show the plot
-    plt.show()
 
 def plot_image_with_bboxes(image: np.ndarray, bounding_boxes: np.ndarray, type: str):
     """
@@ -120,7 +78,6 @@ def plot_image_with_bboxes(image: np.ndarray, bounding_boxes: np.ndarray, type: 
     # Show the plot
     plt.title(f"Image with {type} bboxes")
     plt.show()
-
 
 def plot_image_with_polygons(image_height: int, image_width: int, polygons, image: np.ndarray):
     """
@@ -208,10 +165,9 @@ def check_custom_integration():
         json_data = get_json(idx, responses_set)
         image_height, image_width = json_data['imgHeight'], json_data['imgWidth']
         polygons = get_polygon(json_data) #till here all equal
-        #plot_image_with_polygons(image_height, image_width, polygons, image)
+        plot_image_with_polygons(image_height, image_width, polygons, image)
 
         bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
-        #plot_image_with_bboxes_test(image, bounding_boxes_gt)
 
         # model
         path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
@@ -225,14 +181,14 @@ def check_custom_integration():
         y_true = tf.convert_to_tensor(gt)
 
         # get visualizer
-        # bb_gt_decoder = gt_bb_decoder(image, y_true)
-        # plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes, 'gt')
-        # bb__decoder = bb_decoder(image, y_pred[0, ...])
-        # plot_image_with_bboxes(image, bb__decoder.bounding_boxes, 'pred')
-        # bb_car = bb_car_decoder(image, y_pred[0, ...])
-        # plot_image_with_bboxes(image, bb_car.bounding_boxes, 'pred')
-        # bb_gt_car = bb_car_gt_decoder(image, y_true)
-        # plot_image_with_bboxes(image, bb_gt_car.bounding_boxes, 'gt')
+        bb_gt_decoder = gt_bb_decoder(image, y_true)
+        plot_image_with_bboxes(image, bb_gt_decoder.bounding_boxes, 'gt')
+        bb__decoder = bb_decoder(image, y_pred[0, ...])
+        plot_image_with_bboxes(image, bb__decoder.bounding_boxes, 'pred')
+        bb_car = bb_car_decoder(image, y_pred[0, ...])
+        plot_image_with_bboxes(image, bb_car.bounding_boxes, 'pred')
+        bb_gt_car = bb_car_gt_decoder(image, y_true)
+        plot_image_with_bboxes(image, bb_gt_car.bounding_boxes, 'gt')
 
         # get custom metrics
         ls = od_loss(y_true, y_pred)

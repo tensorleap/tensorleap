@@ -160,15 +160,19 @@ while cars are the primary objects present in the image.
 ### Sample Loss Analysis
 
 Within this section, we delve into the examination of features that impact the model's predictions. 
-Tensorleap automatically generates a heatmap that quantifies the effect different features has on the loss. 
-
+Tensorleap automatically generates a heatmap that quantifies the effect different features has on the loss.
 In the image depicted below, the heat map displays warmer areas, indicating regions in the image where features are more
 prominent, and thereby increasing the likelihood that the object in those areas is a building.
 
 ![heatmap_image](screen_shots/heatmap.png)
 
+#### IOU metric
 
+After implementing the Intersection over Union (IoU) metric for each category's class_id, it becomes evident that the 
+IoU scores for the 'sky' category are consistently high across most of the images. This suggests that the model's 
+performance in detecting and accurately segmenting the 'sky' class is notably successful in many instances.
 
+![iou_sky](screen_shots/iou_sky.png)
 
 
 

@@ -2,19 +2,16 @@ import json
 import os
 from copy import deepcopy
 from typing import Union
-
 from PIL import Image
-
 import numpy as np
 
-from project_config import IMAGE_SIZE, MAX_BB_PER_IMAGE, BACKGROUND_LABEL
-from leap_binder import load_cityscapes_data_leap
+from project_config import IMAGE_SIZE
 from utils_all.gcs_utils import _download
 from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
     filter_out_unknown_classes_id, polygon_to_bbox
-from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
-from utils_all.preprocessing import load_cityscapes_data, Cityscapes, CATEGORIES
+from utils_all.preprocessing import load_cityscapes_data, CATEGORIES
 
+from code_loader.helpers.detection.utils import xywh_to_xyxy_format
 
 def extract_bounding_boxes_from_instance_segmentation_polygons(json_data):
     """
