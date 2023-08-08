@@ -2,14 +2,17 @@ from typing import Union, List
 from numpy._typing import NDArray
 import numpy as np
 import tensorflow as tf
+import json
 
 from utils_all.preprocessing import CATEGORIES, Cityscapes
 from project_config import MAX_BB_PER_IMAGE, BACKGROUND_LABEL, IMAGE_SIZE, MODEL_FORMAT
 from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
+from utils_all.gcs_utils import _download
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
+from code_loader.contract.datasetclasses import PreprocessResponse
 
 
 def filter_out_unknown_classes_id(objects: List[dict]) -> List[dict]:
@@ -23,7 +26,7 @@ def filter_out_unknown_classes_id(objects: List[dict]) -> List[dict]:
     for object in objects:
         class_label = object['label']
         class_id = Cityscapes.get_class_id(class_label)
-        if class_id is not None or class_id == 36:
+        if class_id is not None:
             new_object = {}
             new_object['label'] = class_id
             new_object['polygon'] = object['polygon']
@@ -148,6 +151,37 @@ def get_predict_bbox_list(data: tf.Tensor) ->List[BoundingBox]:
     bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL)
     return bb_object
 
+def get_json(idx: int, data: PreprocessResponse) -> dict:
+    """
+    Description: This function takes an integer index idx and a PreprocessResponse object data as input and returns a
+                Python dictionary containing JSON data.
 
+    Input: idx (int): Index of the sample.
+    data (PreprocessResponse): An object of type PreprocessResponse containing data attributes.
+    Output: json_data (dict): A Python dictionary representing the JSON data obtained from the file at the given index.
+    """
+    data = data.data
+    cloud_path = data['gt_bbx_path'][idx]
+    fpath = _download(cloud_path)
+    with open(fpath, 'r') as file:
+        json_data = json.load(file)
+    return json_data
+
+def get_polygon(json_data: dict) -> List[dict]:
+    """
+    Description: This function takes a Python dictionary json_data as input and returns a list of dictionaries
+    representing polygons.
+
+    Input: json_data (dict): A Python dictionary representing the JSON data containing annotation information.
+    Output: polygons (List[dict]): A list of dictionaries, each representing a label polygon.
+    """
+    polygons = []
+    objects = json_data['objects']
+    objects = filter_out_unknown_classes_id(objects)
+    max_anns = min(MAX_BB_PER_IMAGE, len(objects))
+    for i in range(max_anns):
+        polygon = objects[i]
+        polygons.append(polygon)
+    return polygons
 
 

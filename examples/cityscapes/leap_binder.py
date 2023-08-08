@@ -6,13 +6,11 @@ import tensorflow as tf
 from tensorflow import Tensor
 
 from utils_all.gcs_utils import _download
-from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou, \
-    convert_to_xyxy
+from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou
 from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background
 from project_config import IMAGE_STD, IMAGE_MEAN, IMAGE_SIZE, BACKGROUND_LABEL, SMALL_BBS_TH
-from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
-    bb_array_to_object, get_predict_bbox_list
+from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons
 from visualizers.visualizers import bb_decoder, gt_bb_decoder, bb_car_gt_decoder, bb_car_decoder
 
 from code_loader import leap_binder
@@ -35,57 +33,31 @@ def load_cityscapes_data_leap() -> List[PreprocessResponse]:
     val_len = 100
     test_len = 200
 
-    responses = [PreprocessResponse(length=train_len, data={
-                "image_path": all_images[0],
-                "subset_name": "train",
-                "gt_path": all_gt_labels[0],
-                "gt_bbx_path": all_gt_labels_for_bbx[0],
-                "gt_image_path": all_gt_images[0],
-                "real_size": train_len,
-                "file_names": all_file_names[0],
-                "cities": all_cities[0],
-                "metadata": all_metadata[0],
-                "dataset": ["cityscapes"]*train_len}),
-                PreprocessResponse(length=val_len, data={
-                "image_path": all_images[1],
-                "subset_name": "val",
-                "gt_path": all_gt_labels[1],
-                "gt_bbx_path": all_gt_labels_for_bbx[1],
-                "gt_image_path": all_gt_images[1],
-                "real_size": val_len,
-                "file_names": all_file_names[1],
-                "cities": all_cities[1],
-                "metadata": all_metadata[1],
-                "dataset": ["cityscapes"]*val_len}),
-                PreprocessResponse(length=test_len, data={
-                "image_path": all_images[2],
-                "subset_name": "test",
-                "gt_path": all_gt_labels[2],
-                "gt_bbx_path": all_gt_labels_for_bbx[2],
-                "gt_image_path": all_gt_images[2],
-                "real_size": test_len,
-                "file_names": all_file_names[2],
-                "cities": all_cities[2],
-                "metadata": all_metadata[2],
-                "dataset": ["cityscapes"] * test_len})]
+    lengths = [train_len, val_len, test_len]
+    responses = [
+        PreprocessResponse(length=lengths[i], data={
+            "image_path": all_images[i],
+            "subset_name": ["train", "val", "test"][i],
+            "gt_path": all_gt_labels[i],
+            "gt_bbx_path": all_gt_labels_for_bbx[i],
+            "gt_image_path": all_gt_images[i],
+            "real_size": lengths[i],
+            "file_names": all_file_names[i],
+            "cities": all_cities[i],
+            "metadata": all_metadata[i],
+            "dataset": ["cityscapes"] * lengths[i]
+        }) for i in range(3)
+    ]
     return responses
 
 #------------------------------------------input and gt------------------------------------------
 
 def non_normalized_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
-    cloud_path = data['image_path'][idx%data["real_size"]]
+    cloud_path = data['image_path'][idx]
     fpath = _download(str(cloud_path))
     img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE))/255.
     return img
-
-
-def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    img = non_normalized_image(idx%data.data["real_size"], data)
-    normalized_image = (img - IMAGE_MEAN)/IMAGE_STD #TODO: needed??
-    #resized_image = zoom(normalized_image, (3.2, 1.6, 1))
-    return normalized_image.astype(float)
-
 
 def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
     """
@@ -98,7 +70,7 @@ def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
             the JSON data. Each bounding box is represented as an array containing [x_center, y_center, width, height, label].
     """
     data = data.data
-    cloud_path = data['gt_bbx_path'][idx%data["real_size"]]
+    cloud_path = data['gt_bbx_path'][idx]
     fpath = _download(cloud_path)
     with open(fpath, 'r') as file:
         json_data = json.load(file)
@@ -160,38 +132,15 @@ def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Cal
     return func
 
 
-def get_class_mean_iou(class_id: int = None) -> Callable[[Tensor, Tensor], Tensor]:
-
+def get_class_mean_iou(class_id: int) -> Callable[[Tensor, Tensor], Tensor]:
     def class_mean_iou(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
-        """
-        Calculate the mean Intersection over Union (mIOU) for segmentation using TensorFlow.
-
-        Args:
-            y_true (tf.Tensor): Ground truth segmentation mask tensor.
-            y_pred (tf.Tensor): Predicted segmentation mask tensor.
-
-        Returns:
-            tf.Tensor: Mean Intersection over Union (mIOU) value.
-        """
-        y_true = bb_array_to_object(y_true, iscornercoded=False, bg_label=BACKGROUND_LABEL, is_gt=True)
-        y_true = [bbox for bbox in y_true if bbox.label in CATEGORIES_no_background]
-        y_true = convert_to_xyxy(y_true)
-
-        y_pred = y_pred[0, ...]
-        y_pred = get_predict_bbox_list(y_pred)
-        y_pred = [bbox for bbox in y_pred if bbox.label in CATEGORIES_no_background]
-        y_pred = convert_to_xyxy(y_pred)
-
-        y_true = [box for box in y_true if box[-1] == class_id]
-        y_pred = [box for box in y_pred if box[-1] == class_id]
-        iou = calculate_iou(y_true, y_pred)
+        iou = calculate_iou(y_true, y_pred, class_id)
         return tf.convert_to_tensor(np.array([iou]), dtype=tf.float32)
 
     return class_mean_iou
 
 def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     bboxes = np.array(ground_truth_bbox(idx, data))
-    #obj_boxes = bboxes[bboxes[..., -1] == 0]
     areas = bboxes[..., 2] * bboxes[..., 3]
     return float(len(areas[areas < SMALL_BBS_TH]))
 
@@ -230,7 +179,7 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
     return get_metadata_json(idx, data)['yawRate']
 
 def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
-    img = non_normalized_image(idx%data.data["real_size"], data)
+    img = non_normalized_image(idx, data)
     return np.mean(img)
 
 def category_percent(idx: int, data: PreprocessResponse, class_id:int) -> float:

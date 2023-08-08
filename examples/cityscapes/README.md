@@ -101,35 +101,22 @@ _____________________________________________
 ### YOLOv7 model with Cityscapes dataset
 
 This project utilizes the [YOLOv7]() algorithm to perform object detection on [Cityscapes]() dataset. The 
-cityscapes dataset is a large-scale dataset that contains a diverse set of stereo video sequences recorded in street 
-scenes from 50 different cities, with high quality pixel-level annotations of 
-5 000 frames in addition to a larger set of 20 000 weakly annotated frames.
+cityscapes dataset is a large-scale dataset stands as one of the standard ADAS benchmarks used for multiple vision
+related tasks.
+
 
 ### Latent Space Exploration
 The following plot illustrates a population exploration map, depicting the similarity among samples based on the latent 
 space of a trained model. This map is constructed using the extracted features of the model.
-A distinct separation is evident between images with high and low minimum values (min). This suggests that images with
-high min share common features that differ from those found in images with low min.
-
-![input_min](screen_shots/input_min.png)
-
 
 #### *Detecting & Handling High Loss Clusters*
 Upon conducting additional analysis, it was found that when the number of small bounding boxes decreases, 
 the object detection loss increases.
 
-![high_loss_small_bboxes](screen_shots/high_loss_small_bboxes.png)
-
-Furthermore, When the number of labeled persons decreases, the object detection loss increases. But not necessarily the 
-other direction is also true-There can be a variety of reasons why the loss is high.
-
-![high_loss_number_of_persons](screen_shots/high_loss_number_of_persons.png)
-
-By filtering the dot size in the latent space based on the image mean, we observe a cluster of samples that exhibit a 
-higher mean. The proximity of these samples suggests that they share similar features, indicating a potential 
-correlation between their characteristics.
-
-![high_loss_mean_image](screen_shots/high_loss_mean_image.png)
+<div style="display: flex">
+  <img src="screen_shots/high_loss_small_bboxes.png" alt="Image 1" style="margin-right: 10px;">
+  <img src="screen_shots/img.png" alt="Image 2" style="margin-left: 10px;">
+</div>
 
 #### *Mislabeled data*
 
@@ -139,8 +126,8 @@ incorrect. The cars in the images are mislabeled. To address this issue, it is e
 cars in order to improve the performance of the algorithm.
 
 <div style="display: flex">
-  <img src="screen_shots/bb_gt_car.png" alt="Image 1" style="margin-right: 10px;">
-  <img src="screen_shots/bb_car.png" alt="Image 2" style="margin-left: 10px;">
+  <img src="screen_shots/bb_gt_car.png" alt="Image 3" style="margin-right: 10px;">
+  <img src="screen_shots/bb_car.png" alt="Image 4" style="margin-left: 10px;">
 </div>
 
 We can observe that the class "motorcycle" is underrepresented in the data. The majority of images have zero labeled 
@@ -160,7 +147,7 @@ while cars are the primary objects present in the image.
 ### Sample Loss Analysis
 
 Within this section, we delve into the examination of features that impact the model's predictions. 
-Tensorleap automatically generates a heatmap that quantifies the effect different features has on the loss.
+Tensorleap automatically generates a heatmap that quantifies the effect different features has on loss/ specific prediction.
 In the image depicted below, the heat map displays warmer areas, indicating regions in the image where features are more
 prominent, and thereby increasing the likelihood that the object in those areas is a building.
 

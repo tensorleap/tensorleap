@@ -1,8 +1,9 @@
 from typing import Tuple, List
 import tensorflow as tf
 
-from project_config import MODEL_FORMAT, IMAGE_SIZE
-from utils_all.preprocessing import Cityscapes
+from project_config import MODEL_FORMAT, IMAGE_SIZE, BACKGROUND_LABEL
+from utils_all.general_utils import bb_array_to_object, get_predict_bbox_list
+from utils_all.preprocessing import Cityscapes, CATEGORIES_no_background
 
 from yolo_helpers.yolo_utils import LOSS_FN
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
@@ -125,23 +126,33 @@ def union_area(true_box: List[float], pred_box: List[float]) -> float:
     return true_area + pred_area - intersection_area(true_box, pred_box)
 
 
-def calculate_iou(y_true: List[List[float]], y_pred: List[List[float]]) -> float:
+def calculate_iou(y_true: tf.Tensor, y_pred: tf.Tensor, class_id: int) -> float:
     """Calculates the intersection over union (IoU) between a list of true bounding boxes and a list of predicted bounding boxes.
 
-  Args:
-    true_boxes: A list of y bounding boxes in the format [x1, y1, x2, y2].
-    pred_boxes: A list of y bounding boxes in the format [x1, y1, x2, y2].
+      Args:
+            y_true (tf.Tensor): Ground truth segmentation mask tensor.
+            y_pred (tf.Tensor): Predicted segmentation mask tensor.
 
-  Returns:
-    A list of y IoU scores.
-  """
+      Returns:
+        A float of y IoU scores.
+      """
+    y_true = bb_array_to_object(y_true, iscornercoded=False, bg_label=BACKGROUND_LABEL, is_gt=True)
+    y_true = [bbox for bbox in y_true if bbox.label in CATEGORIES_no_background]
+    y_true = convert_to_xyxy(y_true)
+
+    y_pred = y_pred[0, ...]
+    y_pred = get_predict_bbox_list(y_pred)
+    y_pred = [bbox for bbox in y_pred if bbox.label in CATEGORIES_no_background]
+    y_pred = convert_to_xyxy(y_pred)
+
+    y_true = [box for box in y_true if box[-1] == class_id]
+    y_pred = [box for box in y_pred if box[-1] == class_id]
 
     iou_scores = []
     for true_box in y_true:
         for pred_box in y_pred:
             intersection = intersection_area(true_box, pred_box)
             union = union_area(true_box, pred_box)
-            # Calculate the IOU value
             iou = tf.where(union > 0, intersection / union, 0)
             iou_scores.append(iou)
 
