@@ -1,4 +1,7 @@
 import os
+import urllib
+from os.path import exists
+
 import numpy as np
 import tensorflow as tf
 
@@ -34,11 +37,11 @@ def check_custom_integration():
         plot_image_with_polygons(image_height, image_width, polygons, image)
 
         # model
-        path = "/Users/chenrothschild/repo/tensorleap/examples/cityscapes/model"
-        os.chdir(path)
-        model = os.path.join(path, 'yolov7.h5')
-        yolo = tf.keras.models.load_model(model)
-
+        if not exists('yolov7.h5'):
+            print("Downloading yolov7 for inference")
+            urllib.request.urlretrieve(
+                "https://storage.googleapis.com/example-datasets-47ml982d/yolov7/yolov7.h5", "yolov7.h5")
+        yolo = tf.keras.models.load_model("yolov7.h5")
         concat = np.expand_dims(image, axis=0)
         y_pred = yolo([concat])
         gt = np.expand_dims(bounding_boxes_gt, axis=0)
