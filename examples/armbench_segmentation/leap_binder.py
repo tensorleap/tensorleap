@@ -336,6 +336,73 @@ def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     return float(len(areas[areas < CONFIG['SMALL_BBS_TH']]))
 
 
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    metadata_functions = {
+        "idx": get_idx,
+        "fname": get_fname,
+        "origin_width": get_original_width,
+        "origin_height": get_original_height,
+        "instances_number": get_instances_num,
+        "tote_number": get_tote_instances_num,
+        "object_number": get_object_instances_num,
+        "avg_instance_size": get_avg_instance_percent,
+        "tote_instances_mean": get_tote_instances_mean,
+        "tote_instances_std": get_tote_instances_std,
+        "object_instances_mean": get_object_instances_mean,
+        "object_instances_std": get_object_instances_std,
+        "tote_avg_instance_size": get_tote_avg_instance_percent,
+        "tote_std_instance_size": get_tote_std_instance_percent,
+        "object_avg_instance_size": get_object_avg_instance_percent,
+        "object_std_instance_size": get_object_std_instance_percent,
+        "bbox_number": bbox_num,
+        "bbox_area": get_avg_bb_area,
+        "bbox_aspect_ratio": get_avg_bb_aspect_ratio,
+        "background_percent": get_background_percent,
+        "duplicate_bb": count_duplicate_bbs,
+        "small_bbs_number": count_small_bbs,
+        "count_total_obj_bbox_occlusions": get_obj_bbox_occlusions_count,
+        "avg_obj_bbox_occlusions": get_obj_bbox_occlusions_avg,
+        "count_obj_mask_occlusions": get_obj_mask_occlusions_count
+    }
+    res = dict()
+    for func_name, func in metadata_functions.items():
+        res[func_name] = func(idx, data)
+    return res
+
+
+def general_metrics_dict(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
+                         mask_gt: tf.Tensor, segmentation_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
+    metric_functions = {
+        "Regression_metric": regression_metric,
+        "Classification_metric": classification_metric,
+        "Objectness_metric": object_metric,
+        "Mask_metric": mask_metric,
+    }
+    res = dict()
+    for func_name, func in metric_functions.items():
+        res[func_name] = func(bb_gt, detection_pred, mask_gt, segmentation_pred)
+    return res
+
+
+def segmentation_metrics_dict(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
+                              mask_gt: tf.Tensor) -> Dict[str, Union[int, float]]:
+    metric_functions = {
+        "Over_Segmented_metric": over_segmented,
+        "Under_Segmented_metric": under_segmented,
+        "Small_BB_Under_Segmtented": metric_small_bb_in_under_segment,
+        "Over_Segmented_Instances_count": over_segmented_instances_count,
+        "Under_Segmented_Instances_count": under_segmented_instances_count,
+        "Average_segments_num_Over_Segmented": average_segments_num_over_segment,
+        "Average_segments_num_Under_Segmented": average_segments_num_under_segmented,
+        "Over_Segment_confidences": over_segment_avg_confidence
+    }
+    res = dict()
+    for func_name, func in metric_functions.items():
+
+        res[func_name] = func(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt)
+    return res
+
+
 # ---------------------------------------------------------binding------------------------------------------------------
 # preprocess function
 leap_binder.set_preprocess(subset_images)
@@ -353,6 +420,8 @@ leap_binder.add_prediction('object detection',
 
 # set prediction (segmentation)
 leap_binder.add_prediction('segementation masks', [f"mask_{i}" for i in range(32)])
+# set custom loss
+leap_binder.add_custom_loss(instance_seg_loss, 'instance_seg loss')
 
 # set visualizers
 leap_binder.set_visualizer(mask_visualizer_gt, 'gt_mask', LeapDataType.ImageMask)
@@ -363,42 +432,8 @@ leap_binder.set_visualizer(under_segmented_bb_visualizer, 'under segment', LeapD
 leap_binder.set_visualizer(over_segmented_bb_visualizer, 'over segment', LeapDataType.ImageWithBBox)
 
 # set custom metrics
-leap_binder.add_custom_metric(regression_metric, "Regression_metric")
-leap_binder.add_custom_metric(classification_metric, "Classification_metric")
-leap_binder.add_custom_metric(object_metric, "Objectness_metric")
-leap_binder.add_custom_metric(mask_metric, "Mask metric")
-leap_binder.add_custom_metric(over_segmented, "Over Segmented metric")
-leap_binder.add_custom_metric(under_segmented, "Under Segmented metric")
-leap_binder.add_custom_metric(metric_small_bb_in_under_segment, 'Small BB Under Segmtented metric')
-leap_binder.add_custom_metric(over_segmented_instances_count, "Over Segmented Instances count")
-leap_binder.add_custom_metric(under_segmented_instances_count, "Under Segmented Instances count")
-leap_binder.add_custom_metric(average_segments_num_over_segment, "Average segments num Over Segmented")
-leap_binder.add_custom_metric(average_segments_num_under_segmented, "Average segments num Under Segmented")
-leap_binder.add_custom_metric(over_segment_avg_confidence, "Over Segment confidences")
+leap_binder.add_custom_metric(general_metrics_dict, 'general_metrics')
+leap_binder.add_custom_metric(segmentation_metrics_dict, 'segmentation_metrics')
 
 # set metadata
-leap_binder.set_metadata(get_idx, DatasetMetadataType.int, "idx")
-leap_binder.set_metadata(get_fname, DatasetMetadataType.string, "fname")
-leap_binder.set_metadata(get_original_width, DatasetMetadataType.int, "origin_width")
-leap_binder.set_metadata(get_original_height, DatasetMetadataType.int, "origin_height")
-leap_binder.set_metadata(get_instances_num, DatasetMetadataType.float, "instances_number")
-leap_binder.set_metadata(get_tote_instances_num, DatasetMetadataType.float, "tote_number")
-leap_binder.set_metadata(get_object_instances_num, DatasetMetadataType.float, "object_number")
-leap_binder.set_metadata(get_avg_instance_percent, DatasetMetadataType.float, "avg_instance_size")
-leap_binder.set_metadata(get_tote_instances_mean, DatasetMetadataType.float, "tote_instances_mean")
-leap_binder.set_metadata(get_tote_instances_std, DatasetMetadataType.float, "tote_instances_std")
-leap_binder.set_metadata(get_object_instances_mean, DatasetMetadataType.float, "object_instances_mean")
-leap_binder.set_metadata(get_object_instances_std, DatasetMetadataType.float, "object_instances_std")
-leap_binder.set_metadata(get_tote_avg_instance_percent, DatasetMetadataType.float, "tote_avg_instance_size")
-leap_binder.set_metadata(get_tote_std_instance_percent, DatasetMetadataType.float, "tote_std_instance_size")
-leap_binder.set_metadata(get_object_avg_instance_percent, DatasetMetadataType.float, "object_avg_instance_size")
-leap_binder.set_metadata(get_object_std_instance_percent, DatasetMetadataType.float, "object_std_instance_size")
-leap_binder.set_metadata(bbox_num, DatasetMetadataType.float, "bbox_number")
-leap_binder.set_metadata(get_avg_bb_area, DatasetMetadataType.float, "bbox_area")
-leap_binder.set_metadata(get_avg_bb_aspect_ratio, DatasetMetadataType.float, "bbox_aspect_ratio")
-leap_binder.set_metadata(get_background_percent, DatasetMetadataType.float, "background_percent")
-leap_binder.set_metadata(count_duplicate_bbs, DatasetMetadataType.int, "duplicate_bb")
-leap_binder.set_metadata(count_small_bbs, DatasetMetadataType.int, "small bbs number")
-leap_binder.set_metadata(get_obj_bbox_occlusions_count, DatasetMetadataType.float, "count_total_obj_bbox_occlusions")
-leap_binder.set_metadata(get_obj_bbox_occlusions_avg, DatasetMetadataType.int, "avg_obj_bbox_occlusions")
-leap_binder.set_metadata(get_obj_mask_occlusions_count, DatasetMetadataType.float, "count_obj_mask_occlusions")
+leap_binder.set_metadata(metadata_dict, name='metadata')
