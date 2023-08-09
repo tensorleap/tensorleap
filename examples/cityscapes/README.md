@@ -154,12 +154,12 @@ prominent, and thereby increasing the likelihood that the object in those areas 
 ![heatmap_image](screen_shots/heatmap.png)
 
 #### IOU metric
-
+------------------------------
 After implementing the Intersection over Union (IoU) metric for each category's class_id, it becomes evident that the 
-IoU scores for the 'sky' category are consistently high across most of the images. This suggests that the model's 
-performance in detecting and accurately segmenting the 'sky' class is notably successful in many instances.
+IoU scores for the 'road' category are consistently high across most of the images. This suggests that the model's 
+performance in detecting and accurately segmenting the 'road' class is notably successful in many instances.
 
-![iou_sky](screen_shots/iou_sky.png)
+![iou_road](screen_shots/iou_road.png)
 
 
 
