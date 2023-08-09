@@ -1,6 +1,6 @@
 
 import os
-from typing import Union, List
+from typing import Union, List, Dict
 
 import numpy as np
 import tensorflow as tf
