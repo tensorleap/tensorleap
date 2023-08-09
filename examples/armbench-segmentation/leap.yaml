@@ -1,17 +1,19 @@
-codeIntegrationId: 64ce4435edef73002191016c
-projectId: 64ce4431edef730021910168
-entryFile: 'leap_binder.py'
+codeIntegrationId: 64d0d7a457c84f001927b8c0
+projectId: 64d0d79057c84f001927b8bc
+secretManagerId: ""
+entryFile: leap_binder.py
 include:
-  - leap_binder.py
-  - leap_test.py
-  - leap_custom_test.py
-  - armbench_segmentation/__init__.py
-  - armbench_segmentation/preprocessing.py
-  - armbench_segmentation/visualizers/visualizers.py
-  - armbench_segmentation/visualizers/visualizers_getters.py
-  - armbench_segmentation/metadata.py
-  - armbench_segmentation/metrics.py
-  - armbench_segmentation/utils/general_utils.py
-  - armbench_segmentation/utils/ioa_utils.py
-  - armbench_segmentation/yolo_helpers/yolo_utils.py
-  - armbench_segmentation/config.py
+    - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
+    - armbench_segmentation/__init__.py
+    - armbench_segmentation/preprocessing.py
+    - armbench_segmentation/visualizers/visualizers.py
+    - armbench_segmentation/visualizers/visualizers_getters.py
+    - armbench_segmentation/metadata.py
+    - armbench_segmentation/metrics.py
+    - armbench_segmentation/utils/general_utils.py
+    - armbench_segmentation/utils/ioa_utils.py
+    - armbench_segmentation/yolo_helpers/yolo_utils.py
+    - armbench_segmentation/config.py
+    - armbench_segmentation/object_detection_config.yml
