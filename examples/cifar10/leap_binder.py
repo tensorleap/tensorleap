@@ -5,7 +5,7 @@ from keras.datasets import cifar10
 
 # Tensorleap imports
 from code_loader import leap_binder
-from code_loader.contract.enums import DatasetMetadataType, LeapDataType
+from code_loader.contract.enums import LeapDataType
 from code_loader.contract.visualizer_classes import LeapHorizontalBar
 from code_loader.contract.datasetclasses import PreprocessResponse
 

@@ -131,7 +131,7 @@ def get_decoded_tokens(input_ids: np.ndarray, tokenizer) -> List[str]:
     decoded = [token.replace(chr(9601), '') for token in decoded]
     return decoded
 
-def segmented_tokens_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, gt_logits: np.ndarray, pred_logits: np.ndarray) -> Tuple[npt.NDArray[np.uint8], List[str], List[str]]:
+def segmented_tokens_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, gt_logits: np.ndarray, pred_logits: np.ndarray, tokenizer) -> Tuple[npt.NDArray[np.uint8], List[str], List[str]]:
     """
     Description: Decodes the segmented tokens and returns the mask, text, and corresponding labels for visualization and analysis purposes.
     Parameters:
@@ -168,6 +168,6 @@ def segmented_tokens_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, 
     end_overlap = min(gt_end_index, pred_end_index)
     if start_overlap < end_overlap:
         mask[start_overlap: end_overlap + 1] = labels_mapping['overlap']
-    text = get_decoded_tokens(input_ids)
+    text = get_decoded_tokens(input_ids, tokenizer)
     mask = mask[:len(text)]  # trancate if needed
     return mask, text, labels
