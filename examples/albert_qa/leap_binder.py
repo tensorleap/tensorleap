@@ -238,54 +238,50 @@ for key in input_keys:
 leap_binder.set_ground_truth(function=gt_index_encoder_leap, name='indices_gt')
 
 # ------- Metadata ---------
-leap_binder.set_metadata(function=metadata_answer_length, metadata_type=DatasetMetadataType.float, name='answer_length')
-leap_binder.set_metadata(function=metadata_question_length, metadata_type=DatasetMetadataType.float,
-                         name='question_length')
-leap_binder.set_metadata(function=metadata_context_length, metadata_type=DatasetMetadataType.float,
-                         name='context_length')
-leap_binder.set_metadata(function=metadata_title, metadata_type=DatasetMetadataType.string, name='title')
-leap_binder.set_metadata(function=metadta_title_ids, metadata_type=DatasetMetadataType.int, name='title_idx')
+leap_binder.set_metadata(function=metadata_answer_length, name='answer_length')
+leap_binder.set_metadata(function=metadata_question_length, name='question_length')
+leap_binder.set_metadata(function=metadata_context_length, name='context_length')
+leap_binder.set_metadata(function=metadata_title, name='title')
+leap_binder.set_metadata(function=metadta_title_ids, name='title_idx')
 # leap_binder.set_metadata(function=metadta_context_ids, metadata_type=DatasetMetadataType.int, name='context_idx')
-leap_binder.set_metadata(function=metadata_gt_text, metadata_type=DatasetMetadataType.string, name='gt_string')
-leap_binder.set_metadata(function=metadata_is_truncated, metadata_type=DatasetMetadataType.int, name='is_truncated')
-leap_binder.set_metadata(function=metadata_context_polarity, metadata_type=DatasetMetadataType.float,
-                         name='context_polarity')
-leap_binder.set_metadata(function=metadata_context_subjectivity, metadata_type=DatasetMetadataType.float,
-                         name='context_subjectivity')
+leap_binder.set_metadata(function=metadata_gt_text, name='gt_string')
+leap_binder.set_metadata(function=metadata_is_truncated, name='is_truncated')
+leap_binder.set_metadata(function=metadata_context_polarity, name='context_polarity')
+leap_binder.set_metadata(function=metadata_context_subjectivity, name='context_subjectivity')
 
 # Calculate Automated Readability Index (ARI).
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).ari),
-                         metadata_type=DatasetMetadataType.float, name='context_ari_score')
+                         name='context_ari_score')
 # Calculate Coleman Liau Index
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).coleman_liau),
-                         metadata_type=DatasetMetadataType.float, name='context_coleman_liau_score')
+                         name='context_coleman_liau_score')
 # Calculate Dale Chall
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).dale_chall),
-                         metadata_type=DatasetMetadataType.float, name='context_dale_chall_score')
+                         name='context_dale_chall_score')
 # Calculate Flesch Reading Ease score
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).flesch),
-                         metadata_type=DatasetMetadataType.float, name='context_flesch_score')
+                         name='context_flesch_score')
 # Calculate Flesch-Kincaid Grade Level
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).flesch_kincaid),
-                         metadata_type=DatasetMetadataType.float, name='context_flesch_kincaid_score')
+                         name='context_flesch_kincaid_score')
 # Calculate Gunning Fog score
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).gunning_fog),
-                         metadata_type=DatasetMetadataType.float, name='context_gunning_fog_score')
+                         name='context_gunning_fog_score')
 # Calculate Linsear Write
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).linsear_write),
-                         metadata_type=DatasetMetadataType.float, name='context_linsear_write_score')
+                         name='context_linsear_write_score')
 # SMOG Index. `all_sentences` indicates whether SMOG should use a sample of 30 sentences, as described in the original paper, or if it should use all sentences in the text
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).smog),
-                         metadata_type=DatasetMetadataType.float, name='context_smog_score')
+                         name='context_smog_score')
 # Spache Index
 leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).spache),
-                         metadata_type=DatasetMetadataType.float, name='context_spache_score')
+                         name='context_spache_score')
 
 # Statistics metadata
 for stat in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
              'avg_syllables_per_word']:
     leap_binder.set_metadata(lambda idx, preprocess, key=stat: get_statistics(key, idx, preprocess, 'context'),
-                             metadata_type=DatasetMetadataType.float, name=f'context_{stat}')
+                             name=f'context_{stat}')
 
 # ------- Loss and Metrics ---------
 leap_binder.add_custom_loss(CE_loss, 'qa_cross_entropy')
