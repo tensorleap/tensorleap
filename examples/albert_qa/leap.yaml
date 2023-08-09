@@ -7,5 +7,6 @@ include:
   - utils/loss.py
   - utils/metrices.py
   - utils/utils.py
-  - project_config.py
+  - config.py
+  - project_config.yaml
 

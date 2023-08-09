@@ -1,5 +1,6 @@
 import numpy as np
-from utils.utils import get_start_position, max_sequence_length, get_end_position
+from utils.utils import get_start_position, get_end_position
+from config import CONFIG
 
 def gt_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     """
@@ -12,13 +13,13 @@ def gt_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     encoded. The first column represents the start index, and the second column represents the end index.
     """
     start_position = get_start_position(sample, inputs)
-    one_hot = np.zeros((max_sequence_length, 2))
-    if start_position < max_sequence_length:
+    one_hot = np.zeros((CONFIG['max_sequence_length'], 2))
+    if start_position < CONFIG['max_sequence_length']:
         one_hot[start_position, 0] = 1
     else:
         print("answer start position is out of max sequence length")
     end_position = get_end_position(sample, inputs)
-    if end_position < max_sequence_length:
+    if end_position < CONFIG['max_sequence_length']:
         one_hot[end_position, 1] = 1
     else:
         print("answer end position is out of max sequence length")
@@ -34,8 +35,8 @@ def gt_end_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     one_hot (np.ndarray): A one-hot array of shape (max_sequence_length,) with the ground truth end index encoded.
     """
     end_position = get_end_position(sample, inputs)
-    one_hot = np.zeros(max_sequence_length)
-    if end_position < max_sequence_length:
+    one_hot = np.zeros(CONFIG['max_sequence_length'])
+    if end_position < CONFIG['max_sequence_length']:
         one_hot[end_position] = 1
     else:
         print("answer start position is out of max sequence length")
@@ -51,8 +52,8 @@ def gt_start_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     one_hot (np.ndarray): A one-hot array of shape (max_sequence_length,) with the ground truth start index encoded.
     """
     start_position = get_start_position(sample, inputs)
-    one_hot = np.zeros(max_sequence_length)
-    if start_position < max_sequence_length:
+    one_hot = np.zeros(CONFIG['max_sequence_length'])
+    if start_position < CONFIG['max_sequence_length']:
         one_hot[start_position] = 1
     else:
         print("answer start position is out of max sequence length")
