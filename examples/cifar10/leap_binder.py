@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Union
 import numpy as np
 import numpy.typing as npt
 from keras.datasets import cifar10
@@ -83,16 +83,24 @@ def horizontal_bar_visualizer_with_labels_name(data: npt.NDArray[np.float32]) ->
     labels_names = [CONFIG['LABELS_NAMES'][index] for index in range(data.shape[-1])]
     return LeapHorizontalBar(data, labels_names)
 
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    metadata_functions = {
+        "sample_index": metadata_sample_index,
+        "gt_label": metadata_gt_label_leap,
+        "gt_label_name": metadata_label_name_leap,
+        "fly": metadata_fly_leap,
+        "animal": metadata_animal_leap
+    }
+    res = dict()
+    for func_name, func in metadata_functions.items():
+        res[func_name] = func(idx, data)
+    return res
+
 # Dataset binding functions to bind the functions above to the `Dataset Instance`.
 leap_binder.set_preprocess(function=preprocess_func_leap)
 leap_binder.set_unlabeled_data_preprocess(function=unlabeled_data)
 leap_binder.set_input(function=input_encoder_leap, name='image')
 leap_binder.set_ground_truth(function=gt_encoder, name='classes')
-leap_binder.set_metadata(function=metadata_sample_index, name='sample_index')
-leap_binder.set_metadata(function=metadata_gt_label_leap, name='gt_label')
-leap_binder.set_metadata(function=metadata_label_name_leap, name='gt_label_name')
-leap_binder.set_metadata(function=metadata_fly_leap, name='fly')
-leap_binder.set_metadata(function=metadata_animal_leap, name='animal')
-leap_binder.set_visualizer(horizontal_bar_visualizer_with_labels_name, 'horizontal_bar_lm',
-                           LeapDataType.HorizontalBar)
+leap_binder.set_metadata(metadata_dict, name='metadata')
+leap_binder.set_visualizer(horizontal_bar_visualizer_with_labels_name, 'horizontal_bar_lm', LeapDataType.HorizontalBar)
 leap_binder.add_prediction(name='classes', labels=CONFIG['LABELS_NAMES'])
