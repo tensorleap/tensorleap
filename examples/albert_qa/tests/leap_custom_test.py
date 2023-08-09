@@ -1,12 +1,18 @@
-import tensorflow as tf
+from os.path import exists
+import urllib
+
 from utils.loss import CE_loss
 from utils.metrices import CE_start_index, CE_end_index
 from tensorleap import *
-import numpy as np
 
 def check():
     x = preprocess_load_article_titles()
-    albert = tf.keras.models.load_model("/tensorleap/examples/albert_qa/model/albert.h5")
+
+    if not exists('albert.h5'):
+        print("Downloading resnet for inference")
+        urllib.request.urlretrieve(
+            "https://storage.googleapis.com/example-datasets-47ml982d/albert_squad/albert.h5", "albert.h5")
+    albert = tf.keras.models.load_model("albert.h5")
 
     for idx in range(0, 20):
         input_keys = ['input_ids', 'token_type_ids', 'attention_mask', 'offset_mapping']
