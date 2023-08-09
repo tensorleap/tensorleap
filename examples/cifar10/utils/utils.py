@@ -5,13 +5,6 @@ from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from config import CONFIG
 #
-# with open('/Users/chenrothschild/repo/tensorleap/examples/cifar10/project_config.yaml', 'r') as file:
-#     config_data = yaml.safe_load(file)
-
-# Assign the constants to variables in the current file
-# LABELS_NAMES = config_data['LABELS_NAMES']
-
-# Preprocess Function
 def preprocess_func():
     """
     Description: Preprocesses the CIFAR-10 dataset by loading the data, normalizing the labels, splitting it into training and validation sets, and converting the labels to one-hot vectors.

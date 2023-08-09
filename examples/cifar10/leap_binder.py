@@ -1,6 +1,7 @@
 from typing import List
 import numpy as np
 import numpy.typing as npt
+from keras.datasets import cifar10
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -9,10 +10,10 @@ from code_loader.contract.visualizer_classes import LeapHorizontalBar
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 
-from utils.utils import LABELS_NAMES, metadata_animal, metadata_fly, metadata_label_name, \
+from utils.utils import metadata_animal, metadata_fly, metadata_label_name, \
     metadata_gt_label, preprocess_func
 from utils.encoders import input_encoder
-from keras.datasets import cifar10
+from config import CONFIG
 
 
 # Preprocess Function
@@ -79,7 +80,7 @@ def metadata_animal_leap(idx: int, preprocess: PreprocessResponse) -> str:
         return label
 
 def horizontal_bar_visualizer_with_labels_name(data: npt.NDArray[np.float32]) -> LeapHorizontalBar:
-    labels_names = [LABELS_NAMES[index] for index in range(data.shape[-1])]
+    labels_names = [CONFIG['LABELS_NAMES'][index] for index in range(data.shape[-1])]
     return LeapHorizontalBar(data, labels_names)
 
 # Dataset binding functions to bind the functions above to the `Dataset Instance`.
@@ -94,4 +95,4 @@ leap_binder.set_metadata(function=metadata_fly_leap, name='fly')
 leap_binder.set_metadata(function=metadata_animal_leap, name='animal')
 leap_binder.set_visualizer(horizontal_bar_visualizer_with_labels_name, 'horizontal_bar_lm',
                            LeapDataType.HorizontalBar)
-leap_binder.add_prediction(name='classes', labels=LABELS_NAMES)
+leap_binder.add_prediction(name='classes', labels=CONFIG['LABELS_NAMES'])
