@@ -7,7 +7,7 @@ authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-code-loader = "0.2.83"
+#code-loader = "0.2.83"
 pycocotools = "^2.0.6"
 tqdm = "^4.65.0"
 google-cloud-storage = "^2.10.0"
