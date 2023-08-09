@@ -65,13 +65,13 @@ tensorleap auth login [api key] [api url]
 To deploy your local changes:
 
 ```
-tensorleap datasets push
+leap code push
 
 ```
 
 ### **Tensorleap files**
 
-Tensorleap files in the repository include `tensorleap.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
+Tensorleap files in the repository include `leap_binder.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
 
 **.tensorleap.yaml**
 
@@ -81,7 +81,7 @@ For any additional file being used we add its path under `include` parameter:
 
 ```
 include:
-  - tensorleap.py
+  - leap_binder.py
 	- cs_data.py
   - kitti_data.py
   - configs.py
@@ -89,20 +89,20 @@ include:
 
 ```
 
-**[tensorleap.py](http://tensorleap.py/) file**
+**leap_binder.py file**
 
-`tensorleap.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
+`leap_binder.py` configure all binding functions used to bind to Tensorleap engine. These are the functions used to evaluate and train the model, visualize the variables, and enrich the analysis with external metadata variables
 
 ## Testing
 
-To test the system we can run `[test.py](http://test.py/)` file using poetry:
+To test the system we can run `leap_test.py` file using poetry:
 
 ```
 poetry run test
 
 ```
 
-This file will execute several tests on [the tensorleap.py](http://tensorleap.py/) script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
