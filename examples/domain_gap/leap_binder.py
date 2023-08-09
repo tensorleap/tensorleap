@@ -13,7 +13,7 @@ from domain_gap.utils.gcs_utils import _download
 from domain_gap.tl_helpers.preprocess import subset_images
 from domain_gap.tl_helpers.visualizers.visualizers import image_visualizer, loss_visualizer, mask_visualizer, \
     cityscape_segmentation_visualizer
-from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json, get_class_mean_iou, mean_iou
+from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json, class_mean_iou, mean_iou
 
 
 # ----------------------------------- Input ------------------------------------------
@@ -49,32 +49,19 @@ def metadata_idx(idx: int, data: PreprocessResponse) -> int:
     return idx
 
 
-def metadata_background_percent(idx: int, data: PreprocessResponse) -> float:
+def metadata_class_percent(idx: int, data: PreprocessResponse) -> dict:
+    res = {}
     mask = get_categorical_mask(idx % data.data["real_size"], data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
-    count_obj = unique_per_obj.get(19.)
-    if count_obj is not None:
-        percent_obj = count_obj / mask.size
-    else:
-        percent_obj = 0.0
-    return percent_obj
-
-
-def metadata_percent_function_generator(class_idx: int):
-    def get_metadata_percent(idx: int, data: PreprocessResponse) -> float:
-        mask = get_categorical_mask(idx % data.data["real_size"], data)
-        unique, counts = np.unique(mask, return_counts=True)
-        unique_per_obj = dict(zip(unique, counts))
-        count_obj = unique_per_obj.get(float(class_idx))
+    for i, c in enumerate(CATEGORIES+["background"]):
+        count_obj = unique_per_obj.get(float(i))
         if count_obj is not None:
             percent_obj = count_obj / mask.size
         else:
             percent_obj = 0.0
-        return percent_obj
-
-    get_metadata_percent.__name__ = Cityscapes.train_id_to_label[class_idx] + "_" + "class_percent"
-    return get_metadata_percent
+        res[f'{c}'] = percent_obj
+    return res
 
 
 def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
@@ -138,7 +125,6 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
 
 # ----------------------------------- Binding ------------------------------------------
 
-
 leap_binder.set_preprocess(subset_images)
 
 if NORM_CS:
@@ -148,15 +134,10 @@ else:
 
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 
-leap_binder.set_metadata(metadata_background_percent, 'background_percent')
-for i, c in enumerate(CATEGORIES):
-    leap_binder.set_metadata(metadata_percent_function_generator(i),
-                             Cityscapes.train_id_to_label[i] + "_" + "class_percent")
-
-    leap_binder.add_custom_metric(get_class_mean_iou(i), name=f"iou_class_{c}")
-
+leap_binder.add_custom_metric(class_mean_iou, name=f"iou_class")
 leap_binder.add_custom_metric(mean_iou, name=f"iou")
 
+leap_binder.set_metadata(metadata_class_percent, 'class_percent')
 leap_binder.set_metadata(metadata_filename, 'filename')
 leap_binder.set_metadata(metadata_city, 'city')
 leap_binder.set_metadata(metadata_dataset, 'dataset')
