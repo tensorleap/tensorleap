@@ -10,8 +10,7 @@ from code_loader.contract.visualizer_classes import LeapHorizontalBar
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 
-from utils.utils import metadata_animal, metadata_fly, metadata_label_name, \
-    metadata_gt_label, preprocess_func
+from utils.utils import metadata_animal, metadata_fly, metadata_label_name, metadata_gt_label, preprocess_func
 from utils.encoders import input_encoder
 from config import CONFIG
 
@@ -101,6 +100,6 @@ leap_binder.set_preprocess(function=preprocess_func_leap)
 leap_binder.set_unlabeled_data_preprocess(function=unlabeled_data)
 leap_binder.set_input(function=input_encoder_leap, name='image')
 leap_binder.set_ground_truth(function=gt_encoder, name='classes')
-leap_binder.set_metadata(metadata_dict, name='metadata')
+leap_binder.set_metadata(function=metadata_dict, name='metadata')
 leap_binder.set_visualizer(horizontal_bar_visualizer_with_labels_name, 'horizontal_bar_lm', LeapDataType.HorizontalBar)
 leap_binder.add_prediction(name='classes', labels=CONFIG['LABELS_NAMES'])

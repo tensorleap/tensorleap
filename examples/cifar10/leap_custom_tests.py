@@ -1,13 +1,10 @@
-import os
 import tensorflow as tf
 import numpy as np
 from os.path import exists
 import urllib
-
-from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_sample_index, \
-    metadata_gt_label_leap, metadata_label_name_leap, metadata_fly_leap, metadata_animal_leap
 from keras.losses import CategoricalCrossentropy
 
+from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_dict
 
 def check_custom_integration():
     responses = preprocess_func_leap()
@@ -25,12 +22,12 @@ def check_custom_integration():
         y_true = tf.convert_to_tensor(gt)
 
         ls = CategoricalCrossentropy()(y_true, y_pred).numpy()
-
-        sample_index = metadata_sample_index(i, responses[0])
-        gt_label_leap = metadata_gt_label_leap(i, responses[0])
-        label_name_leap = metadata_label_name_leap(i, responses[0])
-        fly_leap = metadata_fly_leap(i, responses[0])
-        animal_leap = metadata_animal_leap(i, responses[0])
+        metadata = metadata_dict(i, responses[0])
+        # sample_index = metadata_sample_index(i, responses[0])
+        # gt_label_leap = metadata_gt_label_leap(i, responses[0])
+        # label_name_leap = metadata_label_name_leap(i, responses[0])
+        # fly_leap = metadata_fly_leap(i, responses[0])
+        # animal_leap = metadata_animal_leap(i, responses[0])
 
 
 if __name__ == '__main__':
