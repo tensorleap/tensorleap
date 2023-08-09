@@ -1,4 +1,4 @@
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Union
 from PIL import Image
 import numpy as np
 import json
@@ -15,7 +15,6 @@ from visualizers.visualizers import bb_decoder, gt_bb_decoder, bb_car_gt_decoder
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import (
-    DatasetMetadataType,
     LeapDataType
 )
 
@@ -199,11 +198,59 @@ def metadata_car_category_avg_size(idx: int, data: PreprocessResponse) -> float:
     instances_cnt = number_of_bb(idx, data)
     return np.round(car_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    metadata_functions = {
+        "filename": metadata_filename,
+        "city": metadata_city,
+        "idx": metadata_idx,
+        "gps_heading": metadata_gps_heading,
+        "gps_latitude": metadata_gps_latitude,
+        "gps_longtitude": metadata_gps_longtitude,
+        "outside_temperature": metadata_outside_temperature,
+        "speed": metadata_speed,
+        "yaw_rate": metadata_yaw_rate,
+        "bb_count": number_of_bb,
+        "avg_bb_aspect_ratio": avg_bb_aspect_ratio,
+        "avg_bb_area": avg_bb_area_metadata,
+        "instances_number_metadata": instances_num,
+        "small_bbs_number": count_small_bbs,
+        "does_veg_and_buildeng_class_exist": is_class_exist_veg_and_building(21, 11),
+        "metadata_brightness": metadata_brightness,
+        "metadata_person_category_avg_size": metadata_person_category_avg_size,
+        "metadata_car_category_avg_size": metadata_car_category_avg_size,
+
+    }
+    for i, label in enumerate(CATEGORIES_no_background):
+        metadata_functions[f'{label} number_metadata'] = label_instances_num(label)
+
+    for id in CATEGORIES_id_no_background:
+        metadata_functions[f'does_class_number_{id}_exist'] = is_class_exist_gen(id)
+
+    res = dict()
+    for func_name, func in metadata_functions.items():
+        res[func_name] = func(idx, data)
+    return res
+
+def od_metrics_dict(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
+    metric_functions = {
+        "Regression_metric": regression_metric,
+        "Classification_metric": classification_metric,
+        "Objectness_metric": object_metric,
+    }
+
+    for id in CATEGORIES_id_no_background:
+        class_name = Cityscapes.get_class_name(id)
+        metric_functions[f"iou_class_{class_name}"] = get_class_mean_iou(id)
+
+    res = dict()
+    for func_name, func in metric_functions.items():
+        res[func_name] = func(bb_gt, detection_pred)
+    return res
+
 # ---------------------------------------------------------binding------------------------------------------------------
 
 #preprocess function
 leap_binder.set_preprocess(load_cityscapes_data_leap)
-#TODO: unlables data
 
 #set input and gt
 leap_binder.set_input(non_normalized_image, 'non_normalized_image')
@@ -216,31 +263,7 @@ leap_binder.add_prediction(name='object detection', labels=["x", "y", "w", "h", 
 leap_binder.add_custom_loss(od_loss, 'od_loss')
 
 #set meata_data
-leap_binder.set_metadata(metadata_filename, 'filename')
-leap_binder.set_metadata(metadata_city, 'city')
-leap_binder.set_metadata(metadata_idx, 'idx')
-leap_binder.set_metadata(metadata_gps_heading, 'gps_heading')
-leap_binder.set_metadata(metadata_gps_latitude, 'gps_latitude')
-leap_binder.set_metadata(metadata_gps_longtitude, 'gps_longtitude')
-leap_binder.set_metadata(metadata_outside_temperature, 'outside_temperature')
-leap_binder.set_metadata(metadata_speed, 'speed')
-leap_binder.set_metadata(metadata_yaw_rate, 'yaw_rate')
-leap_binder.set_metadata(number_of_bb, 'bb_count')
-leap_binder.set_metadata(avg_bb_aspect_ratio, 'avg_bb_aspect_ratio')
-leap_binder.set_metadata(avg_bb_area_metadata, 'avg_bb_area')
-leap_binder.set_metadata(instances_num, "instances_number_metadata")
-leap_binder.set_metadata(count_small_bbs, "small_bbs_number")
-for i, label in enumerate(CATEGORIES_no_background):
-    leap_binder.set_metadata(label_instances_num(label), f'{label} number_metadata')
-for id in CATEGORIES_id_no_background:
-    class_name = Cityscapes.get_class_name(id)
-    leap_binder.set_metadata(is_class_exist_gen(id), f'does_class_number_{id}_exist')
-    leap_binder.add_custom_metric(get_class_mean_iou(id), name=f"iou_class_{class_name}") #metric
-leap_binder.set_metadata(is_class_exist_veg_and_building(21, 11), f'does_veg_and_buildeng_class_exist')
-leap_binder.set_metadata(metadata_brightness, "metadata_brightness")
-leap_binder.set_metadata(metadata_person_category_avg_size, "metadata_person_category_avg_size")
-leap_binder.set_metadata(metadata_car_category_avg_size, "metadata_car_category_avg_size")
-
+leap_binder.set_metadata(metadata_dict, name='metadata')
 
 #set visualizer
 leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)
@@ -249,8 +272,7 @@ leap_binder.set_visualizer(bb_car_gt_decoder, 'bb_car_gt_decoder', LeapDataType.
 leap_binder.set_visualizer(bb_car_decoder, 'bb_car_decoder', LeapDataType.ImageWithBBox)
 
 # set custom metrics
-leap_binder.add_custom_metric(regression_metric, "Regression_metric")
-leap_binder.add_custom_metric(classification_metric, "Classification_metric")
-leap_binder.add_custom_metric(object_metric, "Objectness_metric")
+leap_binder.add_custom_metric(od_metrics_dict, 'od_metrics')
+
 
 
