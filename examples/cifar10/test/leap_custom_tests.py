@@ -1,6 +1,8 @@
 import os
 import tensorflow as tf
 import numpy as np
+from os.path import exists
+import urllib
 
 from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_sample_index, \
     metadata_gt_label_leap, metadata_label_name_leap, metadata_fly_leap, metadata_animal_leap
@@ -9,10 +11,12 @@ from keras.losses import CategoricalCrossentropy
 
 def check_custom_integration():
     responses = preprocess_func_leap()
-    path = "tensorleap/examples/cifar10/model"
-    os.chdir(path)
-    model = os.path.join(path, 'resnet.h5')
-    resnet = tf.keras.models.load_model(model)  # load model
+
+    if not exists('resnet.h5'):
+        print("Downloading resnet for inference")
+        urllib.request.urlretrieve(
+            "https://storage.googleapis.com/example-datasets-47ml982d/resnet_cifar10/resnet.h5", "resnet.h5")
+    resnet = tf.keras.models.load_model("resnet.h5")
 
     for i in range(0, 20):
         concat = np.expand_dims(input_encoder_leap(i, responses[0]), axis=0)

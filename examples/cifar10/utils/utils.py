@@ -3,7 +3,7 @@ import yaml
 from keras.datasets import cifar10
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
-from project_config import LABELS_NAMES
+from config import CONFIG
 #
 # with open('/Users/chenrothschild/repo/tensorleap/examples/cifar10/project_config.yaml', 'r') as file:
 #     config_data = yaml.safe_load(file)
@@ -57,7 +57,7 @@ def metadata_label_name(one_hot_digit: np.ndarray) -> str:
     """
     digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
     digit_int = int(digit)
-    return LABELS_NAMES[digit_int]
+    return CONFIG['LABELS_NAMES'][digit_int]
 
 
 # This metadata adds each sample if it is contains to airplane or bird.
