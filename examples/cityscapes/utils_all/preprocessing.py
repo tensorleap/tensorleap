@@ -5,11 +5,9 @@ from collections import namedtuple
 from pathlib import Path
 
 from utils_all.gcs_utils import _connect_to_gcs_and_return_bucket
-from project_config import BUCKET_NAME
-
+from config import CONFIG
 class Cityscapes:
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
-
     **Parameters:**
         - **root** (string): Root directory of dataset where directory 'leftImg8bit' and 'gtFine' or 'gtCoarse' are located.
         - **split** (string, optional): The image split to use, 'train', 'test' or 'val' if mode="gtFine" otherwise 'train', 'train_extra' or 'val'
@@ -109,7 +107,7 @@ def load_cityscapes_data() -> Tuple[List[List[str]], List[List[str]], List[List[
     the images and their associated annotations for the respective subsets of the Cityscapes dataset.
     """
     np.random.seed(42)
-    bucket = _connect_to_gcs_and_return_bucket(BUCKET_NAME)
+    bucket = _connect_to_gcs_and_return_bucket(CONFIG['BUCKET_NAME'])
     dataset_path = Path('Cityscapes')
     responses = []
     TRAIN_PERCENT = 0.7
@@ -149,4 +147,3 @@ def load_cityscapes_data() -> Tuple[List[List[str]], List[List[str]], List[List[
             all_cities[0], all_cities[1], all_cities[2] = all_cities[0] + [folder_name]*train_size, all_cities[1] + [folder_name]*(val_size), all_cities[2]+ [folder_name]*(len(permuted_list)-(train_size+val_size))
 
     return all_images, all_gt_images, all_gt_labels, all_gt_labels_for_bbx, all_file_names, all_metadata, all_cities
-

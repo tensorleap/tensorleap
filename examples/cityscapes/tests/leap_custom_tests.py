@@ -1,4 +1,3 @@
-import os
 import urllib
 from os.path import exists
 

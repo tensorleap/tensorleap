@@ -5,7 +5,7 @@ import tensorflow as tf
 import json
 
 from utils_all.preprocessing import CATEGORIES, Cityscapes
-from project_config import MAX_BB_PER_IMAGE, BACKGROUND_LABEL, IMAGE_SIZE, MODEL_FORMAT
+from config import CONFIG
 from yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 from utils_all.gcs_utils import _download
 
@@ -18,7 +18,6 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 def filter_out_unknown_classes_id(objects: List[dict]) -> List[dict]:
     """
     Description: This function takes a list of dictionaries objects as input and filters out unknown class IDs from it.
-
     Input: objects (List[dict]): A list of dictionaries, each representing an object with 'label' and 'polygon' keys.
     Output: new_objects (List[dict]): A filtered list of dictionaries containing objects with valid class IDs.
     """
@@ -39,14 +38,13 @@ def normelized_polygon(image_height: int, image_width: int, ann: dict) ->dict:
     """
     Description: This function normalizes a polygon using the height and width of the original image and a
                  dictionary ann representing an annotation (with 'polygon' key containing a list of (x, y) coordinates).
-
     Input: image_height (int): Height of the original image in pixels.
            image_width (int): Width of the original image in pixels.
            ann (dict): A dictionary representing an annotation with 'polygon' key containing a list of (x, y) coordinates.
     Output: ann (dict): The updated dictionary representing the annotation with normalized polygon coordinates.
     """
 
-    normalized_height, normalized_width = IMAGE_SIZE[0], IMAGE_SIZE[1]
+    normalized_height, normalized_width = CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]
     coords = ann['polygon']
     new_coords = []
     for x, y in coords:
@@ -64,29 +62,26 @@ def extract_bounding_boxes_from_instance_segmentation_polygons(json_data: dict) 
     """
     objects = json_data['objects']
     objects = filter_out_unknown_classes_id(objects)
-    bounding_boxes = np.zeros([MAX_BB_PER_IMAGE, 5])
-    max_anns = min(MAX_BB_PER_IMAGE, len(objects))
+    bounding_boxes = np.zeros([CONFIG['MAX_BB_PER_IMAGE'], 5])
+    max_anns = min(CONFIG['MAX_BB_PER_IMAGE'], len(objects))
     original_image_size = (json_data['imgHeight'], json_data['imgWidth'])
     for i in range(max_anns):
         ann = objects[i]
         ann = normelized_polygon(original_image_size[0], original_image_size[1], ann)
         bbox = polygon_to_bbox(ann['polygon'])
-        bbox /= np.array((IMAGE_SIZE[0], IMAGE_SIZE[1], IMAGE_SIZE[0], IMAGE_SIZE[1]))
+        bbox /= np.array((CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1], CONFIG['IMAGE_SIZE'][0], CONFIG['IMAGE_SIZE'][1]))
         bounding_boxes[i, :4] = bbox
         bounding_boxes[i, 4] = ann['label']
-    bounding_boxes[max_anns:, 4] = BACKGROUND_LABEL
+    bounding_boxes[max_anns:, 4] = CONFIG['BACKGROUND_LABEL']
     return bounding_boxes
 
 def polygon_to_bbox(polygon: List[List]) ->List[float]:
     """
     Converts a polygon representation to a bounding box representation.
-
     Args:
         vertices: (list) List of vertices defining the polygon. The vertices should be in the form [x1, y1, x2, y2, ...].
-
     Returns:
         list: Bounding box representation of the polygon in the form [x, y, width, height].
-
     Note:
         - The input list of vertices should contain x and y coordinates in alternating order.
         - The function calculates the minimum and maximum values of the x and y coordinates to determine the bounding box.
@@ -137,10 +132,10 @@ def get_predict_bbox_list(data: tf.Tensor) ->List[BoundingBox]:
     Input: data (tf.Tensor): A TensorFlow tensor representing the output data.
     Output: bb_object (List[BoundingBox]): A list of bounding box objects representing the predicted annotations.
     """
-    from_logits = True if MODEL_FORMAT != "inference" else False
-    decoded = False if MODEL_FORMAT != "inference" else True
+    from_logits = True if CONFIG['MODEL_FORMAT'] != "inference" else False
+    decoded = False if CONFIG['MODEL_FORMAT'] != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(
-        np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=IMAGE_SIZE)
+        np.reshape(data, (1, *data.shape)), decoded=decoded, image_size=CONFIG['IMAGE_SIZE'])
     # add batch
     outputs = DECODER(loc_list_reshaped,
                       class_list_reshaped,
@@ -148,14 +143,13 @@ def get_predict_bbox_list(data: tf.Tensor) ->List[BoundingBox]:
                       from_logits=from_logits,
                       decoded=decoded,
                       )
-    bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=BACKGROUND_LABEL)
+    bb_object = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=CONFIG['BACKGROUND_LABEL'])
     return bb_object
 
 def get_json(idx: int, data: PreprocessResponse) -> dict:
     """
     Description: This function takes an integer index idx and a PreprocessResponse object data as input and returns a
                 Python dictionary containing JSON data.
-
     Input: idx (int): Index of the sample.
     data (PreprocessResponse): An object of type PreprocessResponse containing data attributes.
     Output: json_data (dict): A Python dictionary representing the JSON data obtained from the file at the given index.
@@ -171,17 +165,14 @@ def get_polygon(json_data: dict) -> List[dict]:
     """
     Description: This function takes a Python dictionary json_data as input and returns a list of dictionaries
     representing polygons.
-
     Input: json_data (dict): A Python dictionary representing the JSON data containing annotation information.
     Output: polygons (List[dict]): A list of dictionaries, each representing a label polygon.
     """
     polygons = []
     objects = json_data['objects']
     objects = filter_out_unknown_classes_id(objects)
-    max_anns = min(MAX_BB_PER_IMAGE, len(objects))
+    max_anns = min(CONFIG['MAX_BB_PER_IMAGE'], len(objects))
     for i in range(max_anns):
         polygon = objects[i]
         polygons.append(polygon)
     return polygons
-
-

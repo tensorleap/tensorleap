@@ -1,4 +1,3 @@
-
 from typing import Tuple
 import webcolors
 import numpy as np
@@ -12,7 +11,6 @@ from utils_all.preprocessing import Cityscapes
 def rgb_to_color_name(rgb_value: Tuple[int]) ->str:
     """
     Description: This function takes an RGB color value as input and converts it into a color name.
-
     Input: rgb_value (Tuple[int]): An RGB color value represented as a tuple of three integers (red, green, blue).
     Output: color_name (str): The color name corresponding to the input RGB value or 'r' as a default placeholder.
     """
@@ -26,7 +24,6 @@ def plot_image_with_bboxes(image: np.ndarray, bounding_boxes: np.ndarray, type: 
     """
     Description: The function takes an image and a list of bounding boxes as input and visualizes the image with
     bounding boxes overlaid.
-
     Input: image (numpy array): Input RGB image as a NumPy array.
            bounding_boxes (list): List of bounding boxes represented as [x_center, y_center, width, height, label].
            type (str): The bboxes type- gt ot prediction.
@@ -70,7 +67,6 @@ def plot_image_with_polygons(image_height: int, image_width: int, polygons, imag
     """
     Description: The function takes an image and a list of polygons as input and visualizes the image with
     polygons overlaid.
-
     Input: image (numpy array): Input RGB image as a NumPy array.
            image_height :(int): Height of the input image in pixels.
            image_width: (int): Width of the input image in pixels.

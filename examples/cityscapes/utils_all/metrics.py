@@ -1,7 +1,7 @@
 from typing import Tuple, List
 import tensorflow as tf
 
-from project_config import MODEL_FORMAT, IMAGE_SIZE, BACKGROUND_LABEL
+from config import CONFIG
 from utils_all.general_utils import bb_array_to_object, get_predict_bbox_list
 from utils_all.preprocessing import Cityscapes, CATEGORIES_no_background
 
@@ -13,9 +13,9 @@ def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor) -> Tuple[tf.Tensor, 
     """
     Computes the sum of the classification (CE loss) and localization (regression) losses from all heads
     """
-    decoded = False if MODEL_FORMAT != "inference" else True
+    decoded = False if CONFIG['MODEL_FORMAT'] != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(od_pred, decoded=decoded,
-                                                                 image_size=IMAGE_SIZE)  # add batch
+                                                                 image_size=CONFIG['IMAGE_SIZE'])  # add batch
     loss_l, loss_c, loss_o = LOSS_FN(y_true=obj_true, y_pred=(loc_list_reshaped, class_list_reshaped))
 
     return loss_l, loss_c, loss_o
@@ -35,11 +35,9 @@ def od_loss(bb_gt: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:  # return batch
 def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:  # return batch
     """
     This function calculates the total classification loss for each head of the object detection model.
-
     Parameters:
     bb_gt (tf.Tensor): The ground truth tensor containing the target bounding box values.
     detection_pred (tf.Tensor): The predicted tensor containing the output from the object detection model.
-
     Returns:
     A tensor representing the total classification (cross-entropy) loss for each head.
     """
@@ -53,7 +51,6 @@ def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:
     Parameters:
     bb_gt (tf.Tensor): The ground truth tensor containing the target bounding box values.
     detection_pred (tf.Tensor): The predicted tensor containing the output from the object detection model.
-
     Returns:
     A tensor representing the total regression (localization) loss for each head.
     """
@@ -64,11 +61,9 @@ def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:
 def object_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> tf.Tensor:
     """
     This function calculates the total objectness loss for each head of the object detection model.
-
     Parameters:
     bb_gt (tf.Tensor): The ground truth tensor containing the target bounding box values.
     detection_pred (tf.Tensor): The predicted tensor containing the output from the object detection model.
-
     Returns:
     A tensor representing the total objectness loss for each head.
     """
@@ -81,21 +76,19 @@ def convert_to_xyxy(bounding_boxes: List) -> List[List[int]]:
     for box in bounding_boxes:
         center_x, center_y, width, height, label = box.x, box.y, box.width, box.height, box.label
         class_id = Cityscapes.get_class_id(label)
-        x_min = (center_x - width / 2) * IMAGE_SIZE[0]
-        y_min = (center_y - height / 2) * IMAGE_SIZE[1]
-        x_max = (center_x + width / 2) * IMAGE_SIZE[0]
-        y_max = (center_y + height / 2) * IMAGE_SIZE[1]
+        x_min = (center_x - width / 2) * CONFIG['IMAGE_SIZE'][0]
+        y_min = (center_y - height / 2) * CONFIG['IMAGE_SIZE'][1]
+        x_max = (center_x + width / 2) * CONFIG['IMAGE_SIZE'][0]
+        y_max = (center_y + height / 2) * CONFIG['IMAGE_SIZE'][1]
         xyxy_boxes.append([x_min, y_min, x_max, y_max, class_id])
     return xyxy_boxes
 
 
 def intersection_area(true_box: List[float], pred_box: List[float]) -> float:
     """Calculates the intersection area between two bounding boxes.
-
   Args:
     true_box: A bounding box in the format [x1, y1, x2, y2].
     pred_box: A bounding box in the format [x1, y1, x2, y2].
-
   Returns:
     The intersection area.
   """
@@ -112,11 +105,9 @@ def intersection_area(true_box: List[float], pred_box: List[float]) -> float:
 
 def union_area(true_box: List[float], pred_box: List[float]) -> float:
     """Calculates the union area between two bounding boxes.
-
   Args:
     true_box: A bounding box in the format [x1, y1, x2, y2].
     pred_box: A bounding box in the format [x1, y1, x2, y2].
-
   Returns:
     The union area.
   """
@@ -128,15 +119,13 @@ def union_area(true_box: List[float], pred_box: List[float]) -> float:
 
 def calculate_iou(y_true: tf.Tensor, y_pred: tf.Tensor, class_id: int) -> float:
     """Calculates the intersection over union (IoU) between a list of true bounding boxes and a list of predicted bounding boxes.
-
       Args:
             y_true (tf.Tensor): Ground truth segmentation mask tensor.
             y_pred (tf.Tensor): Predicted segmentation mask tensor.
-
       Returns:
         A float of y IoU scores.
       """
-    y_true = bb_array_to_object(y_true, iscornercoded=False, bg_label=BACKGROUND_LABEL, is_gt=True)
+    y_true = bb_array_to_object(y_true, iscornercoded=False, bg_label=CONFIG['BACKGROUND_LABEL'], is_gt=True)
     y_true = [bbox for bbox in y_true if bbox.label in CATEGORIES_no_background]
     y_true = convert_to_xyxy(y_true)
 

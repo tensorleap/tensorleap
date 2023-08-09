@@ -4,12 +4,11 @@ import numpy as np
 import json
 import tensorflow as tf
 from tensorflow import Tensor
-
 from utils_all.gcs_utils import _download
 from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou
 from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background
-from project_config import IMAGE_STD, IMAGE_MEAN, IMAGE_SIZE, BACKGROUND_LABEL, SMALL_BBS_TH
+from config import CONFIG
 from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons
 from visualizers.visualizers import bb_decoder, gt_bb_decoder, bb_car_gt_decoder, bb_car_decoder
 
@@ -56,7 +55,7 @@ def non_normalized_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data
     cloud_path = data['image_path'][idx]
     fpath = _download(str(cloud_path))
-    img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE))/255.
+    img = np.array(Image.open(fpath).convert('RGB').resize(CONFIG['IMAGE_SIZE']))/255.
     return img
 
 def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
@@ -81,24 +80,24 @@ def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 def number_of_bb(index: int, subset: PreprocessResponse) -> int:
     bbs = np.array(ground_truth_bbox(index, subset))
-    number_of_bb = np.count_nonzero(bbs[..., -1] != BACKGROUND_LABEL)
+    number_of_bb = np.count_nonzero(bbs[..., -1] != CONFIG['BACKGROUND_LABEL'])
     return number_of_bb
 
 def instances_num(index: int, subset: PreprocessResponse) -> float:
     bbs = np.array(ground_truth_bbox(index, subset))
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     return float(valid_bbs.shape[0])
 
 def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
     bbs = np.array(ground_truth_bbox(index, subset))
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     assert ((valid_bbs[:, 3] > 0).all())
     aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
     return aspect_ratios.mean()
 
 def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
     bbs = np.array(ground_truth_bbox(index, subset)) # x,y,w,h
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     areas = valid_bbs[:, 2] * valid_bbs[:, 3]
     return areas.mean()
 
@@ -142,7 +141,7 @@ def get_class_mean_iou(class_id: int) -> Callable[[Tensor, Tensor], Tensor]:
 def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
     bboxes = np.array(ground_truth_bbox(idx, data))
     areas = bboxes[..., 2] * bboxes[..., 3]
-    return float(len(areas[areas < SMALL_BBS_TH]))
+    return float(len(areas[areas < CONFIG['SMALL_BBS_TH']]))
 
 def metadata_filename(idx: int, data: PreprocessResponse) -> str:
     return data.data['file_names'][idx]
@@ -184,7 +183,7 @@ def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
 
 def category_percent(idx: int, data: PreprocessResponse, class_id:int) -> float:
     bbs = np.array(ground_truth_bbox(idx, data))
-    valid_bbs = bbs[bbs[..., -1] != BACKGROUND_LABEL]
+    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     category_bbs = valid_bbs[valid_bbs[..., -1] == class_id]
     return float(category_bbs.shape[0])
 
