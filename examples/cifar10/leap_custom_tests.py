@@ -23,11 +23,7 @@ def check_custom_integration():
 
         ls = CategoricalCrossentropy()(y_true, y_pred).numpy()
         metadata = metadata_dict(i, responses[0])
-        # sample_index = metadata_sample_index(i, responses[0])
-        # gt_label_leap = metadata_gt_label_leap(i, responses[0])
-        # label_name_leap = metadata_label_name_leap(i, responses[0])
-        # fly_leap = metadata_fly_leap(i, responses[0])
-        # animal_leap = metadata_animal_leap(i, responses[0])
+
 
 
 if __name__ == '__main__':
