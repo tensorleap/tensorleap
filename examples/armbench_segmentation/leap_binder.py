@@ -22,7 +22,7 @@ from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
     mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, over_segmented_instances_count, \
     under_segmented_instances_count, average_segments_num_over_segment, average_segments_num_under_segmented, \
-    over_segment_avg_confidence
+    over_segment_avg_confidence, instance_seg_loss
 from armbench_segmentation.visualizers.visualizers import gt_bb_decoder, bb_decoder, \
     under_segmented_bb_visualizer, over_segmented_bb_visualizer
 from armbench_segmentation.visualizers.visualizers_getters import mask_visualizer_gt, mask_visualizer_prediction
