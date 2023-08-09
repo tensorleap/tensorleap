@@ -76,7 +76,8 @@ include:
     - utils_all/preprocessing.py
     - visualizers/visualizers.py
     - yolo_helpers/yolo_utils.py
-    - project_config.py
+    - config.py
+    - od_config.yaml
 ```
 
 ### **leap_binder.py file**
