@@ -1,4 +1,3 @@
-import yaml
 import tensorflow as tf
 import numpy as np
 from readability import Readability
@@ -6,23 +5,19 @@ from readability import Readability
 # Tensorleap imports
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
-from code_loader.contract.enums import DatasetMetadataType, LeapDataType
+from code_loader.contract.enums import LeapDataType
 from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 
 from transformers import AlbertTokenizerFast
 from typing import List
 
-from utils.utils import load_data, CHANGE_INDEX_FLAG, max_sequence_length, get_context_positions, \
-    get_readibility_score
+from utils.utils import load_data, get_context_positions, get_readibility_score
 from utils.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
     context_subjectivity, answer_decoder, tokens_decoder, tokens_question_decoder, tokens_context_decoder
 from utils.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
 from utils.loss import CE_loss
 from utils.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
-from project_config import input_keys
-
-# with open('/Users/chenrothschild/repo/tensorleap/examples/albert_QA/albert/project_config.yaml', 'r') as f:
-#     config_data = yaml.safe_load(f)
+from config import CONFIG
 
 # -------------------------load_data--------------------------------
 def preprocess_load_article_titles() -> List[PreprocessResponse]:
@@ -37,7 +32,7 @@ def preprocess_load_article_titles() -> List[PreprocessResponse]:
 # ------- Inputs ---------
 
 def convert_index(idx: int, preprocess: PreprocessResponse) -> int:
-    if CHANGE_INDEX_FLAG:
+    if CONFIG['CHANGE_INDEX_FLAG']:
         return int(preprocess.data['idx'][idx])
     return idx
 
@@ -50,7 +45,7 @@ def get_inputs(idx: int, preprocess: PreprocessResponse) -> dict:
         x["context"],
         return_tensors="tf",
         padding='max_length',
-        max_length=max_sequence_length,
+        max_length=CONFIG['max_sequence_length'],
         return_offsets_mapping=True
     )
     return inputs.data
@@ -61,7 +56,7 @@ def get_input_func(key: str):
         idx = convert_index(idx, preprocess)
         x = get_inputs(idx, preprocess)[key].numpy()
         x = x.squeeze()
-        return x[:max_sequence_length]
+        return x[:CONFIG['max_sequence_length']]
         return x[:, :max_sequence_length]
 
     input_func.__name__ = f"{key}"
@@ -146,7 +141,7 @@ def metadata_is_truncated(idx: int, preprocess: PreprocessResponse) -> int:
     input_ids = get_input_func("input_ids")(idx, preprocess)
     tokenizer = get_tokenizer()
     decoded = tokenizer_decoder(tokenizer, input_ids)
-    return int(len(decoded) > max_sequence_length)
+    return int(len(decoded) > CONFIG['max_sequence_length'])
 
 
 def metadata_context_polarity(idx: int, preprocess: PreprocessResponse) -> float:
@@ -231,7 +226,7 @@ leap_binder.set_preprocess(function=preprocess_load_article_titles)
 * attention_mask: Mask to avoid performing attention on padding token indices.
     Mask values selected in [0, 1]:
 """
-for key in input_keys:
+for key in CONFIG['input_keys']:
     leap_binder.set_input(function=get_input_func(key), name=f"{key}")
 
 # ------- GT ---------

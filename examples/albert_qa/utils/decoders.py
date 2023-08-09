@@ -4,8 +4,9 @@ from typing import List, Tuple
 import tensorflow as tf
 from textblob import TextBlob
 
-from utils.utils import get_context_positions, max_sequence_length, PAD_TOKEN
+from utils.utils import get_context_positions
 from utils.metrices import get_start_end_arrays
+from config import CONFIG
 
 def tokens_context_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, tokenizer)->List[str]:
     """
@@ -20,7 +21,7 @@ def tokens_context_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, to
     input_ids = input_ids.astype(np.int32).tolist()
     context_start, context_end = get_context_positions(token_type_ids)
     input_ids = input_ids[int(context_start): int(context_end + 1)]
-    decoded = tokenizer.decode(input_ids, max_seq_length=max_sequence_length)
+    decoded = tokenizer.decode(input_ids, max_seq_length=CONFIG['max_sequence_length'])
     decoded = decoded.split(' ')
     return decoded
 
@@ -37,7 +38,7 @@ def tokens_question_decoder(input_ids: np.ndarray, token_type_ids: np.ndarray, t
     input_ids = input_ids.astype(np.int32).tolist()
     context_start, context_end = get_context_positions(token_type_ids)
     input_ids = input_ids[1:int(context_start - 1)]
-    decoded = tokenizer.decode(input_ids, max_seq_length=max_sequence_length)
+    decoded = tokenizer.decode(input_ids, max_seq_length=CONFIG['max_sequence_length'])
     decoded = decoded.split(' ')
     return decoded
 
@@ -49,10 +50,10 @@ def tokens_decoder(decoded) ->List[str]:
     Returns:
     decoded (List[str]): List of truncated or padded tokens.
     """
-    if len(decoded) < max_sequence_length:  # pad
-        decoded += (max_sequence_length - len(decoded)) * [PAD_TOKEN]
-    elif len(decoded) > max_sequence_length:  # truncate
-        decoded = decoded[:max_sequence_length]
+    if len(decoded) < CONFIG['max_sequence_length']:  # pad
+        decoded += (CONFIG['max_sequence_length'] - len(decoded)) * [CONFIG['PAD_TOKEN']]
+    elif len(decoded) > CONFIG['max_sequence_length']:  # truncate
+        decoded = decoded[:CONFIG['max_sequence_length']]
     return decoded
 
 def tokenizer_decoder(tokenizer, input_ids: np.ndarray) -> List[str]:

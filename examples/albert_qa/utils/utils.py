@@ -1,5 +1,4 @@
 from typing import List, Dict, Tuple
-import yaml
 import numpy as np
 import pandas as pd
 from enum import Enum
@@ -7,8 +6,7 @@ import nltk
 import tensorflow as tf
 
 from datasets import load_dataset
-
-from project_config import *
+from config import home_dir, persistent_dir, CONFIG
 
 nltk.download('punkt')
 np.random.seed(0)
@@ -38,9 +36,9 @@ def load_data() -> Tuple[np.ndarray, dict, np.ndarray, dict, Dict[str, Enum]]:
     for col in val_titles:
         idx = list(np.where(pd.Series(val_ds.data['title']) == col)[0])
         val_idx += idx
-    train_idx = np.random.choice(train_idx, size=TRAIN_SIZE, replace=False) if TRAIN_SIZE < len(
+    train_idx = np.random.choice(train_idx, size=CONFIG['TRAIN_SIZE'], replace=False) if CONFIG['TRAIN_SIZE'] < len(
         train_idx) else train_idx
-    val_idx = np.random.choice(val_idx, size=VAL_SIZE, replace=False) if VAL_SIZE < len(val_idx) else val_idx
+    val_idx = np.random.choice(val_idx, size=CONFIG['VAL_SIZE'], replace=False) if CONFIG['VAL_SIZE'] < len(val_idx) else val_idx
     train_idx.sort()
     val_idx.sort()
 
@@ -62,7 +60,7 @@ def get_context_positions(token_type_ids: np.ndarray) -> List[int]:
     context_end (int): The end position of the context.
     """
     context_start = tf.argmax(token_type_ids)
-    context_end = max_sequence_length - tf.argmax(token_type_ids[::-1]) - 1
+    context_end = CONFIG['max_sequence_length'] - tf.argmax(token_type_ids[::-1]) - 1
     return int(context_start), int(context_end)
 
 
