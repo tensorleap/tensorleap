@@ -11,9 +11,9 @@ from domain_gap.data.cs_data import Cityscapes, CATEGORIES
 from domain_gap.utils.configs import *
 from domain_gap.utils.gcs_utils import _download
 from domain_gap.tl_helpers.preprocess import subset_images
-from domain_gap.tl_helpers.visualizers.visualizers import image_visualizer, loss_visualizer, mask_visualizer, cityscape_segmentation_visualizer
+from domain_gap.tl_helpers.visualizers.visualizers import image_visualizer, loss_visualizer, mask_visualizer, \
+    cityscape_segmentation_visualizer
 from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json, get_class_mean_iou, mean_iou
-
 
 
 # ----------------------------------- Input ------------------------------------------
@@ -38,7 +38,8 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     mask = get_categorical_mask(idx % data.data["real_size"], data)
-    return tf.keras.utils.to_categorical(mask, num_classes=20).astype(float)[..., :19]  # Remove background class from cross-entropy
+    return tf.keras.utils.to_categorical(mask, num_classes=20).astype(float)[...,
+           :19]  # Remove background class from cross-entropy
 
 
 # ----------------------------------- Metadata ------------------------------------------
@@ -135,8 +136,6 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
         return DEFAULT_YAW_RATE
 
 
-
-
 # ----------------------------------- Binding ------------------------------------------
 
 
@@ -149,23 +148,25 @@ else:
 
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 
-leap_binder.set_metadata(metadata_background_percent, DatasetMetadataType.float, 'background_percent')
+leap_binder.set_metadata(metadata_background_percent, 'background_percent')
 for i, c in enumerate(CATEGORIES):
     leap_binder.set_metadata(metadata_percent_function_generator(i),
-                             DatasetMetadataType.float,
                              Cityscapes.train_id_to_label[i] + "_" + "class_percent")
+
     leap_binder.add_custom_metric(get_class_mean_iou(i), name=f"iou_class_{c}")
+
 leap_binder.add_custom_metric(mean_iou, name=f"iou")
-leap_binder.set_metadata(metadata_filename, DatasetMetadataType.string, 'filename')
-leap_binder.set_metadata(metadata_city, DatasetMetadataType.string, 'city')
-leap_binder.set_metadata(metadata_dataset, DatasetMetadataType.string, 'dataset')
-leap_binder.set_metadata(metadata_idx, DatasetMetadataType.float, 'idx')
-leap_binder.set_metadata(metadata_gps_heading, DatasetMetadataType.float, 'gps_heading')
-leap_binder.set_metadata(metadata_gps_latitude, DatasetMetadataType.float, 'gps_latitude')
-leap_binder.set_metadata(metadata_gps_longtitude, DatasetMetadataType.float, 'gps_longtitude')
-leap_binder.set_metadata(metadata_outside_temperature, DatasetMetadataType.float, 'outside_temperature')
-leap_binder.set_metadata(metadata_speed, DatasetMetadataType.float, 'speed')
-leap_binder.set_metadata(metadata_yaw_rate, DatasetMetadataType.float, 'yaw_rate')
+
+leap_binder.set_metadata(metadata_filename, 'filename')
+leap_binder.set_metadata(metadata_city, 'city')
+leap_binder.set_metadata(metadata_dataset, 'dataset')
+leap_binder.set_metadata(metadata_idx, 'idx')
+leap_binder.set_metadata(metadata_gps_heading, 'gps_heading')
+leap_binder.set_metadata(metadata_gps_latitude, 'gps_latitude')
+leap_binder.set_metadata(metadata_gps_longtitude, 'gps_longtitude')
+leap_binder.set_metadata(metadata_outside_temperature, 'outside_temperature')
+leap_binder.set_metadata(metadata_speed, 'speed')
+leap_binder.set_metadata(metadata_yaw_rate, 'yaw_rate')
 
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'mask_visualizer', LeapDataType.ImageMask)
