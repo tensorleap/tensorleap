@@ -9,8 +9,26 @@ from tensorflow.python.ops import confusion_matrix
 from tensorflow.python.ops import math_ops
 
 from domain_gap.utils.gcs_utils import _download
-from domain_gap.data.cs_data import Cityscapes
-from domain_gap.utils.configs import IMAGE_SIZE, AUGMENT, TRAIN_SIZE, NUM_CLASSES
+from domain_gap.utils.configs import IMAGE_SIZE, AUGMENT, TRAIN_SIZE
+from domain_gap.data.cs_data import Cityscapes, CATEGORIES
+
+
+def class_mean_iou(y_true, y_pred) -> dict:
+    """
+    Calculate the mean Intersection over Union (mIOU) for segmentation using TensorFlow.
+
+    Args:
+        y_true (tf.Tensor): Ground truth segmentation mask tensor.
+        y_pred (tf.Tensor): Predicted segmentation mask tensor.
+
+    Returns:
+        tf.Tensor: Mean Intersection over Union (mIOU) value.
+    """
+    res = {}
+    for i, c in enumerate(CATEGORIES):
+        y_true_i, y_pred_i = y_true[..., i], y_pred[..., i]
+        res[f'{c}'] = mean_iou(y_true_i, y_pred_i)
+    return res
 
 
 def get_class_mean_iou(class_i: int = None):

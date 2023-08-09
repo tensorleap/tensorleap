@@ -44,7 +44,7 @@ python-versions = ">=3.7.0"
 
 [[package]]
 name = "code-loader"
-version = "0.2.83"
+version = "0.2.90"
 description = ""
 category = "main"
 optional = false
@@ -55,7 +55,7 @@ numpy = ">=1.22.3,<2.0.0"
 psutil = ">=5.9.5,<6.0.0"
 tensorflow = {version = ">=2.11.0,<3.0.0", markers = "platform_machine == \"x86_64\""}
 tensorflow-macos = {version = ">=2.11.0,<3.0.0", markers = "platform_machine == \"arm64\""}
-torch = "1.12.1"
+torch = ">=1.12,<3.0"
 typeguard = ">=2.13.3,<3.0.0"
 
 [[package]]
@@ -921,8 +921,8 @@ charset-normalizer = [
     {file = "charset_normalizer-3.1.0-py3-none-any.whl", hash = "sha256:3d9098b479e78c85080c98e1e35ff40b4a31d8953102bb0fd7d1b6f8a2111a3d"},
 ]
 code-loader = [
-    {file = "code_loader-0.2.83-py3-none-any.whl", hash = "sha256:aa9249a3d70f3476765a9fe26490d35912d4aaed0c93abde13c0f934d058776d"},
-    {file = "code_loader-0.2.83.tar.gz", hash = "sha256:616d1d2de532e4a9388a7c199ebcf4074eb6f5d5649dbf2ff56220b5614fbb17"},
+    {file = "code_loader-0.2.90-py3-none-any.whl", hash = "sha256:723e7c2e1f19c09e43b0002ab5ba9bf8644894d0b99126684ae44856343c77d4"},
+    {file = "code_loader-0.2.90.tar.gz", hash = "sha256:9b69f02019a5577ff03dc5bc19e0492743eec4d8abb85d387deedcaddc6aac12"},
 ]
 contourpy = [
     {file = "contourpy-1.1.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:89f06eff3ce2f4b3eb24c1055a26981bffe4e7264acd86f15b97e40530b794bc"},
