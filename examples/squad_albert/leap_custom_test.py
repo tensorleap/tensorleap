@@ -1,3 +1,4 @@
+import os
 from os.path import exists
 import urllib
 import tensorflow as tf
@@ -9,14 +10,10 @@ from squad_albert.loss import CE_loss
 
 
 def check():
+    model_path = ('examples/squad_albert/squad_albert/model')
+    albert = tf.keras.models.load_model(os.path.join(model_path,"albert.h5"))
+
     x = preprocess_load_article_titles()
-
-    if not exists('albert.h5'):
-        print("Downloading resnet for inference")
-        urllib.request.urlretrieve(
-            "https://storage.googleapis.com/example-datasets-47ml982d/albert_squad/albert.h5", "albert.h5")
-    albert = tf.keras.models.load_model("albert.h5")
-
     for idx in range(0, 20):
         input_keys = ['input_ids', 'token_type_ids', 'attention_mask', 'offset_mapping']
         inputs = []
