@@ -105,29 +105,29 @@ This file will execute several tests on [the tensorleap.py](http://tensorleap.py
 After inferring RAFT on two KITTI subsets (scene-flow and stereo-flow) using the Tensorleap platform we get a
 visualization of our latent space.
 
-![Untitled](screenshots/1.png)
+![Untitled](images/1.png)
 
 Coloring the latent space according to our TSNE clusters we get several distinct clusters:
 
-![Untitled](screenshots/2.png)
+![Untitled](images/2.png)
 
 Going through some of the clusters we can see that we have clusters that contain:
 
 - image pairs where the car takes a left turn:  
 
-![Untitled](screenshots/left_turns.gif)
+![Untitled](images/left_turns.gif)
 
 - image pairs where the car takes a right turn:
 
-![Untitled](screenshots/right_turns.gif)
+![Untitled](images/right_turns.gif)
 
 - image pairs where the car has no ego motion:
 
-![Untitled](screenshots/no-ego.gif)
+![Untitled](images/no-ego.gif)
 
 # Dashboards
 
-![Untitled](screenshots/dashboard.png)
+![Untitled](images/dashboard.png)
 
 In the Dashboard panel we can see the correlation of various metadata with the loss and FL metrics:
 
