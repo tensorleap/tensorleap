@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from tensorleap import *
+from leap_binder import *
 import onnxruntime as rt
 from os import environ
 from os.path import exists
