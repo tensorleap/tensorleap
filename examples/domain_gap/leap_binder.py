@@ -1,5 +1,4 @@
 from code_loader import leap_binder
-from code_loader.contract.enums import DatasetMetadataType
 from code_loader.contract.datasetclasses import PreprocessResponse
 import tensorflow as tf
 from PIL import Image
@@ -7,10 +6,10 @@ from code_loader.contract.enums import (
     LeapDataType
 )
 
-from domain_gap.data.cs_data import Cityscapes, CATEGORIES
+from domain_gap.data.cs_data import CATEGORIES
 from domain_gap.utils.configs import *
 from domain_gap.utils.gcs_utils import _download
-from domain_gap.tl_helpers.preprocess import subset_images
+from examples.domain_gap.domain_gap.data.preprocess import subset_images
 from domain_gap.tl_helpers.visualizers.visualizers import image_visualizer, loss_visualizer, mask_visualizer, \
     cityscape_segmentation_visualizer
 from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json, class_mean_iou, mean_iou
