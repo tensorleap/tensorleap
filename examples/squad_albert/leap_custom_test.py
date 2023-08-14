@@ -1,6 +1,4 @@
 import os
-from os.path import exists
-import urllib
 import tensorflow as tf
 import numpy as np
 
