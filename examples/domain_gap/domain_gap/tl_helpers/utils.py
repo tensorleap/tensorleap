@@ -81,7 +81,7 @@ def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     cloud_path = data['gt_path'][idx % data["real_size"]]
     fpath = _download(cloud_path)
     mask = np.array(Image.open(fpath).resize(IMAGE_SIZE, Image.Resampling.NEAREST))
-    if data['dataset'][idx % data["real_size"]] == 'cityscapes':
+    if data['dataset'][idx % data["real_size"]] == 'cityscapes_od':
         encoded_mask = Cityscapes.encode_target_cityscapes(mask)
     else:
         encoded_mask = Cityscapes.encode_target(mask)
