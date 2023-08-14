@@ -106,7 +106,7 @@ The visualization show the all the data points, revealing two distinct clusters.
 as animals or vehicles according to their ground truth labels. The noticeable separation between the clusters indicates 
 a significant difference between these two categories.
 
-![distinct_clusters_animal_vehicles](screen_shots_2/distinct_clusters_animal_vehicles.png)
+![distinct_clusters_animal_vehicles](images/distinct_clusters_animal_vehicles.png)
 
 #### *Detecting & Handling High Loss Clusters*
 
@@ -115,7 +115,7 @@ loss, indicated by larger dot sizes on the plot. A closer examination reveals th
 were incorrectly predicted as 'dog' by the model. This suggests that there is a need to include more images of cats and 
 possibly dogs in the training dataset to improve the model's ability to recognize them accurately.
 
-![high_loss_cat](screen_shots_2/Screenshot 2023-07-13 at 11.27.27.png)
+![high_loss_cat](images/Screenshot 2023-07-13 at 11.27.27.png)
 
 
 #### *Detecting & Handling High Loss Unlabeled Clusters* 
@@ -145,9 +145,9 @@ selected sample. This approach allows you to pinpoint a cluster that exhibits a 
 The figure presented below illustrates such a cluster, comprising images that feature animal faces captured from a 
 profile perspective.
 
-![image_1](screen_shots_2/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.04.56.png)
-![image_2](screen_shots_2/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.09.png)
-![image_3](screen_shots_2/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.23.png)
+![image_1](images/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.04.56.png)
+![image_2](images/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.09.png)
+![image_3](images/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.23.png)
 
 ### Sample Loss Analysis
 
@@ -158,9 +158,9 @@ In the image depicted below, it is evident that the presence of background featu
 Conversely, the inclusion of features in the nose area contributes to a lower loss function, which signifies the image's 
 classification as a cat.
 
-![cat_loss_image](screen_shots_2/cat_loss/image.png)
-![cat_loss_background](screen_shots_2/cat_loss/loss_background.png)
-![cat_loss_nose](screen_shots_2/cat_loss/loss_nose.png)
+![cat_loss_image](images/cat_loss/image.png)
+![cat_loss_background](images/cat_loss/loss_background.png)
+![cat_loss_nose](images/cat_loss/loss_nose.png)
 
 
 
