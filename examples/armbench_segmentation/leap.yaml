@@ -15,3 +15,4 @@ include:
   - armbench_segmentation/utils/ioa_utils.py
   - armbench_segmentation/yolo_helpers/yolo_utils.py
   - armbench_segmentation/config.py
+  - object_detection_config.yaml
