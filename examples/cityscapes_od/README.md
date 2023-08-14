@@ -1,12 +1,12 @@
 
+# YOLOv7 model with Cityscapes dataset
 
-## Project Description
-_____________________________________________
-### YOLOv7 model with Cityscapes dataset
+This project utilizes the [YOLOv7](https://github.com/WongKinYiu/yolov7) algorithm to perform object detection on 
+[Cityscapes](https://www.cityscapes-dataset.com/) dataset. The cityscapes dataset is a large-scale dataset stands as one
+of the standard ADAS benchmarks used for multiple vision related tasks.
 
-This project utilizes the [YOLOv7]() algorithm to perform object detection on [Cityscapes]() dataset. The 
-cityscapes dataset is a large-scale dataset stands as one of the standard ADAS benchmarks used for multiple vision
-related tasks.
+**Tensorleap** helps to explore the latent space of a dataset and find new and important insights. It can also be used
+to find unlabeled clusters or miss-labeling in the dataset in the most efficient way.
 
 
 ### Latent Space Exploration

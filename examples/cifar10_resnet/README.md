@@ -1,12 +1,12 @@
 
+# Resnet18 model with CIFAR-10 dataset
 
-## Project Description
-### Resnet18 model with CIFAR-10 dataset
-
-This project utilizes the Resnet18 algorithm to perform image classification on the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset. The 
+This project utilizes the Resnet18 algorithm to perform image classification on the 
+[CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset. The 
 CIFAR-10 dataset comprises 60,000 32x32 color images distributed across 10 classes, with each class containing 6,000 
-images. The ground truth labels for the classes are as follows: 'airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 
-'frog', 'horse', 'ship', and 'truck'.
+images. 
+
+Using **Tensorleap** we can save time while exploring and detecting high loss and or unlabeled clusters and samples.
 
 ### Latent Space Exploration
 
