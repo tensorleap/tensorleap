@@ -3,7 +3,8 @@ from enum import Enum
 from typing import Dict, Tuple
 import numpy as np
 from datasets import load_dataset
-from config import home_dir, persistent_dir, CONFIG
+
+from squad_albert.config import persistent_dir, CONFIG
 
 
 def load_data() -> Tuple[np.ndarray, dict, np.ndarray, dict, Dict[str, Enum]]:

@@ -1,17 +1,13 @@
 from typing import List
 import numpy as np
-
 import nltk
 import tensorflow as tf
 
-from config import home_dir, persistent_dir, CONFIG
+from squad_albert.config import CONFIG
 
 nltk.download('punkt')
 np.random.seed(0)
 #tokenizer = AlbertTokenizerFast.from_pretrained("vumichien/albert-base-v2-squad2")
-
-
-
 
 
 def get_context_positions(token_type_ids: np.ndarray) -> List[int]:

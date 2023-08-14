@@ -1,6 +1,8 @@
 import numpy as np
-from utils.utils import get_start_position, get_end_position
-from config import CONFIG
+
+from squad_albert.config import CONFIG
+from squad_albert.utils.utils import get_start_position, get_end_position
+
 
 def gt_index_encoder(sample: dict, inputs: dict) -> np.ndarray:
     """

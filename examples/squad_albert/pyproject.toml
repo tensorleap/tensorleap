@@ -10,6 +10,13 @@ packages = [{include = "albert_qa"}]
 python = ">=3.8, <3.11"
 code-loader = "^0.2.90"
 readability = "^0.3.1"
+pandas = "^2.0.3"
+datasets = "^2.14.4"
+nltk = "^3.8.1"
+textblob = "^0.17.1"
+transformers = "^4.30.2"
+sentencepiece = "^0.1.99"
+protobuf = "<=3.20.1"
 
 [build-system]
 requires = ["poetry-core"]

@@ -3,9 +3,10 @@ import urllib
 import tensorflow as tf
 import numpy as np
 
-from albert_qa.leap_binder import preprocess_load_article_titles, get_input_func, gt_index_encoder_leap, metrics_dict, \
+from leap_binder import preprocess_load_article_titles, get_input_func, gt_index_encoder_leap, metrics_dict, \
     metadata_dict
-from albert_qa.utils.loss import CE_loss
+from squad_albert.loss import CE_loss
+
 
 def check():
     x = preprocess_load_article_titles()

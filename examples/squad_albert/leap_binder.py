@@ -11,13 +11,15 @@ from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 from transformers import AlbertTokenizerFast
 from typing import List, Dict, Union
 
-from utils.utils import load_data, get_context_positions, get_readibility_score
-from utils.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
-    context_subjectivity, answer_decoder, tokens_decoder, tokens_question_decoder, tokens_context_decoder
-from utils.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
-from utils.loss import CE_loss
-from utils.metrices import get_start_end_arrays, exact_match_metric, f1_metric, CE_start_index, CE_end_index
-from config import CONFIG
+from squad_albert.config import CONFIG
+from squad_albert.data.preprocess import load_data
+from squad_albert.decoders import get_decoded_tokens, tokenizer_decoder, context_polarity, context_subjectivity, \
+    answer_decoder, tokens_decoder, tokens_question_decoder, tokens_context_decoder, segmented_tokens_decoder
+from squad_albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_start_index_encoder
+from squad_albert.loss import CE_loss
+from squad_albert.metrics import get_start_end_arrays, CE_start_index, CE_end_index, exact_match_metric, f1_metric
+from squad_albert.utils.utils import get_context_positions, get_readibility_score
+
 
 # -------------------------load_data--------------------------------
 def preprocess_load_article_titles() -> List[PreprocessResponse]:
