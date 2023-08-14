@@ -1,5 +1,4 @@
-import urllib
-from os.path import exists
+import os
 import numpy as np
 import tensorflow as tf
 
@@ -18,6 +17,10 @@ def check_custom_integration():
     test = responses[2]
     responses_set = val
     for idx in range(20):
+        # model
+        model_path = ('examples/cityscapes_od/cityscapes_od/model')
+        yolo = tf.keras.models.load_model(os.path.join(model_path, "yolov7.h5"))
+
         # get input and gt
         image = non_normalized_image(idx, responses_set)
         bounding_boxes_gt = ground_truth_bbox(idx, responses_set)
@@ -27,12 +30,6 @@ def check_custom_integration():
         polygons = get_polygon(json_data)
         plot_image_with_polygons(image_height, image_width, polygons, image)
 
-        # model
-        if not exists('yolov7.h5'):
-            print("Downloading yolov7 for inference")
-            urllib.request.urlretrieve(
-                "https://storage.googleapis.com/example-datasets-47ml982d/yolov7/yolov7.h5", "yolov7.h5")
-        yolo = tf.keras.models.load_model("yolov7.h5")
         concat = np.expand_dims(image, axis=0)
         y_pred = yolo([concat])
         gt = np.expand_dims(bounding_boxes_gt, axis=0)
