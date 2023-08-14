@@ -135,7 +135,7 @@ We can observe that the class "motorcycle" is underrepresented in the data. The 
 ground truth bounding boxes for motorcycles. To address this, we should investigate if there are any mislabeling or 
 consider adding more images containing motorcycles to improve the representation of this class in the dataset.
 
-![Unlabeled_motorcycle](screen_shots/Unlabeled_motorcycle.png)
+![Unlabeled_motorcycle](images/Unlabeled_motorcycle.png)
 
 
 #### *Detecting Unlabeled Clusters*
@@ -143,7 +143,7 @@ consider adding more images containing motorcycles to improve the representation
 Cluster number 14 of k-means clusters characterized in dark ambiance images, featuring a road surrounded by vegetation, 
 while cars are the primary objects present in the image.
 
-![cluster14_kmeans](screen_shots/cluster14_kmeans.png)
+![cluster14_kmeans](images/cluster14_kmeans.png)
 
 ### Sample Loss Analysis
 
@@ -152,7 +152,7 @@ Tensorleap automatically generates a heatmap that quantifies the effect differen
 In the image depicted below, the heat map displays warmer areas, indicating regions in the image where features are more
 prominent, and thereby increasing the likelihood that the object in those areas is a building.
 
-![heatmap_image](screen_shots/heatmap.png)
+![heatmap_image](images/heatmap.png)
 
 #### IOU metric
 ------------------------------
@@ -160,7 +160,7 @@ After implementing the Intersection over Union (IoU) metric for each category's 
 IoU scores for the 'road' category are consistently high across most of the images. This suggests that the model's 
 performance in detecting and accurately segmenting the 'road' class is notably successful in many instances.
 
-![iou_road](screen_shots/iou_road.png)
+![iou_road](images/iou_road.png)
 
 
 
