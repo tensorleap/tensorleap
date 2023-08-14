@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cityscapes"
+name = "cityscapes_od"
 version = "0.1.0"
 description = ""
 authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
