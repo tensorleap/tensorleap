@@ -36,14 +36,8 @@ if __name__ == "__main__":
     # get foreground mask and add batch dimension
     foreground_mask = fg_mask(i, scene_flow)[None, ...]
     # get all metadata
-    sample_idx = metadata_idx(i, scene_flow)
-    sample_filename = metadata_filename(i, scene_flow)
-    sample_mask_of_percent = masked_of_percent(i, scene_flow)
-    sample_average_of_magnitude = average_of_magnitude(i, scene_flow)
-    sample_poe_x = poe_x(i, scene_flow)
-    sample_poe_y = poe_y(i, scene_flow)
-    sample_dataset_name = dataset_name(i, scene_flow)
-    sample_avg_angle = mu_over_sigma_of(i, scene_flow)
+    metadata_all = metadata_dict(i, scene_flow)
+
     # run all visualizers and plot them. Visualizers run on results without the Batch dimension.
     img_vis = image_visualizer(img_1[0, ...])
     plt.imshow(img_vis.data)

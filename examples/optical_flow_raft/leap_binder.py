@@ -1,5 +1,5 @@
 import cv2
-from typing import List
+from typing import List, Dict, Union
 from code_loader import leap_binder
 from code_loader.contract.enums import DatasetMetadataType, Metric
 from code_loader.contract.datasetclasses import PreprocessResponse
@@ -123,6 +123,23 @@ def mu_over_sigma_of(idx: int, data: PreprocessResponse):
         return mean/std
     else:
         return mean
+
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    metadata_functions = {
+        "masked_of_percent": masked_of_percent,
+        "metadata_filename": metadata_filename,
+        "dataset_name": dataset_name,
+        "metadata_idx": metadata_idx,
+        "average_of_magnitude": average_of_magnitude,
+        "poe_x": poe_x,
+        "poe_y": poe_y,
+        "mu_over_sigma_of": mu_over_sigma_of
+    }
+
+    res = dict()
+    for func_name, func in metadata_functions.items():
+        res[func_name] = func(idx, data)
+    return res
 # -------------------------------------------------------- visualizers -------------------------------------------------
 
 
@@ -184,28 +201,33 @@ def fl_background(gt_flow: tf.Tensor, pred_flow: tf.Tensor, foreground_map: tf.T
     outliers_num = tf.math.count_nonzero(fl_map, axis=[1, 2])
     combined_mask = gt_flow[..., -1]*background_mask
     return outliers_num /(tf.maximum(tf.math.count_nonzero(combined_mask, axis=[1, 2]), 1))
+
 # -------------------------------------------------------- binding  -------------------------------------------------
-
-
+#preprocess function
 leap_binder.set_preprocess(subset_images)
+
+#set input and gt
 leap_binder.set_input(input_image1, 'image1')
 leap_binder.set_input(input_image2, 'image2')
 leap_binder.set_input(fg_mask, 'fg_mask')
 leap_binder.set_ground_truth(gt_encoder, 'mask')
-leap_binder.set_metadata(metadata_idx, DatasetMetadataType.float, 'idx')
-leap_binder.set_metadata(metadata_filename, DatasetMetadataType.string, 'filename')
-leap_binder.set_metadata(masked_of_percent, DatasetMetadataType.float, 'masked OF percent')
-leap_binder.set_metadata(average_of_magnitude, DatasetMetadataType.float, 'Average OF magnitude')
-leap_binder.set_metadata(poe_x, DatasetMetadataType.float, 'focus of expansion x')
-leap_binder.set_metadata(poe_y, DatasetMetadataType.float, 'focus of expansion y')
-leap_binder.set_metadata(dataset_name, DatasetMetadataType.string, 'dataset name')
-leap_binder.set_metadata(mu_over_sigma_of, DatasetMetadataType.float, 'Nomralized mean angle')
+
+#set prediction
+leap_binder.add_prediction('opt_flow', ['x', 'y'], metrics=[])
+
+#set meata_data
+leap_binder.set_metadata(metadata_dict, name='metadata')
+
+#set visualizer
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(flow_visualizer, 'flow_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(gt_visualizer, 'gt_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'fg_visualizer', LeapDataType.Image)
-leap_binder.add_prediction('opt_flow', ['x', 'y'], metrics=[])
+
+#set loss
 leap_binder.add_custom_loss(EPE, 'EPE')
+
+# set custom metrics
 leap_binder.add_custom_metric(fl_metric, 'FL-all')
 leap_binder.add_custom_metric(fl_foreground, 'FL-fg')
 leap_binder.add_custom_metric(fl_background, 'FL-bg')
