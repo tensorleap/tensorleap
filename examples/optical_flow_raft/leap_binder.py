@@ -12,9 +12,11 @@ from code_loader.contract.visualizer_classes import LeapImage
 from code_loader.contract.enums import (
     LeapDataType
 )
-from utils.flow_utils import make_color_wheel, decode_kitti_png, flow_to_image, EPE_mask, get_fl_map
-from utils.kittidataset import get_kitti_data
-from utils.cloud_utils import download
+
+from optical_flow_raft.data.preprocess import get_kitti_data
+from optical_flow_raft.utils.flow_utils import make_color_wheel, decode_kitti_png, flow_to_image, EPE_mask, get_fl_map
+from optical_flow_raft.utils.gcs_utils import download
+
 # ----------------------------------------------------Constants--------------------------------------------------
 BUCKET_NAME = 'datasets-reteai'
 PROJECT_ID = 'splendid-flow-231921'
