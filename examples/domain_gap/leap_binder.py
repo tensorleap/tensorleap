@@ -82,42 +82,42 @@ def metadata_dataset(idx: int, data: PreprocessResponse) -> str:
 
 
 def metadata_gps_heading(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes":
+    if data.data['dataset'][idx] == "cityscapes_od":
         return get_metadata_json(idx, data)['gpsHeading']
     else:
         return DEFAULT_GPS_HEADING
 
 
 def metadata_gps_latitude(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes":
+    if data.data['dataset'][idx] == "cityscapes_od":
         return get_metadata_json(idx, data)['gpsLatitude']
     else:
         return DEFAULT_GPS_LATITUDE
 
 
 def metadata_gps_longtitude(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes":
+    if data.data['dataset'][idx] == "cityscapes_od":
         return get_metadata_json(idx, data)['gpsLongitude']
     else:
         return DEFAULT_GPS_LONGTITUDE
 
 
 def metadata_outside_temperature(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes":
+    if data.data['dataset'][idx] == "cityscapes_od":
         return get_metadata_json(idx, data)['outsideTemperature']
     else:
         return DEFAULT_TEMP
 
 
 def metadata_speed(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes":
+    if data.data['dataset'][idx] == "cityscapes_od":
         return get_metadata_json(idx, data)['speed']
     else:
         return DEFAULT_SPEED
 
 
 def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes":
+    if data.data['dataset'][idx] == "cityscapes_od":
         return get_metadata_json(idx, data)['yawRate']
     else:
         return DEFAULT_YAW_RATE

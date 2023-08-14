@@ -12,6 +12,6 @@ examples/coco/coco/coco_data/
 *.json
 examples/coco/.tensorleap/config.toml
 
-# armbench-segmentation
-/examples/armbench-segmentation/sandbox/
-/examples/armbench-segmentation/armbench_segmentation/dataset
+# armbench_segmentation
+/examples/armbench_segmentation/sandbox/
+/examples/armbench_segmentation/armbench_segmentation/dataset

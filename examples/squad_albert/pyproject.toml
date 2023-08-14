@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "albert-qa"
+version = "0.1.0"
+description = ""
+authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
+readme = "README.md"
+packages = [{include = "albert_qa"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.11"
+code-loader = "^0.2.90"
+readability = "^0.3.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

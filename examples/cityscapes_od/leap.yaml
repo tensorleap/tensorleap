@@ -1,0 +1,14 @@
+codeIntegrationId: 64b50d2d8ff20b00199385c5
+projectId: ""
+secretManagerId: ""
+entryFile: leap_binder.py
+include:
+    - leap_binder.py
+    - utils_all/gcs_utils.py
+    - utils_all/general_utils.py
+    - utils_all/metrics.py
+    - utils_all/preprocessing.py
+    - visualizers/visualizers.py
+    - yolo_helpers/yolo_utils.py
+    - config.py
+    - od_config.yaml
