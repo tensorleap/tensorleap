@@ -152,13 +152,15 @@ For any additional file being used we add its path under `include` parameter:
 
 ```
 include:
-  - leap_binder.py
-  - utils/decoders.py
-  - utils/encoders.py
-  - utils/loss.py
-  - utils/metrices.py
-  - utils/utils.py
-  - project_config.py
+    - leap_binder.py
+    - squad_albert/data/preprocess.py
+    - squad_albert/utils/utils.py
+    - squad_albert/config.py
+    - squad_albert/decoders.py
+    - squad_albert/encoders.py
+    - squad_albert/loss.py
+    - squad_albert/metrics.py
+    - squad_albert/project_config.yaml
 ```
 
 ### **leap_binder.py file**
