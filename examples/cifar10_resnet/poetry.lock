@@ -134,13 +134,13 @@ files = [
 
 [[package]]
 name = "code-loader"
-version = "0.2.83"
+version = "0.2.91"
 description = ""
 optional = false
 python-versions = ">=3.8,<3.11"
 files = [
-    {file = "code_loader-0.2.83-py3-none-any.whl", hash = "sha256:aa9249a3d70f3476765a9fe26490d35912d4aaed0c93abde13c0f934d058776d"},
-    {file = "code_loader-0.2.83.tar.gz", hash = "sha256:616d1d2de532e4a9388a7c199ebcf4074eb6f5d5649dbf2ff56220b5614fbb17"},
+    {file = "code_loader-0.2.91-py3-none-any.whl", hash = "sha256:df626ee46f319601748db9802b579b6fc18dddd7b6d04a8264fb343f647aad02"},
+    {file = "code_loader-0.2.91.tar.gz", hash = "sha256:2a10d1f17fa504e86dd0f0140bedc2c0db87894d64301782878a7fed96237277"},
 ]
 
 [package.dependencies]
@@ -148,7 +148,7 @@ numpy = ">=1.22.3,<2.0.0"
 psutil = ">=5.9.5,<6.0.0"
 tensorflow = {version = ">=2.11.0,<3.0.0", markers = "platform_machine == \"x86_64\""}
 tensorflow-macos = {version = ">=2.11.0,<3.0.0", markers = "platform_machine == \"arm64\""}
-torch = "1.12.1"
+torch = ">=1.12,<3.0"
 typeguard = ">=2.13.3,<3.0.0"
 
 [[package]]

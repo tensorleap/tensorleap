@@ -1,5 +1,8 @@
 import numpy as np
-from config import CONFIG
+
+from cifar10_resnet.config import CONFIG
+
+
 #
 
 # Metadata functions allow to add extra data for a later use in analysis.
