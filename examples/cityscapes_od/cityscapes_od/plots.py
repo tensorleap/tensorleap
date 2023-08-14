@@ -1,11 +1,12 @@
-from typing import Tuple
+from typing import Tuple, List
 import webcolors
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from code_loader.contract.responsedataclasses import BoundingBox
 
-from utils.general_utils import normelized_polygon
-from utils.preprocessing import Cityscapes
+from cityscapes_od.data.preprocess import Cityscapes
+from cityscapes_od.utils.general_utils import normelized_polygon
 
 
 def rgb_to_color_name(rgb_value: Tuple[int]) ->str:
@@ -20,7 +21,7 @@ def rgb_to_color_name(rgb_value: Tuple[int]) ->str:
         color_name = 'r'
     return color_name
 
-def plot_image_with_bboxes(image: np.ndarray, bounding_boxes: np.ndarray, type: str):
+def plot_image_with_bboxes(image: np.ndarray, bounding_boxes: List[BoundingBox], type: str):
     """
     Description: The function takes an image and a list of bounding boxes as input and visualizes the image with
     bounding boxes overlaid.

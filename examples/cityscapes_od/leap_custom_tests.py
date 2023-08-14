@@ -3,12 +3,11 @@ from os.path import exists
 import numpy as np
 import tensorflow as tf
 
-from utils_all.general_utils import get_json, get_polygon
-from utils_all.metrics import od_loss
-from utils_all.plots import plot_image_with_polygons, plot_image_with_bboxes
-from visualizers.visualizers import gt_bb_decoder, bb_decoder, bb_car_decoder, bb_car_gt_decoder
-
-from leap_binder import metadata_dict, load_cityscapes_data_leap, ground_truth_bbox, non_normalized_image, od_metrics_dict
+from cityscapes_od.metrics import od_loss
+from cityscapes_od.plots import plot_image_with_polygons, plot_image_with_bboxes
+from cityscapes_od.utils.general_utils import get_json, get_polygon
+from leap_binder import metadata_dict, load_cityscapes_data_leap, ground_truth_bbox, non_normalized_image, \
+    od_metrics_dict, gt_bb_decoder, bb_decoder, bb_car_decoder, bb_car_gt_decoder
 
 
 def check_custom_integration():

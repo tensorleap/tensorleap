@@ -1,13 +1,12 @@
 from typing import Tuple, List
 import tensorflow as tf
 
-from config import CONFIG
-from utils.general_utils import bb_array_to_object, get_predict_bbox_list
-from utils.preprocessing import Cityscapes, CATEGORIES_no_background
+from cityscapes_od.config import CONFIG
+from cityscapes_od.data.preprocess import Cityscapes, CATEGORIES_no_background
+from cityscapes_od.utils.general_utils import bb_array_to_object, get_predict_bbox_list
+from cityscapes_od.utils.yolo_utils import LOSS_FN
 
-from yolo_helpers.yolo_utils import LOSS_FN
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
-
 
 def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
     """

@@ -2,22 +2,21 @@ from typing import Dict, Callable, Union
 from PIL import Image
 import json
 from tensorflow import Tensor
-from utils_all.gcs_utils import _download
-from utils_all.metrics import regression_metric, classification_metric, object_metric, od_loss, calculate_iou
-from utils_all.preprocessing import Cityscapes, load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
-    CATEGORIES_id_no_background
-from utils_all.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons
+
 from typing import List
 import numpy as np
 import tensorflow as tf
 
-from config import CONFIG
-from utils.general_utils import bb_array_to_object, get_predict_bbox_list
-from utils.preprocessing import CATEGORIES_no_background
+from cityscapes_od.config import CONFIG
+from cityscapes_od.data.preprocess import load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
+    CATEGORIES_id_no_background, Cityscapes
+from cityscapes_od.metrics import calculate_iou, regression_metric, classification_metric, object_metric, od_loss
+from cityscapes_od.utils.gcs_utils import _download
+from cityscapes_od.utils.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
+    bb_array_to_object, get_predict_bbox_list
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.contract.visualizer_classes import LeapImageWithBBox
-
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import (

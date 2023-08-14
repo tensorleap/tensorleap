@@ -6,7 +6,7 @@ import json
 from functools import lru_cache
 from typing import Optional
 
-from config import CONFIG
+from cityscapes_od.config import CONFIG
 
 @lru_cache()
 def _connect_to_gcs_and_return_bucket(bucket_name: str) -> Bucket:

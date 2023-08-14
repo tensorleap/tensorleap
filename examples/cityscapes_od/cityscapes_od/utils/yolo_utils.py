@@ -1,6 +1,6 @@
 
 import numpy as np
-from config import CONFIG
+from cityscapes_od.config import CONFIG
 
 from code_loader.helpers.detection.yolo.loss import YoloLoss
 from code_loader.helpers.detection.yolo.grid import Grid

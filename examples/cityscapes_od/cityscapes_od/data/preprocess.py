@@ -4,8 +4,10 @@ import numpy as np
 from collections import namedtuple
 from pathlib import Path
 
-from utils_all.gcs_utils import _connect_to_gcs_and_return_bucket
-from config import CONFIG
+from cityscapes_od.config import CONFIG
+from cityscapes_od.utils.gcs_utils import _connect_to_gcs_and_return_bucket
+
+
 class Cityscapes:
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
     **Parameters:**
