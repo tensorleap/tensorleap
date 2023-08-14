@@ -71,11 +71,11 @@ leap code push
 
 ### **Tensorleap files**
 
-Tensorleap files in the repository include `leap_binder.py` and `.tensorleap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
+Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The files consist of the  required configurations to make the code integrate with the Tensorleap engine:
 
-**.tensorleap.yaml**
+**leap.yaml**
 
-.tensorleap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
+leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
 For any additional file being used we add its path under `include` parameter:
 
