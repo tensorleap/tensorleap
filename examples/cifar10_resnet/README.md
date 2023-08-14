@@ -144,10 +144,12 @@ For any additional file being used we add its path under `include` parameter:
 
 ```
 include:
-  - leap_binder.py
-  - utils/encoders.py
-  - utils/utils.py
-  - project_config.py
+    - leap_binder.py
+    - cifar10_resnet/data/preprocessing.py
+    - cifar10_resnet/config.py
+    - cifar10_resnet/encoders.py
+    - cifar10_resnet/project_config.yaml
+    - cifar10_resnet/utils.py
 ```
 
 ### **leap_binder.py file**

@@ -18,8 +18,8 @@ Upon conducting additional analysis, it was found that when the number of small 
 the object detection loss increases.
 
 <div style="display: flex">
-  <img src="screen_shots/high_loss_small_bboxes.png" alt="Image 1" style="margin-right: 10px;">
-  <img src="screen_shots/img.png" alt="Image 2" style="margin-left: 10px;">
+  <img src="images/high_loss_small_bboxes.png" alt="Image 1" style="margin-right: 10px;">
+  <img src="images/img.png" alt="Image 2" style="margin-left: 10px;">
 </div>
 
 #### *Mislabeled data*
@@ -30,8 +30,8 @@ incorrect. The cars in the images are mislabeled. To address this issue, it is e
 cars in order to improve the performance of the algorithm.
 
 <div style="display: flex">
-  <img src="screen_shots/bb_gt_car.png" alt="Image 3" style="margin-right: 10px;">
-  <img src="screen_shots/bb_car.png" alt="Image 4" style="margin-left: 10px;">
+  <img src="images/bb_gt_car.png" alt="Image 3" style="margin-right: 10px;">
+  <img src="images/bb_car.png" alt="Image 4" style="margin-left: 10px;">
 </div>
 
 We can observe that the class "motorcycle" is underrepresented in the data. The majority of images have zero labeled 
@@ -57,8 +57,7 @@ prominent, and thereby increasing the likelihood that the object in those areas 
 
 ![heatmap_image](images/heatmap.png)
 
-#### IOU metric
-------------------------------
+### IOU metric
 After implementing the Intersection over Union (IoU) metric for each category's class_id, it becomes evident that the 
 IoU scores for the 'road' category are consistently high across most of the images. This suggests that the model's 
 performance in detecting and accurately segmenting the 'road' class is notably successful in many instances.
@@ -137,14 +136,16 @@ For any additional file being used we add its path under `include` parameter:
 ```
 include:
     - leap_binder.py
-    - utils_all/gcs_utils.py
-    - utils_all/general_utils.py
-    - utils_all/metrics.py
-    - utils_all/preprocessing.py
-    - visualizers/visualizers.py
-    - yolo_helpers/yolo_utils.py
-    - config.py
-    - od_config.yaml
+    - cityscapes_od/data/preprocessing.py
+    - cityscapes_od/utils/gcs_utils.py
+    - cityscapes_od/utils/general_utils.py
+    - cityscapes_od/utils/yolo_utils.py
+    - cityscapes_od/config.py
+    - cityscapes_od/metrics.py
+    - cityscapes_od/od_config.yaml
+    - cityscapes_od/plots.py
+    - cityscapes_od/visualizers.py
+
 ```
 
 ### **leap_binder.py file**
