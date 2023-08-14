@@ -136,7 +136,7 @@ For any additional file being used we add its path under `include` parameter:
 ```
 include:
     - leap_binder.py
-    - cityscapes_od/data/preprocessing.py
+    - cityscapes_od/data/preprocess.py
     - cityscapes_od/utils/gcs_utils.py
     - cityscapes_od/utils/general_utils.py
     - cityscapes_od/utils/yolo_utils.py
