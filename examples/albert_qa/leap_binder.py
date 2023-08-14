@@ -9,7 +9,7 @@ from code_loader.contract.enums import LeapDataType
 from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 
 from transformers import AlbertTokenizerFast
-from typing import List
+from typing import List, Dict, Union
 
 from utils.utils import load_data, get_context_positions, get_readibility_score
 from utils.decoders import segmented_tokens_decoder, get_decoded_tokens, tokenizer_decoder, context_polarity, \
@@ -213,6 +213,45 @@ def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndar
     mask, text, labels = segmented_tokens_decoder(input_ids, token_type_ids, gt_logits, pred_logits, tokenizer)
     return LeapTextMask(mask.astype(np.uint8), text, labels)
 
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    metadata_functions = {
+        "answer_length": metadata_answer_length,
+        "question_length": metadata_question_length,
+        "context_length": metadata_context_length,
+        "title": metadata_title,
+        "title_idx": metadta_title_ids,
+        "gt_string": metadata_gt_text,
+        "is_truncated": metadata_is_truncated,
+        "context_polarity": metadata_context_polarity,
+        "context_subjectivity": metadata_context_subjectivity
+    }
+
+    readability_scores = ['ari', 'coleman_liau', 'dale_chall', 'flesch', 'flesch_kincaid', 'gunning_fog', 'linsear_write', 'smog', 'spache']
+    for score in readability_scores:
+        metadata_functions[f"context_{score}_score"] = lambda idx, preprocess, score=score: get_readibility_score(get_analyzer(idx, preprocess).__getattribute__(score))
+
+    statistics_keys = ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence', 'avg_syllables_per_word']
+    for stat_key in statistics_keys:
+        metadata_functions[f"context_{stat_key}"] = lambda idx, preprocess, key=stat_key: get_statistics(key, idx, preprocess, 'context')
+
+    res = dict()
+    for func_name, func in metadata_functions.items():
+        res[func_name] = func(idx, data)
+    return res
+
+def metrics_dict(y_gt: tf.Tensor, y_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
+
+    metric_functions = {
+        "CE_start_index": CE_start_index,
+        "CE_end_index": CE_end_index,
+        "exact_match_metric": exact_match_metric,
+        "f1_metric" : f1_metric
+    }
+
+    res = dict()
+    for func_name, func in metric_functions.items():
+        res[func_name] = func(y_gt, y_pred)
+    return res
 
 # Dataset binding functions to bind the functions above to the `Dataset Instance`.
 
@@ -234,57 +273,11 @@ for key in CONFIG['input_keys']:
 leap_binder.set_ground_truth(function=gt_index_encoder_leap, name='indices_gt')
 
 # ------- Metadata ---------
-leap_binder.set_metadata(function=metadata_answer_length, name='answer_length')
-leap_binder.set_metadata(function=metadata_question_length, name='question_length')
-leap_binder.set_metadata(function=metadata_context_length, name='context_length')
-leap_binder.set_metadata(function=metadata_title, name='title')
-leap_binder.set_metadata(function=metadta_title_ids, name='title_idx')
-# leap_binder.set_metadata(function=metadta_context_ids, metadata_type=DatasetMetadataType.int, name='context_idx')
-leap_binder.set_metadata(function=metadata_gt_text, name='gt_string')
-leap_binder.set_metadata(function=metadata_is_truncated, name='is_truncated')
-leap_binder.set_metadata(function=metadata_context_polarity, name='context_polarity')
-leap_binder.set_metadata(function=metadata_context_subjectivity, name='context_subjectivity')
-
-# Calculate Automated Readability Index (ARI).
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).ari),
-                         name='context_ari_score')
-# Calculate Coleman Liau Index
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).coleman_liau),
-                         name='context_coleman_liau_score')
-# Calculate Dale Chall
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).dale_chall),
-                         name='context_dale_chall_score')
-# Calculate Flesch Reading Ease score
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).flesch),
-                         name='context_flesch_score')
-# Calculate Flesch-Kincaid Grade Level
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).flesch_kincaid),
-                         name='context_flesch_kincaid_score')
-# Calculate Gunning Fog score
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).gunning_fog),
-                         name='context_gunning_fog_score')
-# Calculate Linsear Write
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).linsear_write),
-                         name='context_linsear_write_score')
-# SMOG Index. `all_sentences` indicates whether SMOG should use a sample of 30 sentences, as described in the original paper, or if it should use all sentences in the text
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).smog),
-                         name='context_smog_score')
-# Spache Index
-leap_binder.set_metadata(lambda idx, preprocess: get_readibility_score(get_analyzer(idx, preprocess).spache),
-                         name='context_spache_score')
-
-# Statistics metadata
-for stat in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
-             'avg_syllables_per_word']:
-    leap_binder.set_metadata(lambda idx, preprocess, key=stat: get_statistics(key, idx, preprocess, 'context'),
-                             name=f'context_{stat}')
+leap_binder.set_metadata(function=metadata_dict, name='metadata_dict')
 
 # ------- Loss and Metrics ---------
 leap_binder.add_custom_loss(CE_loss, 'qa_cross_entropy')
-leap_binder.add_custom_metric(exact_match_metric, "exact_match_metric")
-leap_binder.add_custom_metric(f1_metric, "f1_metric")
-leap_binder.add_custom_metric(CE_start_index, "CE_start_index")
-leap_binder.add_custom_metric(CE_end_index, "CE_end_index")
+leap_binder.add_custom_metric(metrics_dict, 'metrics_dict')
 
 # ------- Visualizers  ---------
 leap_binder.set_visualizer(answer_decoder_leap, 'new_answer_decoder', LeapDataType.Text)
