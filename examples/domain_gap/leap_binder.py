@@ -1,18 +1,25 @@
+import tensorflow as tf
+import numpy.typing as npt
+import json
+from typing import Dict
+from PIL import Image
+
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
-import tensorflow as tf
-from PIL import Image
+from code_loader.contract.visualizer_classes import LeapImage, LeapImageMask
 from code_loader.contract.enums import (
     LeapDataType
 )
 
+from domain_gap.configs import *
 from domain_gap.data.cs_data import CATEGORIES
-from domain_gap.utils.configs import *
+from domain_gap.data.preprocess import subset_images
+from domain_gap.visualizers.visualizers import get_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
+from domain_gap.visualizers.visualizers_utils import unnormalize_image
+from domain_gap.metrics import mean_iou, class_mean_iou
 from domain_gap.utils.gcs_utils import _download
-from examples.domain_gap.domain_gap.data.preprocess import subset_images
-from examples.domain_gap.domain_gap.visualizers.visualizers import image_visualizer, loss_visualizer, mask_visualizer, \
-    cityscape_segmentation_visualizer
-from domain_gap.tl_helpers.utils import get_categorical_mask, get_metadata_json, class_mean_iou, mean_iou
+from domain_gap.configs import IMAGE_SIZE, AUGMENT, TRAIN_SIZE
+from domain_gap.data.cs_data import Cityscapes
 
 
 # ----------------------------------- Input ------------------------------------------
@@ -42,6 +49,32 @@ def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 
 # ----------------------------------- Metadata ------------------------------------------
+
+def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
+    data = data.data
+    cloud_path = data['gt_path'][idx % data["real_size"]]
+    fpath = _download(cloud_path)
+    mask = np.array(Image.open(fpath).resize(IMAGE_SIZE, Image.Resampling.NEAREST))
+    if data['dataset'][idx % data["real_size"]] == 'cityscapes_od':
+        encoded_mask = Cityscapes.encode_target_cityscapes(mask)
+    else:
+        encoded_mask = Cityscapes.encode_target(mask)
+    return encoded_mask
+
+
+def get_metadata_json(idx: int, data: PreprocessResponse) -> Dict[str, str]:
+    cloud_path = data.data['metadata'][idx]
+    fpath = _download(cloud_path)
+    with open(fpath, 'r') as f:
+        metadata_dict = json.loads(f.read())
+    return metadata_dict
+
+
+def aug_factor_or_zero(idx: int, data: PreprocessResponse, value: float) -> float:
+    if data.data["subset_name"] == "train" and AUGMENT and idx > TRAIN_SIZE - 1:
+        return value.numpy()
+    else:
+        return 0.
 
 def metadata_idx(idx: int, data: PreprocessResponse) -> int:
     """ add TL index """
@@ -120,6 +153,27 @@ def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
         return get_metadata_json(idx, data)['yawRate']
     else:
         return DEFAULT_YAW_RATE
+
+# ----------------------------------- Visualizers ------------------------------------------
+
+
+def image_visualizer(image: npt.NDArray[np.float32]) -> LeapImage:
+    return LeapImage((unnormalize_image(image) * 255).astype(np.uint8))
+
+
+def mask_visualizer(image: npt.NDArray[np.float32], mask: npt.NDArray[np.uint8]) -> LeapImageMask:
+    mask = get_masked_img(image, mask)
+    return LeapImageMask(mask.astype(np.uint8), unnormalize_image(image).astype(np.float32), CATEGORIES + ["excluded"])
+
+
+def cityscape_segmentation_visualizer(mask: npt.NDArray[np.uint8]) -> LeapImage:
+    mask_image = get_cityscape_mask_img(mask)
+    return LeapImage(mask_image.astype(np.uint8))
+
+
+def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]) -> LeapImage:
+    overlayed_image = get_loss_overlayed_img(image, prediction, gt)
+    return LeapImage(overlayed_image)
 
 
 # ----------------------------------- Binding ------------------------------------------

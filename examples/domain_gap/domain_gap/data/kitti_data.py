@@ -1,7 +1,7 @@
 from typing import List, Dict
 from pathlib import Path
 
-from domain_gap.utils.configs import VAL_INDICES
+from domain_gap.configs import VAL_INDICES
 
 
 def get_kitti_data() -> Dict[str, List[str]]:

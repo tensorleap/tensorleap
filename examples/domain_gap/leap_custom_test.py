@@ -7,7 +7,7 @@ import numpy as np
 from leap_binder import *
 
 if __name__ == '__main__':
-    model_path = '../model/DeeplabV3.h5'
+    model_path = 'models/DeeplabV3.h5'
     if not exists(model_path):
         print("Downloading DeeplabV3.h5 for inference")
         urllib.request.urlretrieve(

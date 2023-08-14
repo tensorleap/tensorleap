@@ -6,7 +6,7 @@ from google.cloud import storage
 from google.cloud.storage import Bucket
 from google.oauth2 import service_account
 
-from domain_gap.utils.configs import BUCKET_NAME
+from domain_gap.configs import BUCKET_NAME
 
 
 @lru_cache()
