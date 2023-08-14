@@ -10,14 +10,63 @@ The model: which is a semantic segmentation model: [DeepLabV3Plus](https://gith
 
 This quick start guide will walk you through the steps to get started with this example repository project.
 
-**Prerequisites**
+# Latent Space Exploration and Insights
+
+**Creating Model’s Latent Space**
+
+The latent space visualization of the datasets shows the domain gap between Cityscapes and KITTI. The size of the sample within the cluster reflects the loss, with a higher loss represented by a bigger radius. As expected, Cityscapes (the source dataset) samples have lower loss values than KITTI samples.
+
+![Untitled](images/latent_space_before_norm.png)
+
+**Measuring Model Average Loss**
+
+We assess the average loss across datasets. Figure 3 shows the model’s average loss for Cityscapes (left) and KITTI (right).
+
+![Untitled](images/before_norm_plot.png)
+
+We used multiple Tensorleap analysis tools to identify the root cause of the domain gap. We found a possible root cause: which is a color mismatch across the entire dataset.
+
+**Domain Gap – Color Mismatch**
+
+We analysed the distributions of RGB standard deviation across both datasets and identified color variations. The figure below shows the Kitti samples with higher deviations in red.
+
+![Untitled](images/std_diff.png)
+
+By examining single images, we can immediately view apparent differences between the images in datasets. The Cityscapes, shown at the bottom, has a greenish hue compared to the KITTI sample. 
+
+![Untitled](images/single_samples_vis.png)
+
+A straightforward solution will be to normalize the RGB channels of both datasets. This will make the distributions of the two datasets more similar.
+
+**Model’s Latent Space After Normalization**
+
+This modification resulted in a large reduction in the model’s loss on the KITTI dataset.
+
+![Untitled](images/latent_space_after_norm.png)
+
+By comparing the loss of the model before and after color normalization, we observe that the model loss decreased by 23%.
+
+![Untitled](images/loss_diff_after_norm.png)
+
+<br>
+<br>
+Our full 'Domain Gap' blog post can be found [here](https://tensorleap.ai/bridging-domain-gaps-an-adas-dataset-application/)_
+
+<br>
+
+## Tensorleap **CLI Installation**
+
+
+
+#### Prerequisites
 
 Before you begin, ensure that you have the following prerequisites installed:
 
 - **[Python](https://www.python.org/)** (version 3.7 or higher)
 - **[Poetry](https://python-poetry.org/)**
 
-## Tensorleap **CLI Installation**
+<br>
+
 
 with `curl`:
 
@@ -57,7 +106,6 @@ tensorleap auth login [api key] [api url].
 
 ```
 tensorleap auth login [api key] [api url]
-
 ```
 
 ## Tensorleap **Dataset Deployment**
@@ -66,7 +114,6 @@ To deploy your local changes:
 
 ```
 leap code push
-
 ```
 
 ### **Tensorleap files**
@@ -81,12 +128,15 @@ For any additional file being used we add its path under `include` parameter:
 
 ```
 include:
-  - leap_binder.py
-	- cs_data.py
-  - kitti_data.py
-  - configs.py
-  - gcs_utils.py
-
+    - leap_binder.py
+    - domain_gap/data/cs_data.py
+    - domain_gap/data/kitti_data.py
+    - domain_gap/utils/configs.py
+    - domain_gap/utils/gcs_utils.py
+    - domain_gap/tl_helpers/preprocess.py
+    - domain_gap/tl_helpers/utils.py
+    - domain_gap/tl_helpers/visualizers/visualizers.py
+    - domain_gap/tl_helpers/visualizers/visualizers_utils.py
 ```
 
 **leap_binder.py file**
@@ -99,54 +149,8 @@ To test the system we can run `leap_test.py` file using poetry:
 
 ```
 poetry run test
-
 ```
 
 This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
-
-# Latent Space Exploration and Insights
-
-**Creating Model’s Latent Space**
-
-The latent space visualization of the datasets shows the domain gap between Cityscapes and KITTI. The size of the sample within the cluster reflects the loss, with a higher loss represented by a bigger radius. As expected, Cityscapes (the source dataset) samples have lower loss values than KITTI samples.
-
-![Untitled](images/latent_space_before_norm.png)
-
-**Measuring Model Average Loss**
-
-We assess the average loss across datasets. Figure 3 shows the model’s average loss for Cityscapes (left) and KITTI (right).
-
-![Untitled](images/before_norm_plot.png)
-
-We used multiple Tensorleap analysis tools to identify the root cause of the domain gap. We found a possible root cause: which is a color mismatch across the entire dataset.
-
-**Domain Gap – Color Mismatch**
-
-We analysed the distributions of RGB standard deviation across both datasets and identified color variations. The figure below shows the Kitti samples with higher deviations in red.
-
-![Untitled](images/std_diff.png)
-
-By examining single images, we can immediately view apparent differences between the images in datasets. The Cityscapes, shown at the bottom, has a greenish hue compared to the KITTI sample. 
-
-![Untitled](images/single_samples_vis.png)
-
-A straightforward solution will be to normalize the RGB channels of both datasets. This will make the distributions of the two datasets more similar.
-
-**Model’s Latent Space After Normalization**
-
-This modification resulted in a large reduction in the model’s loss on the KITTI dataset.
-
-![Untitled](images/latent_space_after_norm.png)
-
-By comparing the loss of the model before and after color normalization, we observe that the model loss decreased by 23%.
-
-![Untitled](images/loss_diff_after_norm.png)
-
-
-<br>
-<br>
-
-Our full 'Domain Gap' blog post can be found [here](https://tensorleap.ai/bridging-domain-gaps-an-adas-dataset-application/)_
-
