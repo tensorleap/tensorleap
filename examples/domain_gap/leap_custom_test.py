@@ -1,9 +1,5 @@
 import urllib
 from os.path import exists
-
-import tensorflow as tf
-import numpy as np
-
 from leap_binder import *
 
 if __name__ == '__main__':
