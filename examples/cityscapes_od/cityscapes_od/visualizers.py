@@ -3,8 +3,8 @@ import numpy as np
 import tensorflow as tf
 
 from config import CONFIG
-from utils_all.general_utils import bb_array_to_object, get_predict_bbox_list
-from utils_all.preprocessing import CATEGORIES_no_background
+from utils.general_utils import bb_array_to_object, get_predict_bbox_list
+from utils.preprocessing import CATEGORIES_no_background
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.contract.visualizer_classes import LeapImageWithBBox

@@ -2,8 +2,8 @@ from typing import Tuple, List
 import tensorflow as tf
 
 from config import CONFIG
-from utils_all.general_utils import bb_array_to_object, get_predict_bbox_list
-from utils_all.preprocessing import Cityscapes, CATEGORIES_no_background
+from utils.general_utils import bb_array_to_object, get_predict_bbox_list
+from utils.preprocessing import Cityscapes, CATEGORIES_no_background
 
 from yolo_helpers.yolo_utils import LOSS_FN
 from code_loader.helpers.detection.yolo.utils import reshape_output_list

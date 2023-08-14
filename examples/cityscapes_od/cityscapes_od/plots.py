@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-from utils_all.general_utils import normelized_polygon
-from utils_all.preprocessing import Cityscapes
+from utils.general_utils import normelized_polygon
+from utils.preprocessing import Cityscapes
 
 
 def rgb_to_color_name(rgb_value: Tuple[int]) ->str:
