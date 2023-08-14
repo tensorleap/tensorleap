@@ -1,4 +1,4 @@
-from utils.cloud_utils import _connect_to_gcs_and_return_bucket
+from optical_flow_raft.utils.gcs_utils import _connect_to_gcs_and_return_bucket
 
 
 class KITTIDataset:
