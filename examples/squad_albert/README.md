@@ -1,9 +1,17 @@
 
-## Project Description
-### Albert model with SQuAD dataset
+# Albert model with SQuAD dataset
 
-This project implements the Albert algorithm using the [SQuAD](https://huggingface.co/datasets/squad) (Stanford Question Answering Dataset) for question
-answering tasks.
+![Untitled](images/open.png)
+
+The [SQuAD](https://huggingface.co/datasets/squad) dataset is a collection of question-answer pairs, where the answer to
+each question is a contiguous span of text from the corresponding context paragraph. The 
+[Albert](https://huggingface.co/albert-base-v2) algorithm is a neural
+network model that can be trained to predict the answer to a question given the context paragraph.
+This project implements the Albert algorithm using the SQuAD dataset. 
+
+Using **Tensorleap** we can explor the latent space, easily detect unlabeled clusters and handle those with high loss. 
+
+This quick start guide will walk you through the steps to get started with this example repository project.
 
 ### Population Exploration
 
