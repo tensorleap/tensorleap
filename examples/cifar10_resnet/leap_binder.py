@@ -9,10 +9,10 @@ from code_loader.contract.enums import LeapDataType
 from code_loader.contract.visualizer_classes import LeapHorizontalBar
 from code_loader.contract.datasetclasses import PreprocessResponse
 
-
-from utils.utils import metadata_animal, metadata_fly, metadata_label_name, metadata_gt_label, preprocess_func
-from utils.encoders import input_encoder
-from config import CONFIG
+from cifar10_resnet.utils import metadata_animal, metadata_fly, metadata_label_name, metadata_gt_label
+from cifar10_resnet.data.preprocess import preprocess_func
+from cifar10_resnet.encoders import input_encoder
+from cifar10_resnet.config import CONFIG
 
 
 # Preprocess Function
