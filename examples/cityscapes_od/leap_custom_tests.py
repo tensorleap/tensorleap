@@ -21,8 +21,7 @@ def check_custom_integration():
     responses_set = val
     for idx in range(20):
         # model
-        #model_path = ('examples/cityscapes_od/cityscapes_od/model')
-        model_path = ('/Users/chenrothschild/repo/tensorleap/examples/cityscapes_od/cityscapes_od/model')
+        model_path = ('examples/cityscapes_od/cityscapes_od/model')
         yolo = tf.keras.models.load_model(os.path.join(model_path, "yolov7.h5"))
 
         # get input and gt

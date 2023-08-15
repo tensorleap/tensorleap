@@ -2,6 +2,7 @@ datasetId: 64aff30fc0e3b300186d4e5f
 entryFile: 'tensorleap.py'
 include:
     - leap_binder.py
+    - optical_flow_raft/config.py
     - optical_flow_raft/data/preprocess.py
     - optical_flow_raft/utils/cloud_utils.py
     - optical_flow_raft/utils/flow_utils.py

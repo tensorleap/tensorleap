@@ -21,11 +21,8 @@ if __name__ == "__main__":
     #         "optical_flow_raft.onnx")
     # sess = rt.InferenceSession('optical_flow_raft.onnx')
 
-    #model_path = ('examples/optical_flow_raft/optical_flow_raft/model')
-    # sess = rt.InferenceSession(os.path.join(model_path, 'optical_flow_raft.onnx'))
-
-    model_path = ('/Users/chenrothschild/repo/tensorleap/examples/optical_flow_raft/optical_flow_raft/model')
-    sess = rt.InferenceSession(os.path.join(model_path, 'raft_new.onnx'))
+    model_path = ('examples/optical_flow_raft/optical_flow_raft/model')
+    sess = rt.InferenceSession(os.path.join(model_path, 'optical_flow_raft.onnx'))
 
     data_subsets: List[PreprocessResponse] = subset_images()  # preprocess and get data preprocess response list
     i, scene_flow = 0, data_subsets[0]

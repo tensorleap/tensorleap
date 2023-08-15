@@ -12,5 +12,4 @@ include:
     - cityscapes_od/metrics.py
     - cityscapes_od/od_config.yaml
     - cityscapes_od/plots.py
-    - cityscapes_od/visualizers.py
 
