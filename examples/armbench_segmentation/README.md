@@ -197,7 +197,7 @@ For any additional file being used we add its path under `include` parameter:
 ```
 include:
   - leap_binder.py
-  - armbench_segmentation/metrics.py
+  - armbench_segmentation/data/preprocessing.py
   - [...]
 ```
 

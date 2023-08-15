@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "armbench-segmentation"
+name = "armbench_segmentation"
 version = "0.1.0"
 description = ""
 authors = ["ranhomri <ran.homri@tensorleap.ai>"]
