@@ -1,12 +1,12 @@
 > **Note**: The dataset used in this project is not public, access to it can be granted by request.
-> see this link: [Cityscapes dataset](https://www.cityscapes-dataset.com/).
+> See this link: [Cityscapes dataset](https://www.cityscapes-dataset.com/).
 <be>
 
 # YOLOv7 model with Cityscapes dataset
 
 This project utilizes the [YOLOv7](https://github.com/WongKinYiu/yolov7) algorithm to perform object detection on 
-[Cityscapes](https://www.cityscapes-dataset.com/) dataset. The cityscapes dataset is a large-scale dataset stands as one
-of the standard ADAS benchmarks used for multiple vision related tasks.
+[Cityscapes](https://www.cityscapes-dataset.com/) dataset. The cityscapes dataset is a large-scale dataset that stands as one
+of the standard ADAS benchmarks used for multiple vision-related tasks.
 
 **Tensorleap** helps to explore the latent space of a dataset and find new and important insights. It can also be used
 to find unlabeled clusters or miss-labeling in the dataset in the most efficient way.
@@ -38,7 +38,7 @@ cars in order to improve the performance of the algorithm.
 </div>
 
 We can observe that the class "motorcycle" is underrepresented in the data. The majority of images have zero labeled 
-ground truth bounding boxes for motorcycles. To address this, we should investigate if there are any mislabeling or 
+ground truth bounding boxes for motorcycles. To address this, we should investigate if there is any mislabeling or 
 consider adding more images containing motorcycles to improve the representation of this class in the dataset.
 
 ![Unlabeled_motorcycle](images/Unlabeled_motorcycle.png)
@@ -54,7 +54,7 @@ while cars are the primary objects present in the image.
 ### Sample Loss Analysis
 
 Within this section, we delve into the examination of features that impact the model's predictions. 
-Tensorleap automatically generates a heatmap that quantifies the effect different features has on loss/ specific prediction.
+Tensorleap automatically generates a heatmap that quantifies the effect different features have on loss/ specific prediction.
 In the image depicted below, the heat map displays warmer areas, indicating regions in the image where features are more
 prominent, and thereby increasing the likelihood that the object in those areas is a building.
 
@@ -127,7 +127,7 @@ Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The
 
 leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
-For any additional file being used we add its path under `include` parameter:
+For any additional file being used, we add its path under `include` parameter:
 
 ```
 include:
@@ -148,7 +148,7 @@ To test the system we can run `leap_test.py` file using poetry:
 poetry run test
 ```
 
-This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc.,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
