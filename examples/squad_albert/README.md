@@ -9,27 +9,27 @@ each question is a contiguous span of text from the corresponding context paragr
 network model that can be trained to predict the answer to a question given the context paragraph.
 This project implements the Albert algorithm using the SQuAD dataset. 
 
-Using **Tensorleap** we can explor the latent space, easily detect unlabeled clusters and handle those with high loss. 
+Using **Tensorleap** we can explore the latent space, easily detect unlabeled clusters, and handle those with high loss. 
 
 This quick start guide will walk you through the steps to get started with this example repository project.
 
 ### Population Exploration
 
-Below is a population exploration plot. It represents a samples' similarity map based on the model's latent space,
+Below is a population exploration plot. It represents a samples similarity map based on the model's latent space,
 built using the extracted features of the trained model.
 
 It shows a visualization of the training and validation sets where we can see two distinct clusters. 
-This means that there is a difference in their representation that might indicate some sort of imbalance.
+This means there is a difference in their representation that might indicate some sort of imbalance.
 
 ![Latent space_dataset_state](images/population_exploration_dataset_state.png)
 
 #### *Detecting & Handling High Loss Clusters*
 In Question Answering (QA), the "title" refers to the title of the passage from which the question is derived, one of
 the titles in the dataset is ‘American Idol’.
-Further analysis reveals that a cluster in samples related to ‘American Idol’ title, has a higher loss
+Further analysis reveals that a cluster in samples related to the ‘American Idol’ title, has a higher loss
 (larger dot sizes).
-At a glance, we can see that this cluster contains questions that relate to names of songs, 
-such as “what was [singer’s name] first single?” or “what is the name of the song…?”.
+At a glance, we can see that this cluster contains questions that relate to the names of songs, 
+such as “What was [singer’s name] first single?” or “What is the name of the song…?”.
 
 ![High Loss Clusters_American_idol](images/High_loss_clusters_american_idol.png)
 
@@ -46,7 +46,7 @@ related to years,
 such as “What year…?” where the answers are years represented in digits: “1943”, “1659” etc. 
 Cluster 13 (right side image), includes questions that require answers related to dates and times, such as “When.. ?” 
 and answers of the dates and times represented in text and digits: “early months of 1754”, “1 January 1926”, 
-“20 december 1914”, “1990s” etc.
+“20 December 1914”, “1990s” etc.
 
 <div style="display: flex">
   <img src="images/cluster_20.png" alt="Image 1" style="margin-right: 10px;">
@@ -68,12 +68,12 @@ represented in digits and in words: “three”, “two”, “75%”, “50 mil
 
 #### *Sample Loss Analysis*
 In this section, we can see the results of a gradient-based explanatory algorithm to interpret what drives the model to 
-make specific predictions. It is enables us to analyze which of the informative features contributes most 
+make specific predictions. It enables us to analyze which of the informative features contributes most 
 to the loss function. We then generate a heatmap with these features that shows the relevant information.
 
 Let’s analyze the following sample containing the question: “when did Beyonce release ‘formation’?”. The correct 
 predicted answer is: “February 6, 2016”. We see that the tokens that had the most impact on the model’s prediction are:
-‘when’, ‘one’, ‘day’, ‘before’. Also, the answer tokens:’ february’, ‘6’,’ 2016′.
+‘when’, ‘one’, ‘day’, ‘before’. Also, the answer tokens:’ February’, ‘6’,’ 2016′.
 
 ![Sample Loss Analysis](images/Sample_Loss_Analysis.png)
 
@@ -98,8 +98,8 @@ This quick start guide will walk you through the steps to get started with this 
 
 Before you begin, ensure that you have the following prerequisites installed:
 
-- **[Python](https://www.python.org/)** (version 3.7 or higher)
-- **[Poetry](https://python-poetry.org/)**
+- **[Python](https://www.python.org/)** (version 3.7 or higher).
+- **[Poetry](https://python-poetry.org/)**.
 - **[Tensorleap](https://tensorleap.ai/)** platform access. To request a free trial click [here](https://meetings.hubspot.com/esmus/free-trial).
 - **[Tensorleap CLI](https://github.com/tensorleap/leap-cli)**.
 
@@ -109,15 +109,8 @@ Before you begin, ensure that you have the following prerequisites installed:
 with `curl`:
 
 ```
-curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+curl -s https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh | bash
 ```
-
-with `wget`:
-
-```
-wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
-```
-
 
 ## Tensorleap CLI Usage
 
@@ -157,7 +150,7 @@ Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The
 
 leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
-For any additional file being used we add its path under `include` parameter:
+For any additional file being used, we add its path under the `include` parameter:
 
 ```
 include:
@@ -181,6 +174,7 @@ poetry run test
 This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
+
 
 
 
