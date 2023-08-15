@@ -93,50 +93,6 @@ def gt_start_index_encoder_leap(idx: int, preprocess: PreprocessResponse) -> np.
 
 
 # ---------------------- meta_data  --------------------
-def get_decoded_tokens_leap(input_ids: np.ndarray)->List[str]:
-    tokenizer = get_tokenizer()
-    decoded = get_decoded_tokens(input_ids, tokenizer)
-    return decoded
-
-
-def metadata_answer_length(idx: int, preprocess: PreprocessResponse) -> int:
-    idx = convert_index(idx, preprocess)
-    start_ind = np.argmax(gt_start_index_encoder_leap(idx, preprocess))
-    end_ind = np.argmax(gt_end_index_encoder_leap(idx, preprocess))
-    return int(end_ind - start_ind + 1)
-
-
-def metadata_context_length(idx: int, preprocess: PreprocessResponse) -> int:
-    token_type_ids = get_input_func("token_type_ids")(idx, preprocess)
-    context_start, context_end = get_context_positions(token_type_ids)
-    return int(context_end - context_start + 1)
-
-
-def metadata_question_length(idx: int, preprocess: PreprocessResponse) -> int:
-    token_type_ids = get_input_func("token_type_ids")(idx, preprocess)
-    context_start, context_end = get_context_positions(token_type_ids)
-    return int(context_start - 1)
-
-
-def metadata_title(idx: int, preprocess: PreprocessResponse) -> str:
-    idx = convert_index(idx, preprocess)
-    return preprocess.data['ds'][idx]['title']
-
-
-def metadta_title_ids(idx: int, preprocess: PreprocessResponse) -> int:
-    idx = convert_index(idx, preprocess)
-    return preprocess.data['title'][preprocess.data['ds'][idx]['title']].value
-
-
-def metadta_context_ids(idx: int, preprocess: PreprocessResponse) -> int:
-    idx = convert_index(idx, preprocess)
-    return preprocess.data['context'][preprocess.data['ds'][idx]['context']].value
-
-
-def metadata_gt_text(idx: int, preprocess: PreprocessResponse) -> str:
-    idx = convert_index(idx, preprocess)
-    sample = preprocess.data['ds'][idx]
-    return sample['answers']['text'][0]
 
 
 def metadata_is_truncated(idx: int, preprocess: PreprocessResponse) -> int:
@@ -146,22 +102,75 @@ def metadata_is_truncated(idx: int, preprocess: PreprocessResponse) -> int:
     return int(len(decoded) > CONFIG['max_sequence_length'])
 
 
+
+def metadata_length(idx: int, preprocess: PreprocessResponse) -> Dict[str, int]:
+    token_type_ids = get_input_func("token_type_ids")(idx, preprocess)
+    context_start, context_end = get_context_positions(token_type_ids)
+    context_length = int(context_end - context_start + 1)
+    question_length = int(context_start - 1)
+
+    res = {
+        'context_length': context_length,
+        'question_length': question_length
+    }
+
+    return res
+
+
+def metadata_answer_length(idx: int, preprocess: PreprocessResponse) -> int:
+    start_ind = np.argmax(gt_start_index_encoder_leap(idx, preprocess))
+    end_ind = np.argmax(gt_end_index_encoder_leap(idx, preprocess))
+    return int(end_ind - start_ind + 1)
+
+def metadata_title(idx: int, preprocess: PreprocessResponse) -> str:
+    return preprocess.data['ds'][idx]['title']
+
+
+def metadta_title_ids(idx: int, preprocess: PreprocessResponse) -> int:
+    return preprocess.data['title'][preprocess.data['ds'][idx]['title']].value
+
+
+def metadta_context_ids(idx: int, preprocess: PreprocessResponse) -> int:
+    return preprocess.data['context'][preprocess.data['ds'][idx]['context']].value
+
+
+def metadata_gt_text(idx: int, preprocess: PreprocessResponse) -> str:
+    sample = preprocess.data['ds'][idx]
+    return sample['answers']['text'][0]
+
+
+
 def metadata_context_polarity(idx: int, preprocess: PreprocessResponse) -> float:
-    idx = convert_index(idx, preprocess)
     text = preprocess.data['ds'][idx]['context']
     val = context_polarity(text)
     return val
 
 
 def metadata_context_subjectivity(idx: int, preprocess: PreprocessResponse) -> float:
-    idx = convert_index(idx, preprocess)
     text = preprocess.data['ds'][idx]['context']
     val = context_subjectivity(text)
     return val
 
 
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    idx = convert_index(idx, data)
+
+    metadata_functions = {
+        "answer_length": metadata_answer_length,
+        "title": metadata_title,
+        "title_idx": metadta_title_ids,
+        "metadta_context_ids": metadta_context_ids,
+        "gt_text": metadata_gt_text,
+        "context_polarity": metadata_context_polarity,
+        "context_subjectivity": metadata_context_subjectivity
+    }
+
+    res = dict()
+    for func_name, func in metadata_functions.items():
+        res[func_name] = func(idx, data)
+    return res
+
 def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context') -> Readability:
-    idx = convert_index(idx, preprocess)
     text: str = preprocess.data['ds'][idx][section]
     try:
         analyzer = Readability(text)
@@ -169,14 +178,12 @@ def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context') ->
         analyzer = None
     return analyzer
 
-
 def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='context') -> float:
     analyzer = get_analyzer(idx, subset, section)
     if analyzer is not None:
         return float(analyzer.statistics()[str(key)])
     else:
         return -1
-
 
 # ------- Visualizers  ---------
 def answer_decoder_leap(logits: tf.Tensor, input_ids: np.ndarray, token_type_ids, offset_mapping) -> LeapText:
@@ -191,6 +198,10 @@ def onehot_to_indices(one_hot: np.ndarray) -> LeapText:
     end_ind = int(tf.math.argmax(end_logits, axis=-1))
     return LeapText([start_ind, end_ind])
 
+def get_decoded_tokens_leap(input_ids: np.ndarray)->List[str]:
+    tokenizer = get_tokenizer()
+    decoded = get_decoded_tokens(input_ids, tokenizer)
+    return decoded
 
 def tokens_decoder_leap(input_ids: np.ndarray) -> LeapText:  # V
     decoded = get_decoded_tokens_leap(input_ids)
@@ -215,31 +226,7 @@ def segmented_tokens_decoder_leap(input_ids: np.ndarray, token_type_ids: np.ndar
     mask, text, labels = segmented_tokens_decoder(input_ids, token_type_ids, gt_logits, pred_logits, tokenizer)
     return LeapTextMask(mask.astype(np.uint8), text, labels)
 
-def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
-    metadata_functions = {
-        "answer_length": metadata_answer_length,
-        "question_length": metadata_question_length,
-        "context_length": metadata_context_length,
-        "title": metadata_title,
-        "title_idx": metadta_title_ids,
-        "gt_string": metadata_gt_text,
-        "is_truncated": metadata_is_truncated,
-        "context_polarity": metadata_context_polarity,
-        "context_subjectivity": metadata_context_subjectivity
-    }
 
-    readability_scores = ['ari', 'coleman_liau', 'dale_chall', 'flesch', 'flesch_kincaid', 'gunning_fog', 'linsear_write', 'smog', 'spache']
-    for score in readability_scores:
-        metadata_functions[f"context_{score}_score"] = lambda idx, preprocess, score=score: get_readibility_score(get_analyzer(idx, preprocess).__getattribute__(score))
-
-    statistics_keys = ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence', 'avg_syllables_per_word']
-    for stat_key in statistics_keys:
-        metadata_functions[f"context_{stat_key}"] = lambda idx, preprocess, key=stat_key: get_statistics(key, idx, preprocess, 'context')
-
-    res = dict()
-    for func_name, func in metadata_functions.items():
-        res[func_name] = func(idx, data)
-    return res
 
 def metrics_dict(y_gt: tf.Tensor, y_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
 
@@ -275,7 +262,18 @@ for key in CONFIG['input_keys']:
 leap_binder.set_ground_truth(function=gt_index_encoder_leap, name='indices_gt')
 
 # ------- Metadata ---------
+leap_binder.set_metadata(function=metadata_is_truncated, name='metadata_is_truncated')
+leap_binder.set_metadata(function=metadata_length, name='metadata_length')
 leap_binder.set_metadata(function=metadata_dict, name='metadata_dict')
+# Statistics metadata
+for stat in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
+             'avg_syllables_per_word']:
+    leap_binder.set_metadata(lambda idx, preprocess, key=stat: get_statistics(key, idx, preprocess, 'context'),
+                             name=f'context_{stat}')
+for score in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
+             'avg_syllables_per_word']:
+    leap_binder.set_metadata(lambda idx, preprocess, score=score: get_readibility_score(get_analyzer(idx, preprocess).__getattribute__(score)))
+
 
 # ------- Loss and Metrics ---------
 leap_binder.add_custom_loss(CE_loss, 'qa_cross_entropy')

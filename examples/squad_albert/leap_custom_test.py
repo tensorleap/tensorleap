@@ -3,8 +3,9 @@ import tensorflow as tf
 import numpy as np
 
 from leap_binder import preprocess_load_article_titles, get_input_func, gt_index_encoder_leap, metrics_dict, \
-    metadata_dict
+    metadata_dict, metadata_is_truncated, metadata_length, get_statistics, get_analyzer
 from squad_albert.loss import CE_loss
+from squad_albert.utils.utils import get_readibility_score
 
 
 def check():
@@ -26,7 +27,16 @@ def check():
         metrics_all = metrics_dict(y_true, y_pred)
 
         # ------- Metadata ---------
+        is_truncated = metadata_is_truncated(idx, x[0])
+        length = metadata_length(idx, x[0])
         meat_data_all = metadata_dict(idx, x[0])
+        for stat in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
+                     'avg_syllables_per_word']:
+            state = get_statistics(stat, idx, x[0], 'context')
+
+        for score in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
+                      'avg_syllables_per_word']:
+            score = get_readibility_score( get_analyzer(idx, x[0]).__getattribute__(score))
 
 
 if __name__=='__main__':
