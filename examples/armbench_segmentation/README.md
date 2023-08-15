@@ -17,7 +17,7 @@ The relevant dataset for this example is the `mix-object-tot` subset.
 >**Mix-Object-Tote (14G)**: This subset consists of close-up images of mixed objects that are stored in either yellow or blue totes. Mix-Object-Tote comprises a total of 44,253 images of size 2448 by 2048 pixels and 467,225 annotations, with an average of 10.5 instances per tote.
 <br>
 >
-We used a subset of 3000 images from the `mix-object-tote` and split them into train, validation and unlabeled datasets, each with 1000 images
+We used a subset of 3000 images from the `mix-object-tote` and split them into train, validation, and unlabeled datasets, each with 1000 images
 
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
@@ -35,14 +35,14 @@ We used a subset of 3000 images from the `mix-object-tote` and split them into t
 
 ### Model
 The model used to predict both bounding boxes and segmentation masks is `YOLOv5s`
-We trained the model over 1000 samples with validation set of another 1000 samples
+We trained the model over 1000 samples with a validation set of another 1000 samples
 
 ![](images/model_ui.png)
 
 ### Latent Space Exploration
 The following plot illustrates a population exploration map, depicting the similarity among samples based on the latent
 space of a trained model. This map is constructed using the extracted features of the model.
-Each sample is represented by a dot. The dots color and size is corresponding to the sample loss
+Each sample is represented by a dot. The dots' color and size correspond to the sample loss
 
 ![](images/pop_exp_loss.png) 
 
@@ -51,7 +51,7 @@ Each sample is represented by a dot. The dots color and size is corresponding to
 One of our dataset splits is unlabeled data. Labeling data is an expensive process, and we aim to choose the minimal subset of unlabeled images to label.
 <br>
 We can look at areas in which the model tends to fail and choose to label new data only in those regions of the latent space
-> **Example**: The blue rectangles mark areas in wich the model tend to perform well and there is no point adding new similar samples.
+> **Example**: The blue rectangles mark areas in which the model tends to perform well and there is no point adding new similar samples.
 <br>
 > We would prefer to label new samples in the areas marked by the red rectangle in which the loss is relatively high (larger dots)
 <br>
@@ -60,13 +60,13 @@ We can look at areas in which the model tends to fail and choose to label new da
 #### Pruning
 In order to cut down training resources we would like to prune our dataset without hurting performances.
 <br>
-We can do that by examining clusters in which the model perform well and keep only some percentage of them.
+We can do that by examining clusters in which the model performs well and keeping only some percentage of them.
 <br>
 TL allows you to do this with a few simple steps:
-1. choose a cluster to examine, there are several clustering options to choose from.
-2. Set a threshold for the distance from the cluster center. Samples in the center holds less information than sample far away.
+1. Choose a cluster to examine, there are several clustering options to choose from.
+2. Set a threshold for the distance from the cluster center. Samples in the center hold less information than samples far away.
 3. Check the subgroups within the cluster. The samples in each subgroup hold similar information.
-4. Sample from each subgroup to keep all relevant information with smaller amount of samples.
+4. Sample from each subgroup to keep all relevant information with a smaller amount of samples.
 
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
@@ -82,7 +82,7 @@ TL allows you to do this with a few simple steps:
     </div>
     <div>
         <img src="images/tsne_dist_filtered.png" alt="Image 2">
-        <p>2) same as (1) but filtered by distance larger than 2</p>
+        <p>2) same as (1) but filtered by a distance larger than 2</p>
     </div>
     <div>
         <img src="images/tsne_subgroups.png" alt="Image 1">
@@ -91,13 +91,13 @@ TL allows you to do this with a few simple steps:
 </div> <br>
 
 ### Over & Under Segmentation Error Detection
-Two types of model errors were over and under segmenting an object. this errors are defined as follows:
+Two types of model errors were over and under segmenting an object. These errors are defined as follows:
 > **Under Segmentation** - the detection of multiple objects as one object i.e., joining bounding boxes /masks into one.
 <br>
 
 > **Over Segmentation** - the detection of one object as multiple objects i.e., dividing bounding boxes/ masks into multiples.
 
-We defined metrics and visualizers for each error type and we were able to get insights on clusters that tends to fail on those errors
+We defined metrics and visualizers for each error type and we were able to get insights on clusters that tend to fail on those errors
 <br>
 and visualize them for further analysis
 
@@ -111,7 +111,7 @@ and visualize them for further analysis
     </div>
 </div> <br>
 
-#### Over Segmentation Example
+#### Over-Segmentation Example
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 1px;">
         <img src="images/over_seg_original.png" alt="Image 1">
@@ -189,7 +189,7 @@ Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The
 
 leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
-For any additional file being used we add its path under `include` parameter:
+For any additional file being used, we add its path under the `include` parameter:
 
 ```
 include:
@@ -210,6 +210,6 @@ To test the system we can run `leap_test.py` file using poetry:
 poetry run test
 ```
 
-This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc.,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
