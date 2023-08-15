@@ -21,3 +21,9 @@ protobuf = "<=3.20.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "leap_test: check_integration"
+
+
+
