@@ -21,8 +21,11 @@ if __name__ == "__main__":
     #         "optical_flow_raft.onnx")
     # sess = rt.InferenceSession('optical_flow_raft.onnx')
 
-    model_path = ('examples/optical_flow_raft/optical_flow_raft/model')
-    sess = rt.InferenceSession(os.path.join(model_path, 'optical_flow_raft.onnx'))
+    #model_path = ('examples/optical_flow_raft/optical_flow_raft/model')
+    # sess = rt.InferenceSession(os.path.join(model_path, 'optical_flow_raft.onnx'))
+
+    model_path = ('/Users/chenrothschild/repo/tensorleap/examples/optical_flow_raft/optical_flow_raft/model')
+    sess = rt.InferenceSession(os.path.join(model_path, 'raft_new.onnx'))
 
     data_subsets: List[PreprocessResponse] = subset_images()  # preprocess and get data preprocess response list
     i, scene_flow = 0, data_subsets[0]
@@ -42,7 +45,12 @@ if __name__ == "__main__":
     # tensorflow_gt = tf.convert_to_tensor(gt)
     # get foreground mask and add batch dimension
     foreground_mask = fg_mask(i, scene_flow)[None, ...]
+
     # get all metadata
+    idx = metadata_idx(i, scene_flow)
+    filename = metadata_filename(i, scene_flow)
+    name = dataset_name(i, scene_flow)
+    focus_of_expansion = metadata_focus_of_expansion(i, scene_flow)
     metadata_all = metadata_dict(i, scene_flow)
 
     # run all visualizers and plot them. Visualizers run on results without the Batch dimension.

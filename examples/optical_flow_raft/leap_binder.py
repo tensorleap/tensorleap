@@ -17,8 +17,8 @@ from optical_flow_raft.data.preprocess import get_kitti_data
 from optical_flow_raft.utils.flow_utils import decode_kitti_png, flow_to_image, EPE_mask, get_fl_map
 from optical_flow_raft.utils.gcs_utils import download
 
-# --------------------------------------------------inputs & GT---------------------------------------------------------
 
+# --------------------------------------------------inputs & GT---------------------------------------------------------
 
 def subset_images() -> List[PreprocessResponse]:
     scene_flow = get_kitti_data(bucket_name=BUCKET_NAME, data_subset="scene")
@@ -30,13 +30,13 @@ def subset_images() -> List[PreprocessResponse]:
     with open(stereo_flow_poe_p, 'r') as f:
         stereo_flow_poe = json.load(f)
     responses = [
-                 PreprocessResponse(length=min(len(scene_flow.train_IDs), MAX_SCENE),
-                                    data={"dataset_name": "scene_flow", 'paths': scene_flow.train_IDs,
-                                          'poe': scene_flow_poe}),
-                 PreprocessResponse(length=min(len(stereo_flow.train_IDs), MAX_STEREO),
-                                    data={"dataset_name": "stereo_flow", 'paths': stereo_flow.train_IDs,
-                                          'poe': stereo_flow_poe})
-                 ]
+        PreprocessResponse(length=min(len(scene_flow.train_IDs), MAX_SCENE),
+                           data={"dataset_name": "scene_flow", 'paths': scene_flow.train_IDs,
+                                 'poe': scene_flow_poe}),
+        PreprocessResponse(length=min(len(stereo_flow.train_IDs), MAX_STEREO),
+                           data={"dataset_name": "stereo_flow", 'paths': stereo_flow.train_IDs,
+                                 'poe': stereo_flow_poe})
+    ]
     return responses
 
 
@@ -67,12 +67,55 @@ def gt_encoder(idx: int, data: PreprocessResponse) -> np.ndarray:
     img = get_image(path)
     img = decode_kitti_png(img)
     return img
+
+
 # -------------------------------------------------------- metadata ----------------------------------------------------
 
+def masked_of_percent(gt: np.ndarray) -> float:
+    return 100 * gt[..., -1].sum() / (gt.shape[0] * gt.shape[1])
 
-def masked_of_percent(idx: int, data: PreprocessResponse) -> float:
+
+def average_of_magnitude(gt: np.ndarray) -> float:
+    return np.mean(np.sqrt(gt[gt[..., -1].astype(bool), 0] ** 2 + (gt[gt[..., -1].astype(bool), 1]) ** 2))
+
+
+def mu_over_sigma_of(gt: np.ndarray) -> float:
+    x_gt = gt[gt[..., -1] != 0, 0]
+    y_gt = gt[gt[..., -1] != 0, 1]
+    out_angles = np.divide(y_gt, x_gt, out=np.zeros_like(x_gt), where=x_gt != 0)
+    std = out_angles.std()
+    mean = out_angles.mean()
+    if std > 0:
+        return mean / std
+    else:
+        return mean
+
+
+def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
     gt = gt_encoder(idx, data)
-    return 100*gt[..., -1].sum()/(gt.shape[0]*gt.shape[1])
+    res = {
+        "masked_of_percent": masked_of_percent(gt),
+        "average_of_magnitude": average_of_magnitude(gt),
+        "mu_over_sigma_of": mu_over_sigma_of(gt)
+    }
+    return res
+
+
+def poe_x(filename: str, data: PreprocessResponse) -> float:
+    return data.data['poe'][filename][0]
+
+
+def poe_y(filename: str, data: PreprocessResponse) -> float:
+    return data.data['poe'][filename][1]
+
+
+def metadata_focus_of_expansion(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    filename = metadata_filename(idx, data)
+    res = {
+        "focus_of_expansion_x": poe_x(filename, data),
+        "focus_of_expansion_y": poe_y(filename, data)
+    }
+    return res
 
 
 def metadata_filename(idx: int, data: PreprocessResponse) -> str:
@@ -90,49 +133,6 @@ def metadata_idx(idx: int, data: PreprocessResponse) -> int:
     return idx
 
 
-def average_of_magnitude(idx: int, data: PreprocessResponse):
-    gt = gt_encoder(idx,data)
-    return np.mean(np.sqrt(gt[gt[..., -1].astype(bool),0]**2+(gt[gt[..., -1].astype(bool), 1])**2))
-
-
-def poe_x(idx: int, data: PreprocessResponse) -> float:
-    filename = metadata_filename(idx, data)
-    return data.data['poe'][filename][0]
-
-
-def poe_y(idx: int, data: PreprocessResponse) -> float:
-    filename = metadata_filename(idx, data)
-    return data.data['poe'][filename][1]
-
-
-def mu_over_sigma_of(idx: int, data: PreprocessResponse):
-    gt = gt_encoder(idx, data)
-    x_gt = gt[gt[..., -1] != 0, 0]
-    y_gt = gt[gt[..., -1] != 0, 1]
-    out_angles = np.divide(y_gt, x_gt, out=np.zeros_like(x_gt), where=x_gt != 0)
-    std = out_angles.std()
-    mean = out_angles.mean()
-    if std > 0:
-        return mean/std
-    else:
-        return mean
-
-def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
-    metadata_functions = {
-        "masked_of_percent": masked_of_percent,
-        "metadata_filename": metadata_filename,
-        "dataset_name": dataset_name,
-        "metadata_idx": metadata_idx,
-        "average_of_magnitude": average_of_magnitude,
-        "poe_x": poe_x,
-        "poe_y": poe_y,
-        "mu_over_sigma_of": mu_over_sigma_of
-    }
-
-    res = dict()
-    for func_name, func in metadata_functions.items():
-        res[func_name] = func(idx, data)
-    return res
 # -------------------------------------------------------- visualizers -------------------------------------------------
 
 
@@ -152,7 +152,8 @@ def gt_visualizer(flow: npt.NDArray[np.float32]) -> LeapImage:
 
 
 def mask_visualizer(mask: npt.NDArray[np.uint8]) -> LeapImage:
-    return LeapImage((mask[..., None].repeat(3,axis=2)*255).astype(np.uint8))
+    return LeapImage((mask[..., None].repeat(3, axis=2) * 255).astype(np.uint8))
+
 
 # -------------------------------------------------------- metrics  -------------------------------------------------
 
@@ -182,42 +183,48 @@ def fl_metric(gt_flow: tf.Tensor, pred_flow: tf.Tensor) -> tf.Tensor:
 
 
 def fl_foreground(gt_flow: tf.Tensor, pred_flow: tf.Tensor, foreground_map: tf.Tensor) -> tf.Tensor:
-    fl_map = tf.cast(get_fl_map(gt_flow, pred_flow), float)*foreground_map
+    fl_map = tf.cast(get_fl_map(gt_flow, pred_flow), float) * foreground_map
     outliers_num = tf.math.count_nonzero(fl_map, axis=[1, 2])
-    combined_mask = gt_flow[..., -1]*foreground_map
+    combined_mask = gt_flow[..., -1] * foreground_map
     return outliers_num / (tf.maximum(tf.math.count_nonzero(combined_mask, axis=[1, 2]), 1))
 
 
 def fl_background(gt_flow: tf.Tensor, pred_flow: tf.Tensor, foreground_map: tf.Tensor) -> tf.Tensor:
     background_mask = 1 - foreground_map
-    fl_map = tf.cast(get_fl_map(gt_flow, pred_flow), float)*background_mask
+    fl_map = tf.cast(get_fl_map(gt_flow, pred_flow), float) * background_mask
     outliers_num = tf.math.count_nonzero(fl_map, axis=[1, 2])
-    combined_mask = gt_flow[..., -1]*background_mask
-    return outliers_num /(tf.maximum(tf.math.count_nonzero(combined_mask, axis=[1, 2]), 1))
+    combined_mask = gt_flow[..., -1] * background_mask
+    return outliers_num / (tf.maximum(tf.math.count_nonzero(combined_mask, axis=[1, 2]), 1))
+
 
 # -------------------------------------------------------- binding  -------------------------------------------------
-#preprocess function
+# preprocess function
 leap_binder.set_preprocess(subset_images)
 
-#set input and gt
+# set input and gt
 leap_binder.set_input(input_image1, 'image1')
 leap_binder.set_input(input_image2, 'image2')
 leap_binder.set_input(fg_mask, 'fg_mask')
 leap_binder.set_ground_truth(gt_encoder, 'mask')
 
-#set prediction
-leap_binder.add_prediction('opt_flow', ['x', 'y'], metrics=[])
+# set prediction
+leap_binder.add_prediction('opt_flow', ['x', 'y'])
 
-#set meata_data
-leap_binder.set_metadata(metadata_dict, name='metadata')
+# set meata_data
+leap_binder.set_metadata(metadata_idx, 'idx')
+leap_binder.set_metadata(metadata_filename, 'filename')
+leap_binder.set_metadata(dataset_name, 'dataset name')
+leap_binder.set_metadata(metadata_focus_of_expansion, 'metadata_focus_of_expansion')
+leap_binder.set_metadata(metadata_dict, 'metadata_dict')
 
-#set visualizer
+
+# set visualizer
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(flow_visualizer, 'flow_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(gt_visualizer, 'gt_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'fg_visualizer', LeapDataType.Image)
 
-#set loss
+# set loss
 leap_binder.add_custom_loss(EPE, 'EPE')
 
 # set custom metrics
