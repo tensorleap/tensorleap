@@ -73,6 +73,7 @@ TL allows you to do this with a few simple steps:
         <p>latent space colored by tsne clusters, we will focus on the cluster in the red rectangle</p>
     </div>
 </div> <br><br>
+
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
         <img src="screenshots/tsne_dist.png" alt="Image 1">
@@ -144,11 +145,7 @@ with `curl`:
 curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
 ```
 
-with `wget`:
 
-```
-wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
-```
 
 CLI repository: https://github.com/tensorleap/cli-go
 
