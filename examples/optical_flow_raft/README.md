@@ -38,7 +38,7 @@ Going through some of the clusters we can see that we have clusters that contain
 
 In the Dashboard panel we can see the correlation of various metadata with the loss and FL metrics:
 
-- The focus of expnasion location vs. the loss (high error when taking turns)
+- The focus on expansion location vs. the loss (high error when taking turns)
 - Average Optical Flow magnitude vs. loss/Fl-metric
 - Subset Name vs. Loss
 - Amount of max pixels vs. loss (more pixels masked - higher error)
@@ -52,8 +52,8 @@ This quick start guide will walk you through the steps to get started with this 
 
 Before you begin, ensure that you have the following prerequisites installed:
 
-- **[Python](https://www.python.org/)** (version 3.7 or higher)
-- **[Poetry](https://python-poetry.org/)**
+- **[Python](https://www.python.org/)** (version 3.7 or higher).
+- **[Poetry](https://python-poetry.org/)**.
 - **[Tensorleap](https://tensorleap.ai/)** platform access. To request a free trial click [here](https://meetings.hubspot.com/esmus/free-trial).
 - **[Tensorleap CLI](https://github.com/tensorleap/leap-cli)**.
 
@@ -63,15 +63,8 @@ Before you begin, ensure that you have the following prerequisites installed:
 with `curl`:
 
 ```
-curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+curl -s https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh | bash
 ```
-
-with `wget`:
-
-```
-wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
-```
-
 
 ## Tensorleap CLI Usage
 
@@ -111,7 +104,7 @@ Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The
 
 leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
-For any additional file being used we add its path under `include` parameter:
+For any additional file being used, we add its path under `include` parameter:
 
 ```
 include:
