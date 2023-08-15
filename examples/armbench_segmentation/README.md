@@ -20,13 +20,13 @@ We used a subset of 3000 images from the `mix-object-tote` and split them into t
 
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
-        <img src="screenshots/dataset_ex_1.png" alt="Image 1">
+        <img src="images/dataset_ex_1.png" alt="Image 1">
     </div>
     <div>
-        <img src="screenshots/dataset_ex_2.png" alt="Image 2">
+        <img src="images/dataset_ex_2.png" alt="Image 2">
     </div>
     <div>
-        <img src="screenshots/dataset_ex_3.png" alt="Image 1">
+        <img src="images/dataset_ex_3.png" alt="Image 1">
     </div>
 </div> <br>
 
@@ -69,22 +69,22 @@ TL allows you to do this with a few simple steps:
 
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
-        <img src="screenshots/tsne_clusters.png" alt="Image 1">
+        <img src="images/tsne_clusters.png" alt="Image 1">
         <p>latent space colored by tsne clusters, we will focus on the cluster in the red rectangle</p>
     </div>
 </div> <br><br>
 
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
-        <img src="screenshots/tsne_dist.png" alt="Image 1">
+        <img src="images/tsne_dist.png" alt="Image 1">
         <p>1) cluster's samples colored by the distance from the cluster center</p>
     </div>
     <div>
-        <img src="screenshots/tsne_dist_filtered.png" alt="Image 2">
+        <img src="images/tsne_dist_filtered.png" alt="Image 2">
         <p>2) same as (1) but filtered by distance larger than 2</p>
     </div>
     <div>
-        <img src="screenshots/tsne_subgroups.png" alt="Image 1">
+        <img src="images/tsne_subgroups.png" alt="Image 1">
         <p>3) cluster's samples colored by the distance from the cluster center</p>
     </div>
 </div> <br>
@@ -103,25 +103,25 @@ and visualize them for further analysis
 #### Under Segmentation Examples
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 10px;">
-        <img src="screenshots/under_seg_1.png" alt="Image 1">
+        <img src="images/under_seg_1.png" alt="Image 1">
     </div>
     <div>
-        <img src="screenshots/under_seg_2.png" alt="Image 2">
+        <img src="images/under_seg_2.png" alt="Image 2">
     </div>
 </div> <br>
 
 #### Over Segmentation Example
 <div style="display: flex; justify-content: center;">
     <div style="margin-right: 1px;">
-        <img src="screenshots/over_seg_original.png" alt="Image 1">
+        <img src="images/over_seg_original.png" alt="Image 1">
         <p>1) original image</p>
     </div>
     <div>
-        <img src="screenshots/over_seg_gt.png" alt="Image 2">
+        <img src="images/over_seg_gt.png" alt="Image 2">
         <p>2) ground truth mask</p>
     </div>
     <div>
-        <img src="screenshots/over_seg_pred.png" alt="Image 2">
+        <img src="images/over_seg_pred.png" alt="Image 2">
         <p>3) predicted masks</p>
     </div>
 </div> <br>
