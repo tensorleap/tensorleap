@@ -2,11 +2,14 @@ import os
 import numpy as np
 import tensorflow as tf
 
+from cityscapes_od.data.preprocess import CATEGORIES_no_background, CATEGORIES_id_no_background, Cityscapes
 from cityscapes_od.metrics import od_loss
 from cityscapes_od.plots import plot_image_with_polygons, plot_image_with_bboxes
 from cityscapes_od.utils.general_utils import get_json, get_polygon
-from leap_binder import metadata_dict, load_cityscapes_data_leap, ground_truth_bbox, non_normalized_image, \
-    od_metrics_dict, gt_bb_decoder, bb_decoder, bb_car_decoder, bb_car_gt_decoder
+from leap_binder import load_cityscapes_data_leap, ground_truth_bbox, non_normalized_image, \
+    od_metrics_dict, gt_bb_decoder, bb_decoder, bb_car_decoder, bb_car_gt_decoder, metadata_filename, metadata_city, \
+    metadata_idx, metadata_brightness, metadata_json, metadata_category_avg_size, metadata_bbs, label_instances_num, \
+    is_class_exist_gen, is_class_exist_veg_and_building, get_class_mean_iou
 
 
 def check_custom_integration():
@@ -18,7 +21,8 @@ def check_custom_integration():
     responses_set = val
     for idx in range(20):
         # model
-        model_path = ('examples/cityscapes_od/cityscapes_od/model')
+        #model_path = ('examples/cityscapes_od/cityscapes_od/model')
+        model_path = ('/Users/chenrothschild/repo/tensorleap/examples/cityscapes_od/cityscapes_od/model')
         yolo = tf.keras.models.load_model(os.path.join(model_path, "yolov7.h5"))
 
         # get input and gt
@@ -45,10 +49,32 @@ def check_custom_integration():
         bb_gt_car = bb_car_gt_decoder(image, y_true)
         plot_image_with_bboxes(image, bb_gt_car.bounding_boxes, 'gt')
 
-        # get custom metrics and meta data
+        # get custom meta data
+        filename = metadata_filename(idx, responses_set)
+        city = metadata_city(idx, responses_set)
+        idx = metadata_idx(idx, responses_set)
+        brightness = metadata_brightness(idx, responses_set)
+        json = metadata_json(idx, responses_set)
+        category_avg_size = metadata_category_avg_size(idx, responses_set)
+        bbs = metadata_bbs(idx, responses_set)
+        for label in CATEGORIES_no_background:
+            instances_count_func = label_instances_num(label)
+            instance_count = instances_count_func(idx, responses_set)
+        for id in CATEGORIES_id_no_background:
+            class_name = Cityscapes.get_class_name(id)
+            class_exist_gen_func = is_class_exist_gen(id)
+            class_exist_gen = class_exist_gen_func(idx, responses_set)
+        class_exist_veg_func = is_class_exist_veg_and_building(21, 11)
+        class_exist_veg = class_exist_veg_func(idx, responses_set)
+
+
+        # get loss and custom metrics
         ls = od_loss(y_true, y_pred)
         metrices_all = od_metrics_dict(y_true, y_pred)
-        metadata_all = metadata_dict(idx, responses_set)
+        for id in CATEGORIES_id_no_background:
+            iou_func = get_class_mean_iou(id)
+            iou = iou_func(y_true, y_pred)
+
 
 if __name__ == '__main__':
     check_custom_integration()

@@ -10,8 +10,7 @@ import tensorflow as tf
 from cityscapes_od.config import CONFIG
 from cityscapes_od.data.preprocess import load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background, Cityscapes
-from cityscapes_od.metrics import calculate_iou, regression_metric, classification_metric, object_metric, od_loss, \
-    metric
+from cityscapes_od.metrics import calculate_iou, od_loss, metric
 from cityscapes_od.utils.gcs_utils import _download
 from cityscapes_od.utils.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
     bb_array_to_object, get_predict_bbox_list, instances_num, avg_bb_aspect_ratio, avg_bb_area_metadata, \
@@ -119,11 +118,11 @@ def category_percent(idx: int, data: PreprocessResponse, class_id:int) -> float:
     bbs = np.array(ground_truth_bbox(idx, data))
     valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
     category_bbs = valid_bbs[valid_bbs[..., -1] == class_id]
-    return float(category_bbs.shape[0])
+    return bbs, float(category_bbs.shape[0])
 
 def category_avg_size(idx: int, data: PreprocessResponse, class_id: int) -> float:
-    car_val = category_percent(idx, data, class_id)
-    instances_cnt = number_of_bb(idx, data)
+    bbs, car_val = category_percent(idx, data, class_id)
+    instances_cnt = number_of_bb(bbs)
     return np.round(car_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
 def metadata_category_avg_size(idx: int, data: PreprocessResponse) -> Dict[str, float]:
@@ -258,7 +257,7 @@ leap_binder.set_metadata(metadata_brightness, name='metadata_brightness')
 leap_binder.set_metadata(metadata_json, name='metadata_json')
 leap_binder.set_metadata(metadata_category_avg_size, name='metadata_category_avg_size')
 leap_binder.set_metadata(metadata_bbs, name='metadata_bbs')
-for i, label in enumerate(CATEGORIES_no_background):
+for label in CATEGORIES_no_background:
     leap_binder.set_metadata(label_instances_num(label), f'{label} number_metadata')
 for id in CATEGORIES_id_no_background:
     class_name = Cityscapes.get_class_name(id)
