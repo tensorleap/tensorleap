@@ -16,7 +16,7 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from pycocotools.coco import COCO
 
 from armbench_segmentation.config import CONFIG
-from armbench_segmentation.preprocessing import load_set
+from armbench_segmentation.data.preprocessing import load_set
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
     count_obj_bbox_occlusions, extract_and_cache_bboxes
 from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
