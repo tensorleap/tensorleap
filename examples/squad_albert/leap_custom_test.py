@@ -36,7 +36,7 @@ def check():
 
         for score in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
                       'avg_syllables_per_word']:
-            score = get_readibility_score( get_analyzer(idx, x[0]).__getattribute__(score))
+            score = get_readibility_score(get_analyzer(idx, x[0]).__getattribute__(score))
 
 
 if __name__=='__main__':
