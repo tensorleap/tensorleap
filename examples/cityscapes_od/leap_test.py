@@ -2,7 +2,8 @@ import os
 from code_loader import LeapLoader
 
 def check_intagration():
-    dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print("started tests")
+    dir_path = os.path.dirname(os.path.abspath(__file__))
     script_path = 'leap_binder.py'
     datascript = LeapLoader(code_path=dir_path, code_entry_name=script_path)
     res = datascript.check_dataset()
