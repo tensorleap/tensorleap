@@ -193,7 +193,7 @@ For any additional file being used we add its path under `include` parameter:
 ```
 include:
     - leap_binder.py
-    - domain_gap/configs.py
+    - armbench_segmentation/configs.py
     - [...]
 ```
 
