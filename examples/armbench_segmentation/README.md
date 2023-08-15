@@ -1,11 +1,10 @@
 # ARMBench Segmentation
 
 > **Note**: The dataset used in this project is not public, access to it can be granted by request.
-
 > see this link: [ARMBench dataset](http://armbench.s3-website-us-east-1.amazonaws.com/index.html).
 <be>
 
-> After downloading the dataset it must be placed in a `armbench-segmentation/armbench_segmentation/dataset` folder
+After downloading the dataset it must be placed in a `armbench-segmentation/armbench_segmentation/dataset` folder
 
 
 ## Project Description
