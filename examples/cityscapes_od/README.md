@@ -1,4 +1,7 @@
-
+> **Note**: The dataset used in this project is not public, access to it can be granted by request.
+> see this link: [Cityscapes dataset](https://www.cityscapes-dataset.com/).
+<br>
+> 
 # YOLOv7 model with Cityscapes dataset
 
 This project utilizes the [YOLOv7](https://github.com/WongKinYiu/yolov7) algorithm to perform object detection on 
