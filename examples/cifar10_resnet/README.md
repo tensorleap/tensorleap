@@ -56,9 +56,9 @@ selected sample. This approach allows you to pinpoint a cluster that exhibits a 
 The figure presented below illustrates such a cluster, comprising images that feature animal faces captured from a 
 profile perspective.
 
-![image_1](images/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.04.56.png)
-![image_2](images/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.09.png)
-![image_3](images/cluset_bisecting_number_12/Screenshot 2023-07-13 at 11.05.23.png)
+![image_1](images/cluset_bisecting_number_12/Screenshot1.png)
+![image_2](images/cluset_bisecting_number_12/Screenshot2.png)
+![image_3](images/cluset_bisecting_number_12/Screenshot3.png)
 
 ### Sample Loss Analysis
 
