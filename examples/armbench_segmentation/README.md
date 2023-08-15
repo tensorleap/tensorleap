@@ -35,6 +35,7 @@ We used a subset of 3000 images from the `mix-object-tote` and split them into t
 ### Model
 The model used to predict both bounding boxes and segmentation masks is `YOLOv5s`
 We trained the model over 1000 samples with validation set of another 1000 samples
+
 ![](images/model_ui.png)
 
 ### Latent Space Exploration
@@ -42,7 +43,7 @@ The following plot illustrates a population exploration map, depicting the simil
 space of a trained model. This map is constructed using the extracted features of the model.
 Each sample is represented by a dot. The dots color and size is corresponding to the sample loss
 
-![](images/pop_exp_loss.png)
+![](images/pop_exp_loss.png) 
 
 ### Data Labeling & Dataset Pruning
 #### Labeling
