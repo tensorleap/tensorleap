@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 from leap_binder import *
 import onnxruntime as rt
@@ -10,19 +12,24 @@ if __name__ == "__main__":
     if environ.get('AUTH_SECRET') is None:
         print("The AUTH_SECRET system variable must be initialized with the relevant secret to run this test")
         exit(-1)
+
+    # # run inference on Onnx
+    # if not exists("optical_flow_raft.onnx"):
+    #     print("Downloading Raft ONNX for inference")
+    #     urllib.request.urlretrieve(
+    #         "https://storage.googleapis.com/example-datasets-47ml982d/raft/raft_new.onnx",
+    #         "optical_flow_raft.onnx")
+    # sess = rt.InferenceSession('optical_flow_raft.onnx')
+
+    model_path = ('examples/optical_flow_raft/optical_flow_raft/model')
+    sess = rt.InferenceSession(os.path.join(model_path, 'optical_flow_raft.onnx'))
+
     data_subsets: List[PreprocessResponse] = subset_images()  # preprocess and get data preprocess response list
     i, scene_flow = 0, data_subsets[0]
     x = subset_images()
     # get inputs
     img_1 = np.expand_dims(input_image1(i, scene_flow), axis=0)
     img_2 = np.expand_dims(input_image2(i, scene_flow), axis=0)
-    # run inference on Onnx
-    if not exists("optical_flow_raft.onnx"):
-        print("Downloading Raft ONNX for inference")
-        urllib.request.urlretrieve(
-            "https://storage.googleapis.com/example-datasets-47ml982d/raft/raft_new.onnx",
-            "optical_flow_raft.onnx")
-    sess = rt.InferenceSession('optical_flow_raft.onnx')
     input_name_1 = sess.get_inputs()[0].name
     input_name_2 = sess.get_inputs()[1].name
     label_name = sess.get_outputs()[-1].name
