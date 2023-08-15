@@ -47,15 +47,15 @@ def metadata_sample_index(idx: int, preprocess: PreprocessResponse) -> int:
     return idx
 
 def metadata_dict(idx: int, preprocess: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
-    digit_int = int(digit)
     if preprocess.data['subset_name'] == 'unlabeled':
         gt_label = -1
         label_name = 'unlabeled'
         fly = 'unlabeled'
         animal = 'unlabeled'
     else:
+        one_hot_digit = gt_encoder(idx, preprocess)
+        digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
+        digit_int = int(digit)
         gt_label = metadata_gt_label(digit_int)
         label_name = metadata_label_name(digit_int)
         fly = metadata_fly(digit_int)
