@@ -100,7 +100,7 @@ Before you begin, ensure that you have the following prerequisites installed:
 
 - **[Python](https://www.python.org/)** (version 3.7 or higher)
 - **[Poetry](https://python-poetry.org/)**
-- **[Tensorleap](https://tensorleap.ai/)** platform access. To request a free trial click [here](#).
+- **[Tensorleap](https://tensorleap.ai/)** platform access. To request a free trial click [here](https://meetings.hubspot.com/esmus/free-trial).
 - **[Tensorleap CLI](https://github.com/tensorleap/leap-cli)**.
 
 
