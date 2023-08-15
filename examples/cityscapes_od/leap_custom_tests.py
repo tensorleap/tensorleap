@@ -21,8 +21,9 @@ def check_custom_integration():
     responses_set = val
     for idx in range(20):
         # model
-        model_path = ('examples/cityscapes_od/cityscapes_od/model')
-        yolo = tf.keras.models.load_model(os.path.join(model_path, "yolov7.h5"))
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        model_path = ('cityscapes_od/model/yolov7.h5')
+        yolo = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
         # get input and gt
         image = non_normalized_image(idx, responses_set)

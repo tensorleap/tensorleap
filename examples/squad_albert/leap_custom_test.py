@@ -9,8 +9,9 @@ from squad_albert.utils.utils import get_readibility_score
 
 
 def check():
-    model_path = ('examples/squad_albert/squad_albert/model')
-    albert = tf.keras.models.load_model(os.path.join(model_path,"albert.h5"))
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    model_path = ('squad_albert/model/albert.h5')
+    albert = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
     x = preprocess_load_article_titles()
     for idx in range(0, 20):

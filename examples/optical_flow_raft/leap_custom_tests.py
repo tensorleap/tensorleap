@@ -20,9 +20,9 @@ if __name__ == "__main__":
     #         "https://storage.googleapis.com/example-datasets-47ml982d/raft/raft_new.onnx",
     #         "optical_flow_raft.onnx")
     # sess = rt.InferenceSession('optical_flow_raft.onnx')
-
-    model_path = ('examples/optical_flow_raft/optical_flow_raft/model')
-    sess = rt.InferenceSession(os.path.join(model_path, 'optical_flow_raft.onnx'))
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    model_path = ('optical_flow_raft/model/raft_new.onnx')
+    sess = rt.InferenceSession(os.path.join(dir_path, model_path))
 
     data_subsets: List[PreprocessResponse] = subset_images()  # preprocess and get data preprocess response list
     i, scene_flow = 0, data_subsets[0]

@@ -10,8 +10,9 @@ from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, me
 
 
 def check_custom_integration():
-    model_path = ('examples/cifar10_resnet/cifar10_resnet/model')
-    resnet = tf.keras.models.load_model(os.path.join(model_path, 'resnet.h5'))
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    model_path = ('cifar10_resnet/model/resnet.h5')
+    resnet = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
     responses = preprocess_func_leap()
 
