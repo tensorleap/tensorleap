@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "domain-gap"
+name = "domain_gap"
 version = "0.1.0"
 description = ""
 authors = ["Danielle Ben Bashat <daniellebenba@gmail.com>"]
