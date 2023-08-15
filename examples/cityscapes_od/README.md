@@ -1,7 +1,7 @@
 > **Note**: The dataset used in this project is not public, access to it can be granted by request.
 > see this link: [Cityscapes dataset](https://www.cityscapes-dataset.com/).
-<br>
-> 
+<be>
+
 # YOLOv7 model with Cityscapes dataset
 
 This project utilizes the [YOLOv7](https://github.com/WongKinYiu/yolov7) algorithm to perform object detection on 
@@ -75,8 +75,8 @@ This quick start guide will walk you through the steps to get started with this 
 
 Before you begin, ensure that you have the following prerequisites installed:
 
-- **[Python](https://www.python.org/)** (version 3.7 or higher)
-- **[Poetry](https://python-poetry.org/)**
+- **[Python](https://www.python.org/)** (version 3.7 or higher).
+- **[Poetry](https://python-poetry.org/)**.
 - **[Tensorleap](https://tensorleap.ai/)** platform access. To request a free trial click [here](https://meetings.hubspot.com/esmus/free-trial).
 - **[Tensorleap CLI](https://github.com/tensorleap/leap-cli)**.
 
@@ -86,15 +86,8 @@ Before you begin, ensure that you have the following prerequisites installed:
 with `curl`:
 
 ```
-curl -s <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
+curl -s https://raw.githubusercontent.com/tensorleap/leap-cli/master/install.sh | bash
 ```
-
-with `wget`:
-
-```
-wget -q -O - <https://raw.githubusercontent.com/tensorleap/cli-go/master/install.sh> | bash
-```
-
 
 ## Tensorleap CLI Usage
 
@@ -158,5 +151,6 @@ poetry run test
 This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
+
 
 
