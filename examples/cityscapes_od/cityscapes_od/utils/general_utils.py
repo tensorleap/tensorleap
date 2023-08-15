@@ -176,3 +176,23 @@ def get_polygon(json_data: dict) -> List[dict]:
         polygon = objects[i]
         polygons.append(polygon)
     return polygons
+
+def instances_num(valid_bbs) -> float:
+    return float(valid_bbs.shape[0])
+
+def avg_bb_aspect_ratio(valid_bbs) -> float:
+    assert ((valid_bbs[:, 3] > 0).all())
+    aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
+    return aspect_ratios.mean()
+
+def avg_bb_area_metadata(valid_bbs) -> float:
+    areas = valid_bbs[:, 2] * valid_bbs[:, 3]
+    return areas.mean()
+
+def count_small_bbs(bboxes) -> float:
+    areas = bboxes[..., 2] * bboxes[..., 3]
+    return float(len(areas[areas < CONFIG['SMALL_BBS_TH']]))
+
+def number_of_bb(bboxes) -> int:
+    number_of_bb = np.count_nonzero(bboxes[..., -1] != CONFIG['BACKGROUND_LABEL'])
+    return number_of_bb

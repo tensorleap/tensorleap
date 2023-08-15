@@ -10,10 +10,12 @@ import tensorflow as tf
 from cityscapes_od.config import CONFIG
 from cityscapes_od.data.preprocess import load_cityscapes_data, CATEGORIES, CATEGORIES_no_background, \
     CATEGORIES_id_no_background, Cityscapes
-from cityscapes_od.metrics import calculate_iou, regression_metric, classification_metric, object_metric, od_loss
+from cityscapes_od.metrics import calculate_iou, regression_metric, classification_metric, object_metric, od_loss, \
+    metric
 from cityscapes_od.utils.gcs_utils import _download
 from cityscapes_od.utils.general_utils import extract_bounding_boxes_from_instance_segmentation_polygons, \
-    bb_array_to_object, get_predict_bbox_list
+    bb_array_to_object, get_predict_bbox_list, instances_num, avg_bb_aspect_ratio, avg_bb_area_metadata, \
+    count_small_bbs, number_of_bb
 
 from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.contract.visualizer_classes import LeapImageWithBBox
@@ -81,30 +83,70 @@ def ground_truth_bbox(idx: int, data: PreprocessResponse) -> np.ndarray:
     return bounding_boxes
 
 # ----------------------------------------------------------metadata----------------------------------------------------
+def metadata_filename(idx: int, data: PreprocessResponse) -> str:
+    return data.data['file_names'][idx]
 
-def number_of_bb(index: int, subset: PreprocessResponse) -> int:
-    bbs = np.array(ground_truth_bbox(index, subset))
-    number_of_bb = np.count_nonzero(bbs[..., -1] != CONFIG['BACKGROUND_LABEL'])
-    return number_of_bb
+def metadata_city(idx: int, data: PreprocessResponse) -> str:
+    return data.data['cities'][idx]
 
-def instances_num(index: int, subset: PreprocessResponse) -> float:
-    bbs = np.array(ground_truth_bbox(index, subset))
+def metadata_idx(idx: int, data: PreprocessResponse) -> int:
+    return idx
+
+def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
+    img = non_normalized_image(idx, data)
+    return np.mean(img)
+
+def get_metadata_json(idx: int, data: PreprocessResponse) -> Dict[str,str]:
+    cloud_path = data.data['metadata'][idx]
+    fpath = _download(cloud_path)
+    with open(fpath, 'r') as f:
+        metadata_dict = json.loads(f.read())
+    return metadata_dict
+
+def metadata_json(idx: int, data: PreprocessResponse):
+    json_dict = get_metadata_json(idx, data)
+    res = {
+        "gps_heading": json_dict['gpsHeading'],
+        "gps_latitude": json_dict['gpsLatitude'],
+        "gps_longtitude": json_dict['gpsLongitude'],
+        "outside_temperature": json_dict['outsideTemperature'],
+        "speed": json_dict['speed'],
+        "yaw_rate": json_dict['yawRate']
+    }
+    return res
+#
+def category_percent(idx: int, data: PreprocessResponse, class_id:int) -> float:
+    bbs = np.array(ground_truth_bbox(idx, data))
     valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
-    return float(valid_bbs.shape[0])
+    category_bbs = valid_bbs[valid_bbs[..., -1] == class_id]
+    return float(category_bbs.shape[0])
 
-def avg_bb_aspect_ratio(index: int, subset: PreprocessResponse) -> float:
-    bbs = np.array(ground_truth_bbox(index, subset))
-    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
-    assert ((valid_bbs[:, 3] > 0).all())
-    aspect_ratios = valid_bbs[:, 2] / valid_bbs[:, 3]
-    return aspect_ratios.mean()
+def category_avg_size(idx: int, data: PreprocessResponse, class_id: int) -> float:
+    car_val = category_percent(idx, data, class_id)
+    instances_cnt = number_of_bb(idx, data)
+    return np.round(car_val/instances_cnt, 3) if instances_cnt > 0 else 0
 
-def avg_bb_area_metadata(index: int, subset: PreprocessResponse) -> float:
-    bbs = np.array(ground_truth_bbox(index, subset)) # x,y,w,h
-    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
-    areas = valid_bbs[:, 2] * valid_bbs[:, 3]
-    return areas.mean()
+def metadata_category_avg_size(idx: int, data: PreprocessResponse) -> Dict[str, float]:
+    res = {
+        "metadata_person_category_avg_size": category_avg_size(idx, data, 24),
+        "metadata_car_category_avg_size": category_avg_size(idx, data, 26)
+    }
+    return res
 
+#
+def metadata_bbs(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    bboxes = np.array(ground_truth_bbox(idx, data))
+    valid_bbs = bboxes[bboxes[..., -1] != CONFIG['BACKGROUND_LABEL']]
+    res = {
+    "instances_number": instances_num(valid_bbs),
+    "bb_aspect_ratio": avg_bb_aspect_ratio(valid_bbs),
+    "avg_bb_area": avg_bb_area_metadata(valid_bbs),
+    "small_bbs": count_small_bbs(bboxes),
+    "bbox_number": number_of_bb(bboxes)
+
+    }
+    return res
+#
 def label_instances_num(class_label: str) -> Callable[[int, PreprocessResponse], float]:
     def func(index: int, subset: PreprocessResponse) -> float:
         bbs = np.array(ground_truth_bbox(index, subset))
@@ -124,7 +166,7 @@ def is_class_exist_gen(class_id: int) -> Callable[[int, PreprocessResponse], flo
     func.__name__ = f'metadata_{class_id}_instances_count'
     return func
 
-def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Callable[[int, PreprocessResponse], float]:
+def is_class_exist_veg_and_building(class_id_veg: int, class_id_building: int) -> Callable[[int, PreprocessResponse], float]:
     def func(index: int, subset: PreprocessResponse):
         bbs = np.array(ground_truth_bbox(index, subset))
         is_veg_exist = (bbs[..., -1] == class_id_veg).any()
@@ -134,6 +176,7 @@ def is_class_exist_veg_and_building(class_id_veg: int, class_id_building) -> Cal
     func.__name__ = f'metadata_class_veg_and_class_building_instances_count'
     return func
 
+# ---------------------------------------------------------metrics------------------------------------------------------
 
 def get_class_mean_iou(class_id: int) -> Callable[[Tensor, Tensor], Tensor]:
     def class_mean_iou(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
@@ -142,115 +185,14 @@ def get_class_mean_iou(class_id: int) -> Callable[[Tensor, Tensor], Tensor]:
 
     return class_mean_iou
 
-def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
-    bboxes = np.array(ground_truth_bbox(idx, data))
-    areas = bboxes[..., 2] * bboxes[..., 3]
-    return float(len(areas[areas < CONFIG['SMALL_BBS_TH']]))
-
-def metadata_filename(idx: int, data: PreprocessResponse) -> str:
-    return data.data['file_names'][idx]
-
-def metadata_city(idx: int, data: PreprocessResponse) -> str:
-    return data.data['cities'][idx]
-
-def metadata_idx(idx: int, data: PreprocessResponse) -> int:
-    return idx
-
-def get_metadata_json(idx: int, data: PreprocessResponse) -> Dict[str,str]:
-    cloud_path = data.data['metadata'][idx]
-    fpath = _download(cloud_path)
-    with open(fpath, 'r') as f:
-        metadata_dict = json.loads(f.read())
-    return metadata_dict
-
-def metadata_gps_heading(idx: int, data: PreprocessResponse) -> float:
-    return get_metadata_json(idx, data)['gpsHeading']
-
-def metadata_gps_latitude(idx: int, data: PreprocessResponse) -> float:
-    return get_metadata_json(idx, data)['gpsLatitude']
-
-def metadata_gps_longtitude(idx: int, data: PreprocessResponse) -> float:
-    return get_metadata_json(idx, data)['gpsLongitude']
-
-def metadata_outside_temperature(idx: int, data: PreprocessResponse) -> float:
-    return get_metadata_json(idx, data)['outsideTemperature']
-
-def metadata_speed(idx: int, data: PreprocessResponse) -> float:
-    return get_metadata_json(idx, data)['speed']
-
-def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
-    return get_metadata_json(idx, data)['yawRate']
-
-def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
-    img = non_normalized_image(idx, data)
-    return np.mean(img)
-
-def category_percent(idx: int, data: PreprocessResponse, class_id:int) -> float:
-    bbs = np.array(ground_truth_bbox(idx, data))
-    valid_bbs = bbs[bbs[..., -1] != CONFIG['BACKGROUND_LABEL']]
-    category_bbs = valid_bbs[valid_bbs[..., -1] == class_id]
-    return float(category_bbs.shape[0])
-
-def metadata_person_category_avg_size(idx: int, data: PreprocessResponse) -> float:
-    class_id = 24
-    percent_val = category_percent(idx, data, class_id)
-    instances_cnt = number_of_bb(idx, data)
-    return np.round(percent_val/instances_cnt, 3) if instances_cnt > 0 else 0
-
-def metadata_car_category_avg_size(idx: int, data: PreprocessResponse) -> float:
-    class_id = 26
-    car_val = category_percent(idx, data, class_id)
-    instances_cnt = number_of_bb(idx, data)
-    return np.round(car_val/instances_cnt, 3) if instances_cnt > 0 else 0
-
-def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
-    metadata_functions = {
-        "filename": metadata_filename,
-        "city": metadata_city,
-        "idx": metadata_idx,
-        "gps_heading": metadata_gps_heading,
-        "gps_latitude": metadata_gps_latitude,
-        "gps_longtitude": metadata_gps_longtitude,
-        "outside_temperature": metadata_outside_temperature,
-        "speed": metadata_speed,
-        "yaw_rate": metadata_yaw_rate,
-        "bb_count": number_of_bb,
-        "avg_bb_aspect_ratio": avg_bb_aspect_ratio,
-        "avg_bb_area": avg_bb_area_metadata,
-        "instances_number_metadata": instances_num,
-        "small_bbs_number": count_small_bbs,
-        "does_veg_and_buildeng_class_exist": is_class_exist_veg_and_building(21, 11),
-        "metadata_brightness": metadata_brightness,
-        "metadata_person_category_avg_size": metadata_person_category_avg_size,
-        "metadata_car_category_avg_size": metadata_car_category_avg_size,
-
-    }
-    for i, label in enumerate(CATEGORIES_no_background):
-        metadata_functions[f'{label} number_metadata'] = label_instances_num(label)
-
-    for id in CATEGORIES_id_no_background:
-        metadata_functions[f'does_class_number_{id}_exist'] = is_class_exist_gen(id)
-
-    res = dict()
-    for func_name, func in metadata_functions.items():
-        res[func_name] = func(idx, data)
-    return res
-
 def od_metrics_dict(bb_gt: tf.Tensor, detection_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
+    losses = metric(bb_gt, detection_pred)
     metric_functions = {
-        "Regression_metric": regression_metric,
-        "Classification_metric": classification_metric,
-        "Objectness_metric": object_metric,
+        "Regression_metric": losses[0],
+        "Classification_metric": losses[1],
+        "Objectness_metric": losses[2],
     }
-
-    for id in CATEGORIES_id_no_background:
-        class_name = Cityscapes.get_class_name(id)
-        metric_functions[f"iou_class_{class_name}"] = get_class_mean_iou(id)
-
-    res = dict()
-    for func_name, func in metric_functions.items():
-        res[func_name] = func(bb_gt, detection_pred)
-    return res
+    return metric_functions
 
 def gt_bb_decoder(image: np.ndarray, bb_gt: tf.Tensor) -> LeapImageWithBBox:
     """
@@ -309,7 +251,20 @@ leap_binder.add_prediction(name='object detection', labels=["x", "y", "w", "h", 
 leap_binder.add_custom_loss(od_loss, 'od_loss')
 
 #set meata_data
-leap_binder.set_metadata(metadata_dict, name='metadata')
+leap_binder.set_metadata(metadata_filename, name='metadata_filename')
+leap_binder.set_metadata(metadata_city, name='metadata_city')
+leap_binder.set_metadata(metadata_idx, name='metadata_idx')
+leap_binder.set_metadata(metadata_brightness, name='metadata_brightness')
+leap_binder.set_metadata(metadata_json, name='metadata_json')
+leap_binder.set_metadata(metadata_category_avg_size, name='metadata_category_avg_size')
+leap_binder.set_metadata(metadata_bbs, name='metadata_bbs')
+for i, label in enumerate(CATEGORIES_no_background):
+    leap_binder.set_metadata(label_instances_num(label), f'{label} number_metadata')
+for id in CATEGORIES_id_no_background:
+    class_name = Cityscapes.get_class_name(id)
+    leap_binder.set_metadata(is_class_exist_gen(id), f'does_class_number_{id}_exist')
+leap_binder.set_metadata(is_class_exist_veg_and_building(21, 11), "does_veg_and_buildeng_class_exist")
+
 
 #set visualizer
 leap_binder.set_visualizer(gt_bb_decoder, 'bb_gt_decoder', LeapDataType.ImageWithBBox)
@@ -319,6 +274,9 @@ leap_binder.set_visualizer(bb_car_decoder, 'bb_car_decoder', LeapDataType.ImageW
 
 # set custom metrics
 leap_binder.add_custom_metric(od_metrics_dict, 'od_metrics')
+for id in CATEGORIES_id_no_background:
+    class_name = Cityscapes.get_class_name(id)
+    leap_binder.add_custom_metric(get_class_mean_iou(id), f"iou_class_{class_name}")
 
 
 
