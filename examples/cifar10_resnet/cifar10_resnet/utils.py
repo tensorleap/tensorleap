@@ -1,4 +1,5 @@
 import numpy as np
+from code_loader.contract.datasetclasses import PreprocessResponse
 
 from cifar10_resnet.config import CONFIG
 
@@ -7,7 +8,7 @@ from cifar10_resnet.config import CONFIG
 
 # Metadata functions allow to add extra data for a later use in analysis.
 # This metadata adds the int gt_digit of each sample (not a hot vector).
-def metadata_gt_label(one_hot_digit: np.ndarray) -> int:
+def metadata_gt_label(digit_int: int) -> int:
     """
      Retrieves the ground truth label (digit) of each sample from its one-hot encoded representation.
     :param:
@@ -15,12 +16,10 @@ def metadata_gt_label(one_hot_digit: np.ndarray) -> int:
     :return:
     digit_int (int): The ground truth label of the sample as an integer.
     """
-    digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
-    digit_int = int(digit)
     return digit_int
 
 # This metadata adds the int gt_name of each sample.
-def metadata_label_name(one_hot_digit: np.ndarray) -> str:
+def metadata_label_name(digit_int: int) -> str:
     """
     Description: Retrieves the ground truth label name of each sample from its one-hot encoded representation.
     :param:
@@ -28,13 +27,11 @@ def metadata_label_name(one_hot_digit: np.ndarray) -> str:
     :return:
     label_name (str): The ground truth label name of the sample as a string.
     """
-    digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
-    digit_int = int(digit)
     return CONFIG['LABELS_NAMES'][digit_int]
 
 
 # This metadata adds each sample if it is contains to airplane or bird.
-def metadata_fly(one_hot_digit: np.ndarray) -> str:
+def metadata_fly(digit_int: int) -> str:
     """
     Description: Adds metadata to each sample indicating if it belongs to the "airplane or bird" category or not.
     :param:
@@ -42,14 +39,12 @@ def metadata_fly(one_hot_digit: np.ndarray) -> str:
     :return:
     metadata (str): Metadata indicating whether the sample belongs to the "airplane or bird" category or not.
     """
-    digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
-    digit_int = int(digit)
     if digit_int in [0, 2]:
         return 'airplane or bird'
     return 'else'
 
 # This metadata adds each sample if it is vehicle ar animal.
-def metadata_animal(one_hot_digit: np.ndarray) -> str:
+def metadata_animal(digit_int: int) -> str:
     """
     Description: Adds metadata to each sample indicating if it belongs to the "vehicles" category or the "animals" category.
     :param:
@@ -57,11 +52,10 @@ def metadata_animal(one_hot_digit: np.ndarray) -> str:
     :return:
     metadata (str): Metadata indicating whether the sample belongs to the "vehicles" category or the "animals" category.
     """
-    digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
-    digit_int = int(digit)
     if digit_int in [0, 1, 9]:
         return 'vehicles'
     return 'animals'
+
 
 
 

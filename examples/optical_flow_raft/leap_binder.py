@@ -1,7 +1,6 @@
 import cv2
 from typing import List, Dict, Union
 from code_loader import leap_binder
-from code_loader.contract.enums import DatasetMetadataType, Metric
 from code_loader.contract.datasetclasses import PreprocessResponse
 import tensorflow as tf
 from PIL import Image
@@ -13,17 +12,11 @@ from code_loader.contract.enums import (
     LeapDataType
 )
 
+from optical_flow_raft.config import BUCKET_NAME, MAX_SCENE, MAX_STEREO, IMG_SIZE
 from optical_flow_raft.data.preprocess import get_kitti_data
-from optical_flow_raft.utils.flow_utils import make_color_wheel, decode_kitti_png, flow_to_image, EPE_mask, get_fl_map
+from optical_flow_raft.utils.flow_utils import decode_kitti_png, flow_to_image, EPE_mask, get_fl_map
 from optical_flow_raft.utils.gcs_utils import download
 
-# ----------------------------------------------------Constants--------------------------------------------------
-BUCKET_NAME = 'datasets-reteai'
-PROJECT_ID = 'splendid-flow-231921'
-IMG_SIZE = (440, 1024)
-COLORWHEEL = make_color_wheel()
-MAX_SCENE = 300
-MAX_STEREO = 300
 # --------------------------------------------------inputs & GT---------------------------------------------------------
 
 

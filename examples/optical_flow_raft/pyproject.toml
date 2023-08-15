@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "raft"
+name = "optical_flow_raft"
 version = "0.1.0"
 description = ""
 authors = ["Danielle Ben Bashat <daniellebenba@gmail.com>"]

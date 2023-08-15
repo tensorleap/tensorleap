@@ -6,7 +6,8 @@ from os.path import exists
 import urllib
 from keras.losses import CategoricalCrossentropy
 
-from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_dict
+from leap_binder import preprocess_func_leap, input_encoder_leap, gt_encoder, metadata_dict, metadata_sample_index
+
 
 def check_custom_integration():
     model_path = ('examples/cifar10_resnet/cifar10_resnet/model')
@@ -21,7 +22,8 @@ def check_custom_integration():
         y_true = tf.convert_to_tensor(gt)
 
         ls = CategoricalCrossentropy()(y_true, y_pred).numpy()
-        metadata = metadata_dict(i, responses[0])
+        sample_index = metadata_sample_index(i, responses[0])
+        dict_metadata = metadata_dict(i, responses[0])
 
 
 

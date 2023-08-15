@@ -46,60 +46,41 @@ def gt_encoder(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
 def metadata_sample_index(idx: int, preprocess: PreprocessResponse) -> int:
     return idx
 
-def metadata_gt_label_leap(idx: int, preprocess: PreprocessResponse) -> int:
+def metadata_dict(idx: int, preprocess: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+    one_hot_digit = gt_encoder(idx, preprocess)
+    digit = one_hot_digit.argmax()  # Returns the indices of the maximum values along an axis
+    digit_int = int(digit)
     if preprocess.data['subset_name'] == 'unlabeled':
-        return -1
+        gt_label = -1
+        label_name = 'unlabeled'
+        fly = 'unlabeled'
+        animal = 'unlabeled'
     else:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_gt_label(one_hot_digit)
-        return label
+        gt_label = metadata_gt_label(digit_int)
+        label_name = metadata_label_name(digit_int)
+        fly = metadata_fly(digit_int)
+        animal = metadata_animal(digit_int)
 
-# This metadata adds the int gt_name of each sample.
-def metadata_label_name_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    if preprocess.data['subset_name'] == 'unlabeled':
-        return 'Unlabeled'
-    else:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_label_name(one_hot_digit)
-        return label
-def metadata_fly_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    if preprocess.data['subset_name'] == 'unlabeled':
-        return 'Unlabeled'
-    else:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_fly(one_hot_digit)
-        return label
+    res = {
+        "gt_label": gt_label,
+        "gt_label_name": label_name,
+        "fly": fly,
+        "animal": animal
+    }
+    return res
 
-def metadata_animal_leap(idx: int, preprocess: PreprocessResponse) -> str:
-    if preprocess.data['subset_name'] == 'unlabeled':
-        return 'Unlabeled'
-    else:
-        one_hot_digit = gt_encoder(idx, preprocess)
-        label = metadata_animal(one_hot_digit)
-        return label
 
 def horizontal_bar_visualizer_with_labels_name(data: npt.NDArray[np.float32]) -> LeapHorizontalBar:
     labels_names = [CONFIG['LABELS_NAMES'][index] for index in range(data.shape[-1])]
     return LeapHorizontalBar(data, labels_names)
 
-def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
-    metadata_functions = {
-        "sample_index": metadata_sample_index,
-        "gt_label": metadata_gt_label_leap,
-        "gt_label_name": metadata_label_name_leap,
-        "fly": metadata_fly_leap,
-        "animal": metadata_animal_leap
-    }
-    res = dict()
-    for func_name, func in metadata_functions.items():
-        res[func_name] = func(idx, data)
-    return res
 
 # Dataset binding functions to bind the functions above to the `Dataset Instance`.
 leap_binder.set_preprocess(function=preprocess_func_leap)
 leap_binder.set_unlabeled_data_preprocess(function=unlabeled_data)
 leap_binder.set_input(function=input_encoder_leap, name='image')
 leap_binder.set_ground_truth(function=gt_encoder, name='classes')
+leap_binder.set_metadata(function=metadata_sample_index, name='sample_index')
 leap_binder.set_metadata(function=metadata_dict, name='metadata')
 leap_binder.set_visualizer(horizontal_bar_visualizer_with_labels_name, 'horizontal_bar_lm', LeapDataType.HorizontalBar)
 leap_binder.add_prediction(name='classes', labels=CONFIG['LABELS_NAMES'])
