@@ -1,8 +1,11 @@
 # RAFT optical flow
-
-**RAFT** is an optical flow model that uses an all-pairs recurrent model to approximate the optical flow solution.
-In this example, we infer [RAFT](https://github.com/princeton-vl/RAFT) on the
-[KITTI](https://www.cvlibs.net/datasets/kitti/index.php) dataset .
+This project evaluates and analyzes the [RAFT (Recurrent All-Pairs Field Transforms)](https://github.com/princeton-vl/RAFT)
+optical flow model on the [KITTI](https://www.cvlibs.net/datasets/kitti/) dataset. RAFT is a state-of-the-art model that
+uses an all-pairs recurrent approach to approximate optical flow solutions. Optical flow is the pattern of apparent 
+motion of objects, surfaces, and edges in a visual scene caused by the relative motion between the observer and the 
+scene. RAFT estimates these motion patterns by calculating the displacement (flow) of pixels between consecutive frames
+of an image sequence. This project has the potential to advance applications like object tracking and autonomous driving
+through improved optical flow estimation and contribute to the broader field of computer vision.
 
 # Latent Space and Clusters
 
