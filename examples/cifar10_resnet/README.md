@@ -13,7 +13,7 @@ Using **Tensorleap** we can save time while exploring and detecting high loss an
 The following plot illustrates a population exploration map, depicting the similarity among samples based on the latent 
 space of a trained model. This map is constructed using the extracted features of the model.
 
-The visualization show the all the data points, revealing two distinct clusters. These clusters represent images labeled 
+The visualization shows all the data points, revealing two distinct clusters. These clusters represent images labeled 
 as animals or vehicles according to their ground truth labels. The noticeable separation between the clusters indicates 
 a significant difference between these two categories.
 
@@ -63,7 +63,7 @@ profile perspective.
 ### Sample Loss Analysis
 
 Within this section, we delve into the examination of features that impact the model's predictions. 
-Tensorleap automatically generates a heatmap that quantifies the effect different features has on the loss. 
+Tensorleap automatically generates a heatmap that quantifies the effect different features have on the loss. 
 
 In the image depicted below, it is evident that the presence of background features leads to a higher loss function. 
 Conversely, the inclusion of features in the nose area contributes to a lower loss function, which signifies the image's 
@@ -134,7 +134,7 @@ Tensorleap files in the repository include `leap_binder.py` and `leap.yaml`. The
 
 leap.yaml file is configured to a dataset in your Tensorleap environment and is synced to the dataset saved in the environment.
 
-For any additional file being used we add its path under `include` parameter:
+For any additional file being used, we add its path under `include` parameter:
 
 ```
 include:
@@ -155,7 +155,7 @@ To test the system we can run `leap_test.py` file using poetry:
 poetry run test
 ```
 
-This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc,  run smoothly.
+This file will execute several tests on leap_binder.py script to assert that the implemented binding functions: preprocess, encoders,  metadata, etc.,  run smoothly.
 
 *For further explanation please refer to the [docs](https://docs.tensorleap.ai/)*
 
