@@ -26,7 +26,7 @@ loss, indicated by larger dot sizes on the plot. A closer examination reveals th
 were incorrectly predicted as 'dog' by the model. This suggests that there is a need to include more images of cats and 
 possibly dogs in the training dataset to improve the model's ability to recognize them accurately.
 
-![high_loss_cat](images/Screenshot 2023-07-13 at 11.27.27.png)
+![high_loss_cat](images/Screenshot3.png)
 
 
 #### *Detecting & Handling High Loss Unlabeled Clusters* 
