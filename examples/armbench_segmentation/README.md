@@ -8,7 +8,7 @@
 
 ## Project Description
 
-This project focuses on advancing robotic perception using the YOLOv5 model on Amazon's Armbench Robotics Dataset. The dataset emulates real-world robotic scenarios, and our objective is to develop an instance segmentation pipeline that identifies and precisely outlines different objects within a tote. By combining YOLOv5's deep learning capabilities with the dataset's richness, we aim to enhance robotic manipulation and interaction by enabling accurate object recognition and segmentation.
+This project focuses on advancing robotic perception using the [YOLOv5](https://github.com/ultralytics/yolov5/discussions/10258) model on Amazon's Armbench Robotics Dataset. The dataset emulates real-world robotic scenarios, and our objective is to develop an instance segmentation pipeline that identifies different objects within a tote.
 
 ### Dataset
 The relevant dataset for this example is the `mix-object-tot` subset.
