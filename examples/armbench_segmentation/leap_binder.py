@@ -19,14 +19,13 @@ from armbench_segmentation.config import CONFIG
 from armbench_segmentation.preprocessing import load_set
 from armbench_segmentation.utils.general_utils import count_obj_masks_occlusions, \
     count_obj_bbox_occlusions, extract_and_cache_bboxes
-from armbench_segmentation.metrics import regression_metric, classification_metric, object_metric, \
-    mask_metric, over_segmented, under_segmented, metric_small_bb_in_under_segment, over_segmented_instances_count, \
-    under_segmented_instances_count, average_segments_num_over_segment, average_segments_num_under_segmented, \
-    over_segment_avg_confidence, instance_seg_loss
+from armbench_segmentation.metrics import instance_seg_loss, compute_losses
 from armbench_segmentation.visualizers.visualizers import gt_bb_decoder, bb_decoder, \
     under_segmented_bb_visualizer, over_segmented_bb_visualizer
 from armbench_segmentation.visualizers.visualizers_getters import mask_visualizer_gt, mask_visualizer_prediction
-
+from armbench_segmentation.utils.general_utils import get_mask_list, get_argmax_map_and_separate_masks
+from armbench_segmentation.utils.ioa_utils import ioa_mask
+from armbench_segmentation.metrics import over_under_segmented_metrics
 
 # ----------------------------------------------------data processing--------------------------------------------------
 def subset_images() -> List[PreprocessResponse]:
@@ -35,10 +34,12 @@ def subset_images() -> List[PreprocessResponse]:
     """
     ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "train.json")
     # initialize COCO api for instance annotations
+
     train = COCO(ann_filepath)
     x_train_raw = load_set(coco=train, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
 
     ann_filepath = os.path.join(CONFIG['DIR'], CONFIG['IMG_FOLDER'], "test.json")
+
     val = COCO(ann_filepath)
     x_val_raw = load_set(coco=val, load_union=CONFIG['LOAD_UNION_CATEGORIES_IMAGES'])
 
@@ -373,59 +374,44 @@ def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, 
 
 def general_metrics_dict(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
                          mask_gt: tf.Tensor, segmentation_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
-    # reg_met, class_met, obj_met, mask_met = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
-    # res = {
-    #     "Regression_metric": tf.reduce_sum(reg_met, axis=0)[:, 0],
-    #     "Classification_metric": tf.reduce_sum(class_met, axis=0)[:, 0],
-    #     "Objectness_metric": tf.reduce_sum(obj_met, axis=0)[:, 0],
-    #     "Mask_metric": tf.reduce_sum(mask_met, axis=0)[:, 0],
-    # }
-    # return res
-    metric_functions = {
-        "Over_Segmented_metric": over_segmented,
-        "Under_Segmented_metric": under_segmented,
-        "Small_BB_Under_Segmtented": metric_small_bb_in_under_segment,
-        "Over_Segmented_Instances_count": over_segmented_instances_count,
-        "Under_Segmented_Instances_count": under_segmented_instances_count,
-        "Average_segments_num_Over_Segmented": average_segments_num_over_segment,
-        "Average_segments_num_Under_Segmented": average_segments_num_under_segmented,
-        "Over_Segment_confidences": over_segment_avg_confidence
+    reg_met, class_met, obj_met, mask_met = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
+    res = {
+        "Regression_metric": tf.reduce_sum(reg_met, axis=0)[:, 0],
+        "Classification_metric": tf.reduce_sum(class_met, axis=0)[:, 0],
+        "Objectness_metric": tf.reduce_sum(obj_met, axis=0)[:, 0],
+        "Mask_metric": tf.reduce_sum(mask_met, axis=0)[:, 0],
     }
-    res = dict()
-    for func_name, func in metric_functions.items():
-
-        res[func_name] = func(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt)
     return res
 
 
 def segmentation_metrics_dict(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
                               mask_gt: tf.Tensor) -> Dict[str, Union[int, float]]:
-    #get_ioa_array('gt')
-    #get_ioa_array('pred')
-    #get_mask_list
-
-    # bb_gt_object, _ = get_mask_list(bb_gt, None, is_gt=True)
-    # bb_pred_object, _ = get_mask_list(y_pred_bb[i, ...], None, is_gt=False)
-    # bb_gt_object, _ = get_mask_list(bb_gt, None, is_gt=True)
-
-
-    # new_gt_objects = remove_label_from_bbs(bb_gt_object, "Tote", "gt")
-    # new_bb_pred_object = remove_label_from_bbs(bb_pred_object, "Tote", "pred")
-
-    metric_functions = {
-        "Over_Segmented_metric": over_segmented,
-        "Under_Segmented_metric": under_segmented,
-        "Small_BB_Under_Segmtented": metric_small_bb_in_under_segment,
-        "Over_Segmented_Instances_count": over_segmented_instances_count,
-        "Under_Segmented_Instances_count": under_segmented_instances_count,
-        "Average_segments_num_Over_Segmented": average_segments_num_over_segment,
-        "Average_segments_num_Under_Segmented": average_segments_num_under_segmented,
-        "Over_Segment_confidences": over_segment_avg_confidence
+    bs = bb_gt.shape[0]
+    bb_mask_gt = [get_mask_list(bb_gt[i, ...], mask_gt[i, ...], is_gt=True) for i in range(bs)]
+    bb_mask_pred = [get_mask_list(y_pred_bb[i, ...], y_pred_mask[i, ...], is_gt=False) for i in range(bs)]
+    sep_mask_pred = [get_argmax_map_and_separate_masks(image[i, ...], bb_mask_pred[i][0],
+                                       bb_mask_pred[i][1])['separate_masks'] for i in range(bs)]
+    sep_mask_gt = [get_argmax_map_and_separate_masks(image[i, ...], bb_mask_gt[i][0],
+                                       bb_mask_gt[i][1])['separate_masks'] for i in range(bs)]
+    pred_gt_ioas = [np.array([[ioa_mask(pred_mask, gt_mask) for gt_mask in sep_mask_gt[i]]
+                              for pred_mask in sep_mask_pred[i]]) for i in range(bs)]
+    gt_pred_ioas = [np.array([[ioa_mask(gt_mask, pred_mask) for gt_mask in sep_mask_gt[i]]
+                             for pred_mask in sep_mask_pred[i]]) for i in range(bs)]
+    gt_pred_ioas_t =[arr.transpose() for arr in gt_pred_ioas]
+    over_seg_bool, over_seg_count, avg_segments_over, _, over_conf =\
+        over_under_segmented_metrics(gt_pred_ioas_t, get_avg_confidence=True, bb_mask_object_list=bb_mask_pred)
+    under_seg_bool, under_seg_count, avg_segments_under, under_small_bb, _ =\
+        over_under_segmented_metrics(pred_gt_ioas, count_small_bbs=True, bb_mask_object_list=bb_mask_gt)
+    res = {
+        "Over_Segmented_metric": over_seg_bool,
+        "Under_Segmented_metric": under_seg_bool,
+        "Small_BB_Under_Segmtented": under_small_bb,
+        "Over_Segmented_Instances_count": over_seg_count,
+        "Under_Segmented_Instances_count": under_seg_count,
+        "Average_segments_num_Over_Segmented": avg_segments_over,
+        "Average_segments_num_Under_Segmented": avg_segments_under,
+        "Over_Segment_confidences": over_conf
     }
-    res = dict()
-    for func_name, func in metric_functions.items():
-
-        res[func_name] = func(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt)
     return res
 
 
