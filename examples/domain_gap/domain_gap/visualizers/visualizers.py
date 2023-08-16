@@ -18,7 +18,7 @@ def get_masked_img(image: npt.NDArray[np.float32], mask: npt.NDArray[np.uint8]) 
 
 
 
-def get_cityscape_mask_img(mask: npt.NDArray[np.uint8]):
+def get_cityscape_mask_img(mask: npt.NDArray[np.uint8]) -> np.ndarray:
     if len(mask.shape) > 2:
         if mask.shape[-1] == 1:
             cat_mask = np.squeeze(mask, axis=-1)
@@ -31,7 +31,7 @@ def get_cityscape_mask_img(mask: npt.NDArray[np.uint8]):
     return mask_image
 
 
-def get_loss_overlayed_img(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]):
+def get_loss_overlayed_img(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]) -> np.ndarray:
     image = unnormalize_image(image)
     ls = tf.keras.losses.CategoricalCrossentropy(from_logits=True, reduction='none')
     ls_image = ls(gt, prediction).numpy()

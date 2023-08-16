@@ -2,7 +2,8 @@ import urllib
 from os.path import exists
 from leap_binder import *
 
-if __name__ == '__main__':
+def test():
+    print("statedtesting")
     model_path = 'models/DeeplabV3.h5'
     if not exists(model_path):
         print("Downloading DeeplabV3.h5 for inference")
