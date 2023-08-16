@@ -13,6 +13,7 @@ readability = "0.3"
 transformers = "4.28.1"
 readability-lxml = "^0.8.1"
 textstat = "^0.7.3"
+py-readability-metrics = "^1.4.5"
 
 [build-system]
 requires = ["poetry-core"]
