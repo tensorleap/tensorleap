@@ -7,8 +7,6 @@ from code_loader.contract.responsedataclasses import BoundingBox
 from code_loader.helpers.detection.utils import xyxy_to_xywh_format, xywh_to_xyxy_format
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 from numpy._typing import NDArray
-
-from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.config import CONFIG
 from armbench_segmentation.yolo_helpers.yolo_utils import DECODER, DEFAULT_BOXES
 
@@ -228,10 +226,6 @@ def bb_array_to_object(bb_array: Union[NDArray[float], tf.Tensor], iscornercoded
 
 
 def get_mask_list(data, masks, is_gt):
-    res = CACHE_DICTS['mask_list'].get(str(data) + str(masks) + str(is_gt))
-    if res is not None:
-        return res
-
     is_inference = CONFIG["MODEL_FORMAT"] == "inference"
     if is_gt:
         bb_object, mask_list = bb_array_to_object(data, iscornercoded=False, bg_label=CONFIG["BACKGROUND_LABEL"],
@@ -250,10 +244,6 @@ def get_mask_list(data, masks, is_gt):
                           )
         bb_object, mask_list = bb_array_to_object(outputs[0], iscornercoded=True, bg_label=CONFIG["BACKGROUND_LABEL"],
                                                   masks=masks)
-    if len(CACHE_DICTS['mask_list'].keys()) > 4 * CONFIG["BATCH_SIZE"]:
-        CACHE_DICTS['mask_list'] = {str(data) + str(masks) + str(is_gt): (bb_object, mask_list)}
-    else:
-        CACHE_DICTS['mask_list'][str(data) + str(masks) + str(is_gt)] = (bb_object, mask_list)
     return bb_object, mask_list
 
 
@@ -310,9 +300,6 @@ def get_argmax_map_and_separate_masks(image, bbs, masks):
 
 
 def extract_and_cache_bboxes(idx: int, data: Dict):
-    res = CACHE_DICTS['bbs'].get(str(idx) + data['subdir'])
-    if res is not None:
-        return res
     x = data['samples'][idx]
     coco = data['cocofile']
     ann_ids = coco.getAnnIds(imgIds=x['id'])
@@ -328,8 +315,4 @@ def extract_and_cache_bboxes(idx: int, data: Dict):
         bboxes[i, :4] = bbox
         bboxes[i, 4] = class_id
     bboxes[max_anns:, 4] = CONFIG['BACKGROUND_LABEL']
-    if len(CACHE_DICTS['bbs'].keys()) > CONFIG['BATCH_SIZE']:
-        CACHE_DICTS['bbs'] = {str(idx) + data['subdir']: bboxes}
-    else:
-        CACHE_DICTS['bbs'][str(idx) + data['subdir']] = bboxes
     return bboxes

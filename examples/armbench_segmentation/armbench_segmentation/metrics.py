@@ -4,7 +4,6 @@ import numpy as np
 import tensorflow as tf
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
-from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.config import CONFIG
 from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
 from armbench_segmentation.utils.ioa_utils import get_ioa_array
@@ -18,16 +17,11 @@ def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor,
     """
     Computes the sum of the classification (CE loss) and localization (regression) losses from all heads
     """
-    res = CACHE_DICTS['loss'].get(str(obj_true) + str(od_pred) + str(mask_true) + str(instance_seg))
-    if res is not None:
-        return res
     decoded = False if CONFIG["MODEL_FORMAT"] != "inference" else True
     class_list_reshaped, loc_list_reshaped = reshape_output_list(od_pred, decoded=decoded,
                                                                  image_size=CONFIG["IMAGE_SIZE"])  # add batch
     loss_l, loss_c, loss_o, loss_m = LOSS_FN(y_true=obj_true, y_pred=(loc_list_reshaped, class_list_reshaped),
                                              instance_seg=instance_seg, instance_true=mask_true)
-    CACHE_DICTS['loss'] = {
-        str(obj_true) + str(od_pred) + str(mask_true) + str(instance_seg): (loss_l, loss_c, loss_o, loss_m)}
     return loss_l, loss_c, loss_o, loss_m
 
 
