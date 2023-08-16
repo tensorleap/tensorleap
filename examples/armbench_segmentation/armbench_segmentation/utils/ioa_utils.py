@@ -40,5 +40,6 @@ def get_ioa_array(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt, containing='pre
         ioas = np.array([[ioa_mask(pred_mask, gt_mask) for gt_mask in gt_masks] for pred_mask in prediction_masks])
     else:
         ioas = np.array([[ioa_mask(gt_mask, pred_mask) for gt_mask in gt_masks] for pred_mask in prediction_masks])
-
+    if len(ioas) == 0:
+        ioas = np.zeros((len(prediction_masks), len(gt_masks)))
     return ioas
