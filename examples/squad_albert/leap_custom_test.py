@@ -8,7 +8,7 @@ from squad_albert.loss import CE_loss
 from squad_albert.metrics import exact_match_metric, f1_metric, CE_start_index, CE_end_index
 from squad_albert.utils.utils import get_readibility_score
 
-def check():
+def check_custom_integration():
     dir_path = os.path.dirname(os.path.abspath(__file__))
     model_path = ('squad_albert/model/albert.h5')
     albert = tf.keras.models.load_model(os.path.join(dir_path, model_path))
@@ -48,7 +48,5 @@ def check():
                       'gunning_fog', 'linsear_write', 'smog', 'spache']:
             score = get_readibility_score(get_analyzer(idx, x[0]).__getattribute__(score))
 
-
-
 if __name__=='__main__':
-    check()
+    check_custom_integration()

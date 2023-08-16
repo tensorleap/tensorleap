@@ -10,9 +10,13 @@ from leap_binder import load_cityscapes_data_leap, ground_truth_bbox, non_normal
     od_metrics_dict, gt_bb_decoder, bb_decoder, bb_car_decoder, bb_car_gt_decoder, metadata_filename, metadata_city, \
     metadata_idx, metadata_brightness, metadata_json, metadata_category_avg_size, metadata_bbs, label_instances_num, \
     is_class_exist_gen, is_class_exist_veg_and_building, get_class_mean_iou
-
+from os import environ
 
 def check_custom_integration():
+    if environ.get('AUTH_SECRET') is None:
+        print("The AUTH_SECRET system variable must be initialized with the relevant secret to run this test")
+        exit(-1)
+
     # preprocess function
     responses = load_cityscapes_data_leap()
     train = responses[0]
@@ -22,7 +26,7 @@ def check_custom_integration():
     for idx in range(20):
         # model
         dir_path = os.path.dirname(os.path.abspath(__file__))
-        model_path = ('cityscapes_od/model/yolov7.h5')
+        model_path = ('model/yolov7.h5')
         yolo = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
         # get input and gt
@@ -74,7 +78,6 @@ def check_custom_integration():
         for id in CATEGORIES_id_no_background:
             iou_func = get_class_mean_iou(id)
             iou = iou_func(y_true, y_pred)
-
 
 if __name__ == '__main__':
     check_custom_integration()

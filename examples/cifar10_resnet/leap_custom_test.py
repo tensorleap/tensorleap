@@ -24,8 +24,11 @@ def check_all_fuctions(responses, resnet, type):
             ls = CategoricalCrossentropy()(y_true, y_pred).numpy()
 
 def check_custom_integration():
+    if os.environ.get('AUTH_SECRET') is None:
+        print("The AUTH_SECRET system variable must be initialized with the relevant secret to run this test")
+        exit(-1)
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    model_path = ('cifar10_resnet/model/resnet.h5')
+    model_path = ('model/resnet.h5')
     resnet = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
     responses = preprocess_func_leap()
