@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-from readability import Readability
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -8,7 +7,6 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import LeapDataType
 from code_loader.contract.visualizer_classes import LeapText, LeapTextMask
 
-from transformers import AlbertTokenizerFast
 from typing import List, Dict, Union
 
 from squad_albert.config import CONFIG
@@ -19,6 +17,9 @@ from squad_albert.encoders import gt_index_encoder, gt_end_index_encoder, gt_sta
 from squad_albert.loss import CE_loss
 from squad_albert.metrics import get_start_end_arrays, CE_start_index, CE_end_index, exact_match_metric, f1_metric
 from squad_albert.utils.utils import get_context_positions, get_readibility_score
+
+from transformers import AlbertTokenizerFast
+from readability import Readability
 
 
 # -------------------------load_data--------------------------------

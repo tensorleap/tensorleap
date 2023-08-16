@@ -1,7 +1,7 @@
 import os
 from code_loader import LeapLoader
 
-def check_intagration():
+def check_integration():
     print("started tests")
     dir_path = os.path.dirname(os.path.abspath(__file__))
     script_path = 'leap_binder.py'
@@ -13,4 +13,4 @@ def check_intagration():
         print(f"Integration failed with error: {res.general_error}")
 
 if __name__ == '__main__':
-    check_intagration()
+    check_integration()
