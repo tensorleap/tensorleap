@@ -200,7 +200,7 @@ def onehot_to_indices(one_hot: np.ndarray) -> LeapText:
     return LeapText([start_ind, end_ind])
 
 
-def tokens_decoder_leap(input_ids: np.ndarray) -> LeapText:  # V
+def tokens_decoder_leap(input_ids: np.ndarray) -> LeapText:
     decoded = get_decoded_tokens_leap(input_ids)
     decoded = tokens_decoder(decoded)
     return LeapText(decoded)

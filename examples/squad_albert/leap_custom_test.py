@@ -9,8 +9,9 @@ from squad_albert.metrics import exact_match_metric, f1_metric, CE_start_index, 
 from squad_albert.utils.utils import get_readibility_score
 
 def check_custom_integration():
+    print("started custom tests")
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    model_path = ('squad_albert/model/albert.h5')
+    model_path = ('model/albert.h5')
     albert = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
     x = preprocess_load_article_titles()
@@ -47,6 +48,8 @@ def check_custom_integration():
         for score in ['ari', 'coleman_liau', 'dale_chall', 'flesch', 'flesch_kincaid',
                       'gunning_fog', 'linsear_write', 'smog', 'spache']:
             score = get_readibility_score(get_analyzer(idx, x[0]).__getattribute__(score))
+
+    print("Custom tests finished successfully")
 
 if __name__=='__main__':
     check_custom_integration()

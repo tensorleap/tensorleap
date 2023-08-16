@@ -24,9 +24,7 @@ def check_all_fuctions(responses, resnet, type):
             ls = CategoricalCrossentropy()(y_true, y_pred).numpy()
 
 def check_custom_integration():
-    if os.environ.get('AUTH_SECRET') is None:
-        print("The AUTH_SECRET system variable must be initialized with the relevant secret to run this test")
-        exit(-1)
+    print("started custom tests")
     dir_path = os.path.dirname(os.path.abspath(__file__))
     model_path = ('model/resnet.h5')
     resnet = tf.keras.models.load_model(os.path.join(dir_path, model_path))
@@ -36,7 +34,7 @@ def check_custom_integration():
 
     check_all_fuctions(unlabeled_responses, resnet, "unlabeled")
     check_all_fuctions(responses[0], resnet, "labeled")
-
+    print("Custom tests finished successfully")
 
 if __name__ == '__main__':
     check_custom_integration()

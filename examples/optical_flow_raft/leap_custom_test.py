@@ -11,6 +11,7 @@ def check_custom_integration():    # This test requires the relevant secret to b
     if environ.get('AUTH_SECRET') is None:
         print("The AUTH_SECRET system variable must be initialized with the relevant secret to run this test")
         exit(-1)
+    print("started custom tests")
     dir_path = os.path.dirname(os.path.abspath(__file__))
     model_path = ('model/raft_new.onnx')
     sess = rt.InferenceSession(os.path.join(dir_path, model_path))
@@ -55,6 +56,7 @@ def check_custom_integration():    # This test requires the relevant secret to b
     sample_fl_metric = fl_metric(gt, pred)
     sample_fl_fg_metric = fl_foreground(gt, pred, foreground_mask)
     sample_fl_bg_metric = fl_background(gt, pred, foreground_mask)
+    print("Custom tests finished successfully")
 
 if __name__ == "__main__":
     check_custom_integration()
