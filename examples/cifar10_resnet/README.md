@@ -66,11 +66,10 @@ Within this section, we delve into the examination of features that impact the m
 Tensorleap automatically generates a heatmap that quantifies the effect different features have on the loss. 
 
 In the image depicted below, it is evident that the presence of background features leads to a higher loss function. 
-Conversely, the inclusion of features in the nose area contributes to a lower loss function, which signifies the image's 
+Conversely, the inclusion of features in the nose area contributes to a lower loss function, which signifies the image 
 classification as a cat.
 
 ![cat_loss_image](images/cat_loss/image.png)
-![cat_loss_background](images/cat_loss/loss_background.png)
 ![cat_loss_nose](images/cat_loss/loss_nose.png)
 
 
