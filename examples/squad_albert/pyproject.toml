@@ -1,16 +1,28 @@
 [tool.poetry]
-name = "albert-qa"
+name = "squad_albert"
 version = "0.1.0"
 description = ""
 authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
 readme = "README.md"
-packages = [{include = "albert_qa"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8, <3.11"
-code-loader = "^0.2.90"
-readability = "^0.3.1"
+code-loader = "^0.2.91"
+readability = "0.3.1"
+transformers = "4.29.2"
+readability-lxml = "^0.8.1"
+textstat = "^0.7.3"
+py-readability-metrics = "^1.4.5"
+sentencepiece = "^0.1.99"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "leap_test: check_integration"
+custom_test = "leap_custom_test: check_custom_integration"
+
+
+
+

@@ -8,9 +8,10 @@ def check_integration():
     datascript = LeapLoader(code_path=dir_path, code_entry_name=script_path)
     res = datascript.check_dataset()
     if res.is_valid:
-        print('Integration script is valid')
+        print("Integration script is valid")
     else:
         print(f"Integration failed with error: {res.general_error}")
+
 
 if __name__ == '__main__':
     check_integration()

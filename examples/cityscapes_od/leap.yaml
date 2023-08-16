@@ -4,11 +4,12 @@ secretManagerId: ""
 entryFile: leap_binder.py
 include:
     - leap_binder.py
-    - utils_all/gcs_utils.py
-    - utils_all/general_utils.py
-    - utils_all/metrics.py
-    - utils_all/preprocessing.py
-    - visualizers/visualizers.py
-    - yolo_helpers/yolo_utils.py
-    - config.py
-    - od_config.yaml
+    - cityscapes_od/data/preprocess.py
+    - cityscapes_od/utils/gcs_utils.py
+    - cityscapes_od/utils/general_utils.py
+    - cityscapes_od/utils/yolo_utils.py
+    - cityscapes_od/config.py
+    - cityscapes_od/metrics.py
+    - cityscapes_od/od_config.yaml
+    - cityscapes_od/plots.py
+

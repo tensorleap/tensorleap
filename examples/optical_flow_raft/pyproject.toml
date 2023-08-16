@@ -1,10 +1,9 @@
 [tool.poetry]
-name = "raft"
+name = "optical_flow_raft"
 version = "0.1.0"
 description = ""
 authors = ["Danielle Ben Bashat <daniellebenba@gmail.com>"]
 readme = "README.md"
-packages = [{include = "domain_gap"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
@@ -19,3 +18,8 @@ onnxruntime = "^1.14.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "leap_test: check_integration"
+custom_test = "leap_custom_test: check_custom_integration"
+
