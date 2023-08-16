@@ -12,14 +12,6 @@ if __name__ == "__main__":
     if environ.get('AUTH_SECRET') is None:
         print("The AUTH_SECRET system variable must be initialized with the relevant secret to run this test")
         exit(-1)
-
-    # # run inference on Onnx
-    # if not exists("optical_flow_raft.onnx"):
-    #     print("Downloading Raft ONNX for inference")
-    #     urllib.request.urlretrieve(
-    #         "https://storage.googleapis.com/example-datasets-47ml982d/raft/raft_new.onnx",
-    #         "optical_flow_raft.onnx")
-    # sess = rt.InferenceSession('optical_flow_raft.onnx')
     dir_path = os.path.dirname(os.path.abspath(__file__))
     model_path = ('optical_flow_raft/model/raft_new.onnx')
     sess = rt.InferenceSession(os.path.join(dir_path, model_path))
