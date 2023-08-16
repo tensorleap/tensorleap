@@ -2,9 +2,9 @@ import urllib
 from os.path import exists
 from leap_binder import *
 
-def test():
+def check_custom_integration():
     print("statedtesting")
-    model_path = 'models/DeeplabV3.h5'
+    model_path = 'model/DeeplabV3.h5'
     if not exists(model_path):
         print("Downloading DeeplabV3.h5 for inference")
         urllib.request.urlretrieve(
@@ -27,5 +27,10 @@ def test():
     metric_result = mean_iou(y_pred, mask_gt)
 
     index = metadata_idx(idx, train_res)
-    filename = metadata_filename(idx, train_res)
     class_percent = metadata_class_percent(idx, train_res)
+    brightness = metadata_brightness(idx, train_res)
+    filename_city_dataset = metadata_filename_city_dataset(idx, train_res)
+    json_data = metadata_json_data(idx, train_res)
+
+if __name__ == "__main__":
+    check_custom_integration()
