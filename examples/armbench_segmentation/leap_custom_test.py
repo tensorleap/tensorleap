@@ -17,10 +17,13 @@ from leap_binder import (
     subset_images, input_image, get_bbs, get_masks, get_cat_instances_seg_lst, general_metrics_dict,
     segmentation_metrics_dict, metadata_dict
 )
+from os import makedirs
+
 
 if __name__ == '__main__':
     model_path = 'model/yolov5.h5'
     if not exists(model_path):
+        makedirs(dirname(model_path))
         print("Downloading YOLOv5.h5 for inference")
         urllib.request.urlretrieve(
             "https://storage.googleapis.com/example-datasets-47ml982d/yolov5/yolov5.h5",
