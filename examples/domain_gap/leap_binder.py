@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy.typing as npt
 import json
-from typing import Dict
+from typing import Dict, Any, Union
 from PIL import Image
 
 from code_loader import leap_binder
@@ -10,6 +10,7 @@ from code_loader.contract.visualizer_classes import LeapImage, LeapImageMask
 from code_loader.contract.enums import (
     LeapDataType
 )
+from numpy import ndarray
 
 from domain_gap.configs import *
 from domain_gap.data.cs_data import CATEGORIES
@@ -70,12 +71,6 @@ def get_metadata_json(idx: int, data: PreprocessResponse) -> Dict[str, str]:
     return metadata_dict
 
 
-def aug_factor_or_zero(idx: int, data: PreprocessResponse, value: float) -> float:
-    if data.data["subset_name"] == "train" and AUGMENT and idx > TRAIN_SIZE - 1:
-        return value.numpy()
-    else:
-        return 0.
-
 def metadata_idx(idx: int, data: PreprocessResponse) -> int:
     """ add TL index """
     return idx
@@ -86,7 +81,7 @@ def metadata_class_percent(idx: int, data: PreprocessResponse) -> dict:
     mask = get_categorical_mask(idx % data.data["real_size"], data)
     unique, counts = np.unique(mask, return_counts=True)
     unique_per_obj = dict(zip(unique, counts))
-    for i, c in enumerate(CATEGORIES+["background"]):
+    for i, c in enumerate(CATEGORIES + ["background"]):
         count_obj = unique_per_obj.get(float(i))
         if count_obj is not None:
             percent_obj = count_obj / mask.size
@@ -96,63 +91,37 @@ def metadata_class_percent(idx: int, data: PreprocessResponse) -> dict:
     return res
 
 
-def metadata_brightness(idx: int, data: PreprocessResponse) -> float:
+def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
     img = non_normalized_input_image(idx % data.data["real_size"], data)
     return np.mean(img)
 
-
-def metadata_filename(idx: int, data: PreprocessResponse) -> str:
-    return data.data['file_names'][idx]
-
-
-def metadata_city(idx: int, data: PreprocessResponse) -> str:
-    return data.data['cities'][idx]
-
-
-def metadata_dataset(idx: int, data: PreprocessResponse) -> str:
-    return data.data['dataset'][idx % data.data["real_size"]]
+def metadata_filename_city_dataset(idx: int, data: PreprocessResponse) -> dict[str, Any]:
+    res = {'file_names': data.data['file_names'][idx],
+           'cities': data.data['cities'][idx],
+           'dataset': data.data['dataset'][idx % data.data["real_size"]]
+           }
+    return res
 
 
-def metadata_gps_heading(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes_od":
-        return get_metadata_json(idx, data)['gpsHeading']
-    else:
-        return DEFAULT_GPS_HEADING
+def metadata_json_data(idx: int, data: PreprocessResponse) -> dict[str, Union[str, Any]]:
+    json_data = get_metadata_json(idx, data)
+    gpsHeading = json_data['gpsHeading'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_GPS_HEADING
+    gpsLatitude = json_data['gpsLatitude'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_GPS_LATITUDE
+    gpsLongitude = json_data['gpsLongitude'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_GPS_LONGTITUDE
+    outsideTemperature = json_data['outsideTemperature'] if data.data['dataset'][
+                                                                idx] == "cityscapes_od" else DEFAULT_TEMP
+    speed = json_data['speed'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_SPEED
+    yawRate = json_data['yawRate'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_YAW_RATE
 
+    res = {'gpsHeading': gpsHeading,
+           'gpsLatitude': gpsLatitude,
+           'gpsLongitude': gpsLongitude,
+           'outsideTemperature': outsideTemperature,
+           'speed': speed,
+           'yawRate': yawRate
+           }
 
-def metadata_gps_latitude(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes_od":
-        return get_metadata_json(idx, data)['gpsLatitude']
-    else:
-        return DEFAULT_GPS_LATITUDE
-
-
-def metadata_gps_longtitude(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes_od":
-        return get_metadata_json(idx, data)['gpsLongitude']
-    else:
-        return DEFAULT_GPS_LONGTITUDE
-
-
-def metadata_outside_temperature(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes_od":
-        return get_metadata_json(idx, data)['outsideTemperature']
-    else:
-        return DEFAULT_TEMP
-
-
-def metadata_speed(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes_od":
-        return get_metadata_json(idx, data)['speed']
-    else:
-        return DEFAULT_SPEED
-
-
-def metadata_yaw_rate(idx: int, data: PreprocessResponse) -> float:
-    if data.data['dataset'][idx] == "cityscapes_od":
-        return get_metadata_json(idx, data)['yawRate']
-    else:
-        return DEFAULT_YAW_RATE
+    return res
 
 # ----------------------------------- Visualizers ------------------------------------------
 
@@ -171,7 +140,8 @@ def cityscape_segmentation_visualizer(mask: npt.NDArray[np.uint8]) -> LeapImage:
     return LeapImage(mask_image.astype(np.uint8))
 
 
-def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32], gt: npt.NDArray[np.float32]) -> LeapImage:
+def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32],
+                    gt: npt.NDArray[np.float32]) -> LeapImage:
     overlayed_image = get_loss_overlayed_img(image, prediction, gt)
     return LeapImage(overlayed_image)
 
@@ -191,16 +161,10 @@ leap_binder.add_custom_metric(class_mean_iou, name=f"iou_class")
 leap_binder.add_custom_metric(mean_iou, name=f"iou")
 
 leap_binder.set_metadata(metadata_class_percent, 'class_percent')
-leap_binder.set_metadata(metadata_filename, 'filename')
-leap_binder.set_metadata(metadata_city, 'city')
-leap_binder.set_metadata(metadata_dataset, 'dataset')
 leap_binder.set_metadata(metadata_idx, 'idx')
-leap_binder.set_metadata(metadata_gps_heading, 'gps_heading')
-leap_binder.set_metadata(metadata_gps_latitude, 'gps_latitude')
-leap_binder.set_metadata(metadata_gps_longtitude, 'gps_longtitude')
-leap_binder.set_metadata(metadata_outside_temperature, 'outside_temperature')
-leap_binder.set_metadata(metadata_speed, 'speed')
-leap_binder.set_metadata(metadata_yaw_rate, 'yaw_rate')
+leap_binder.set_metadata(metadata_brightness, 'brightness')
+leap_binder.set_metadata(metadata_filename_city_dataset, 'filename_city_dataset')
+leap_binder.set_metadata(metadata_json_data, 'json_data')
 
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'mask_visualizer', LeapDataType.ImageMask)

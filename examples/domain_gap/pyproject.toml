@@ -20,4 +20,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 test = "leap_test: check_integration"
-custom_test = "leap_custom_test: test"
+custom_test = "leap_custom_test: check_custom_integration"
