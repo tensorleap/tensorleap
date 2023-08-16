@@ -4,7 +4,7 @@
 
 # YOLOv7 model with Cityscapes dataset
 
-This project utilizes the [YOLOv7](https://github.com/WongKinYiu/yolov7) algorithm to perform object detection on 
+This project utilizes the [YOLOv7](https://github.com/WongKinYiu/yolov7) model to perform object detection on 
 [Cityscapes](https://www.cityscapes-dataset.com/) dataset. The cityscapes dataset is a large-scale dataset that stands as one
 of the standard ADAS benchmarks used for multiple vision-related tasks.
 
