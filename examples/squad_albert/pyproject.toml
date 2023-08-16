@@ -9,11 +9,12 @@ packages = [{include = "albert_qa"}]
 [tool.poetry.dependencies]
 python = ">=3.8, <3.11"
 code-loader = "^0.2.91"
-readability = "0.3"
-transformers = "4.28.1"
+readability = "0.3.1"
+transformers = "4.29.2"
 readability-lxml = "^0.8.1"
 textstat = "^0.7.3"
 py-readability-metrics = "^1.4.5"
+sentencepiece = "^0.1.99"
 
 [build-system]
 requires = ["poetry-core"]

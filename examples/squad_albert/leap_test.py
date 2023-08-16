@@ -1,6 +1,7 @@
 import os
 from code_loader import LeapLoader
 
+
 def check_integration():
     print("started tests")
     dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -11,6 +12,7 @@ def check_integration():
         print('Integration script is valid')
     else:
         print(f"Integration failed with error: {res.general_error}")
+
 
 if __name__ == '__main__':
     check_integration()
