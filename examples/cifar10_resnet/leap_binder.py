@@ -2,7 +2,6 @@ from typing import List, Dict, Union
 import numpy as np
 import numpy.typing as npt
 from keras.datasets import cifar10
-from functools import lru_cache
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -28,7 +27,6 @@ def preprocess_func_leap() -> List[PreprocessResponse]:
     return response
 
 
-@lru_cache(maxsize=2)
 def unlabeled_data() -> PreprocessResponse:
     _, (test_X, _) = cifar10.load_data()
     return PreprocessResponse(length=1000, data={'images': test_X, 'subset_name': 'unlabeled'})

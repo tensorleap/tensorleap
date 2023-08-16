@@ -2,10 +2,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.datasets import cifar10
 from keras.utils import to_categorical
-from functools import lru_cache
 
 
-@lru_cache(maxsize=2)
 def preprocess_func():
     """
     Description: Preprocesses the CIFAR-10 dataset by loading the data, normalizing the labels, splitting it into training and validation sets, and converting the labels to one-hot vectors.
