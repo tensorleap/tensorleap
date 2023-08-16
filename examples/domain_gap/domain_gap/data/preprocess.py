@@ -3,7 +3,7 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 
 from domain_gap.data.cs_data import get_cityscapes_data
 from domain_gap.data.kitti_data import get_kitti_data
-from domain_gap.utils.configs import TRAIN_SIZE, VAL_SIZE
+from domain_gap.configs import TRAIN_SIZE, VAL_SIZE
 
 
 def subset_images() -> List[PreprocessResponse]:

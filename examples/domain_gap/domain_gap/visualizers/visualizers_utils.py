@@ -4,7 +4,7 @@ from matplotlib import colors
 from matplotlib import cm as cmx
 import matplotlib.pyplot as plt
 
-from domain_gap.utils.configs import IMAGE_MEAN, IMAGE_STD
+from domain_gap.configs import IMAGE_MEAN, IMAGE_STD
 
 # ------------------------ Color Config ------------------------
 jet = plt.get_cmap('jet')

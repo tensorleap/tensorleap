@@ -6,7 +6,7 @@ import numpy as np
 from code_loader.contract.datasetclasses import PreprocessResponse
 
 from domain_gap.utils.gcs_utils import _connect_to_gcs_and_return_bucket
-from domain_gap.utils.configs import BUCKET_NAME, TRAIN_PERCENT, SEED, NUM_CLASSES
+from domain_gap.configs import BUCKET_NAME, TRAIN_PERCENT, SEED, NUM_CLASSES
 
 
 class Cityscapes:
