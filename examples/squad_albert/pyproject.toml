@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
 readme = "README.md"
-packages = [{include = "albert_qa"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8, <3.11"
