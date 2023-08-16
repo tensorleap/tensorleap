@@ -5,9 +5,9 @@ import tensorflow as tf
 from code_loader.helpers.detection.yolo.utils import reshape_output_list
 
 from armbench_segmentation.config import CONFIG
-from armbench_segmentation.utils.general_utils import get_mask_list, remove_label_from_bbs
-from armbench_segmentation.utils.ioa_utils import get_ioa_array
+from armbench_segmentation.utils.general_utils import remove_label_from_bbs
 from armbench_segmentation.yolo_helpers.yolo_utils import LOSS_FN
+from code_loader.contract.responsedataclasses import BoundingBox
 
 
 def compute_losses(obj_true: tf.Tensor, od_pred: tf.Tensor,
@@ -36,175 +36,45 @@ def instance_seg_loss(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
     return sum_loss
 
 
-def classification_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
-                          mask_gt: tf.Tensor, segmentation_pred: tf.Tensor):  # return batch
-    _, loss_c, _, _ = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
-    return tf.reduce_sum(loss_c, axis=0)[:, 0]
-
-
-def regression_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
-                      mask_gt: tf.Tensor, segmentation_pred: tf.Tensor):  # return batch
-    loss_l, _, _, _ = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
-    return tf.reduce_sum(loss_l, axis=0)[:, 0]  # shape of batch
-
-
-def object_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
-                  mask_gt: tf.Tensor, segmentation_pred: tf.Tensor):
-    _, _, loss_o, _ = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
-    return tf.reduce_sum(loss_o, axis=0)[:, 0]  # shape of batch
-
-
-def mask_metric(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
-                mask_gt: tf.Tensor, segmentation_pred: tf.Tensor):
-    _, _, _, loss_m = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
-    return tf.reduce_sum(loss_m, axis=0)[:, 0]  # shape of batch
-
-
-def under_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                    mask_gt: tf.Tensor):
+def over_under_segmented_metrics(batched_ioas_list: List[np.ndarray], count_small_bbs=False, get_avg_confidence=False,
+                                 bb_mask_object_list: List[Union[List[BoundingBox], List[np.ndarray]]] = None):
     th = 0.8
-    under_segmented_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='pred')
-        if len(ioas) > 0:
-            matches_count = (ioas > th).astype(int).sum(axis=-1)
-            is_under_segmented = float(len(matches_count[matches_count > 1]) > 0)
-            under_segmented_arr.append(is_under_segmented)
-        else:
-            is_under_segmented = 0.
-            under_segmented_arr.append(is_under_segmented)
-    return tf.convert_to_tensor(under_segmented_arr)
-
-
-def over_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                   mask_gt: tf.Tensor):
-    th = 0.8
-    over_segmented_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='gt')
-        if len(ioas) > 0:
-            matches_count = (ioas > th).astype(int).sum(axis=0)
-            is_over_segmented = float(len(matches_count[matches_count > 1]) > 0)
-            over_segmented_arr.append(is_over_segmented)
-        else:
-            is_over_segmented = 0.
-            over_segmented_arr.append(is_over_segmented)
-    return tf.convert_to_tensor(over_segmented_arr)
-
-
-def metric_small_bb_in_under_segment(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                                     mask_gt: tf.Tensor):  # bb_visualizer + gt_visualizer
-    th = 0.8  # equivelan
-    has_small_bbs = [0.] * image.shape[0]
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='pred')
+    segmented_arr = [0.]*len(batched_ioas_list)
+    segmented_arr_count = [0.]*len(batched_ioas_list)
+    average_segments_amount = [0.]*len(batched_ioas_list)
+    conf_arr = [0.]*len(batched_ioas_list)
+    has_small_bbs = [0.]*len(batched_ioas_list)
+    for batch in range(len(batched_ioas_list)):
+        ioas = batched_ioas_list[batch]
         if len(ioas) > 0:
             th_arr = ioas > th
             matches_count = th_arr.astype(int).sum(axis=-1)
-            relevant_bbs = np.argwhere(matches_count > 1)[..., 0]  # [Indices of bbs]
-            relevant_gts = np.where(np.any((th_arr)[relevant_bbs], axis=0))[0]  # [Indices of gts]
-            bb_gt_object, _ = get_mask_list(bb_gt, None, is_gt=True)
-            new_gt_objects = remove_label_from_bbs(bb_gt_object, "Tote", "gt")
-            new_bb_array = [new_gt_objects[i] for i in relevant_gts]
-            for j in range(len(new_bb_array)):
-                if new_bb_array[j].width * new_bb_array[j].height < CONFIG["SMALL_BBS_TH"]:
-                    has_small_bbs[i] = 1.
-        else:
-            has_small_bbs = [0. for _ in range(len(has_small_bbs))]
-    return tf.convert_to_tensor(has_small_bbs)
-
-
-def over_segmented_instances_count(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                                   mask_gt: tf.Tensor):
-    th = 0.8
-    over_segmented_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='gt')
-        if len(ioas) > 0:
-            matches_count = (ioas > th).astype(int).sum(axis=0)
-            is_over_segmented = float(len(matches_count[matches_count > 1]))
-            over_segmented_arr.append(is_over_segmented)
-        else:
-            is_over_segmented = 0.
-            over_segmented_arr.append(is_over_segmented)
-    return tf.convert_to_tensor(over_segmented_arr)
-
-
-def under_segmented_instances_count(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                                    mask_gt: tf.Tensor):
-    th = 0.8
-    under_segmented_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='pred')
-        if len(ioas) > 0:
-            matches_count = (ioas > th).astype(int).sum(axis=-1)
-            is_under_segmented = float(len(matches_count[matches_count > 1]))
-            under_segmented_arr.append(is_under_segmented)
-        else:
-            is_under_segmented = 0.
-            under_segmented_arr.append(is_under_segmented)
-    return tf.convert_to_tensor(under_segmented_arr)
-
-
-def average_segments_num_over_segment(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                                      mask_gt: tf.Tensor):
-    th = 0.8
-    over_segmented_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='gt')
-        matches_count = (ioas > th).astype(int).sum(axis=0)
-        if len(matches_count[matches_count > 1]) > 0:
-            is_over_segmented = float(matches_count[matches_count > 1].mean())
-        else:
-            is_over_segmented = 0.
-        over_segmented_arr.append(is_over_segmented)
-    return tf.convert_to_tensor(over_segmented_arr)
-
-
-def average_segments_num_under_segmented(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor,
-                                         bb_gt: tf.Tensor, mask_gt: tf.Tensor):
-    th = 0.8
-    under_segmented_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='pred')
-        matches_count = (ioas > th).astype(int).sum(axis=-1)
-        if len(matches_count[matches_count > 1]) > 0:
-            is_under_segmented = float(matches_count[matches_count > 1].mean())
-        else:
-            is_under_segmented = 0.
-        under_segmented_arr.append(is_under_segmented)
-    return tf.convert_to_tensor(under_segmented_arr)
-
-
-def over_segment_avg_confidence(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
-                                mask_gt: tf.Tensor):  # bb_visualizer + gt_visualizer
-    th = 0.8
-    conf_arr = []
-    for i in range(image.shape[0]):
-        ioas = get_ioa_array(image[i, ...], y_pred_bb[i, ...], y_pred_mask[i, ...], bb_gt[i, ...], mask_gt[i, ...],
-                             containing='gt')
-        if len(ioas) > 0:
-            th_arr = ioas > th
-            matches_count = th_arr.astype(int).sum(axis=0)
-            relevant_gts = np.argwhere(matches_count > 1)[..., 0]  # [Indices of bbs]
-            relevant_bbs = np.where(np.any(th_arr[..., relevant_gts], axis=1))[0]  # [Indices of gts]
-            bb_pred_object, _ = get_mask_list(y_pred_bb[i, ...], None, is_gt=False)
-            new_bb_pred_object = remove_label_from_bbs(bb_pred_object, "Tote", "pred")
-            bb_gt_object, _ = get_mask_list(bb_gt, None, is_gt=True)
-            new_bb_array = [new_bb_pred_object[j] for j in relevant_bbs]
-            if len(new_bb_array) > 0:
-                avg_conf = np.array([new_bb_array[j].confidence for j in range(len(new_bb_array))]).mean()
+            is_over_under_segmented = float(len(matches_count[matches_count > 1]) > 0)
+            over_under_segmented_count = float(len(matches_count[matches_count > 1]))
+            if over_under_segmented_count > 0:
+                average_segments_num_over_under = float(matches_count[matches_count > 1].mean())
             else:
-                avg_conf = 0.
-            conf_arr.append(avg_conf)
-        else:
-            avg_conf = 0.
-            conf_arr.append(avg_conf)
-    return tf.convert_to_tensor(conf_arr)
+                average_segments_num_over_under = 0.
+            average_segments_amount[batch] = average_segments_num_over_under
+            segmented_arr_count[batch] = over_under_segmented_count
+            segmented_arr[batch] = is_over_under_segmented
+            if count_small_bbs or get_avg_confidence:
+                relevant_bbs = np.argwhere(matches_count > 1)[..., 0]  # [Indices of bbs]
+                relevant_gts = np.where(np.any(th_arr[relevant_bbs], axis=0))[0]  # [Indices of gts]
+                if count_small_bbs:
+                    new_gt_objects = remove_label_from_bbs(bb_mask_object_list[batch][0], "Tote", "gt")
+                    new_bb_array = [new_gt_objects[i] for i in relevant_gts]
+                    for j in range(len(new_bb_array)):
+                        if new_bb_array[j].width * new_bb_array[j].height < CONFIG["SMALL_BBS_TH"]:
+                            has_small_bbs[batch] = 1.
+                if get_avg_confidence:
+                    new_bb_pred_object = remove_label_from_bbs(bb_mask_object_list[batch][0], "Tote", "pred")
+                    new_bb_array = [new_bb_pred_object[j] for j in relevant_gts]
+                    if len(new_bb_array) > 0:
+                        avg_conf = np.array([new_bb_array[j].confidence for j in range(len(new_bb_array))]).mean()
+                    else:
+                        avg_conf = 0.
+                    conf_arr[batch] = avg_conf
+    return tf.convert_to_tensor(segmented_arr), tf.convert_to_tensor(segmented_arr_count),\
+           tf.convert_to_tensor(average_segments_amount), tf.convert_to_tensor(has_small_bbs),\
+           tf.convert_to_tensor(conf_arr)
