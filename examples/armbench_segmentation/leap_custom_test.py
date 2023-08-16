@@ -1,14 +1,9 @@
 import urllib
-from os.path import exists
+from os.path import exists, dirname
 
 import tensorflow as tf
 import numpy as np
 
-from armbench_segmentation.metrics import (
-    regression_metric, classification_metric, object_metric, mask_metric, over_segmented, under_segmented,
-    metric_small_bb_in_under_segment, over_segmented_instances_count, under_segmented_instances_count,
-    average_segments_num_over_segment, average_segments_num_under_segmented, over_segment_avg_confidence
-)
 from armbench_segmentation.visualizers.visualizers import (
     gt_bb_decoder, bb_decoder, under_segmented_bb_visualizer, over_segmented_bb_visualizer
 )
@@ -49,15 +44,16 @@ if __name__ == '__main__':
     general_metric_results = general_metrics_dict(y_true_bbs, y_pred_bbs, y_true_masks, y_pred_masks)
     segmentation_metrics_results = segmentation_metrics_dict(input_img_tf, y_pred_bbs, y_pred_masks, y_true_bbs,
                                                              y_true_masks)
-
     # visualizers
-    gt_mask_visualizer_img = mask_visualizer_gt(image, bb_gt, mask_gt)
+    #
+    gt_mask_visualizer_img = mask_visualizer_gt(image, y_true_bbs[0, ...], y_true_masks[0, ...])
     predicted_mask_visualizer_img = mask_visualizer_prediction(image, y_pred_bbs[0, ...], y_pred_masks[0, ...])
     predicted_bboxes_img = bb_decoder(image, y_pred_bbs[0, ...])
-    gt_bboxes_img = gt_bb_decoder(image, bb_gt)
-    under_segmented_img = under_segmented_bb_visualizer(image, y_pred_bbs[0, ...], y_pred_masks[0, ...], bb_gt, mask_gt)
-    over_segmented_img = over_segmented_bb_visualizer(image, y_pred_bbs[0, ...], y_pred_masks[0, ...], bb_gt, mask_gt)
-
+    gt_bboxes_img = gt_bb_decoder(image, y_true_bbs[0, ...])
+    under_segmented_img = under_segmented_bb_visualizer(image, y_pred_bbs[0, ...], y_pred_masks[0, ...],
+                                                        y_true_bbs[0, ...], y_true_masks[0, ...])
+    over_segmented_img = over_segmented_bb_visualizer(image, y_pred_bbs[0, ...], y_pred_masks[0, ...],
+                                                      y_true_bbs[0, ...], y_true_masks[0, ...])
     # metadata functions
     for cat in ['tote', 'object']:
         instances = get_cat_instances_seg_lst(idx, training_response, cat)
