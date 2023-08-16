@@ -13,6 +13,7 @@ pycocotools = "^2.0.6"
 tqdm = "^4.65.0"
 google-cloud-storage = "^2.10.0"
 pyyaml = "^6.0"
+torch = "1.12.1"
 
 
 [build-system]
