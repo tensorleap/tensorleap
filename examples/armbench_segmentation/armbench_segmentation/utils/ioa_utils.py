@@ -1,6 +1,5 @@
 import numpy as np
 
-from armbench_segmentation import CACHE_DICTS
 from armbench_segmentation.config import CONFIG
 from armbench_segmentation.visualizers.visualizers_getters import multiple_mask_pred, multiple_mask_gt
 
@@ -34,11 +33,6 @@ def ioa_mask(mask_containing, mask_contained):
 
 
 def get_ioa_array(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt, containing='pred'):
-    hash_str = str(image) + str(y_pred_bb) + str(y_pred_mask) + str(bb_gt) + str(mask_gt) + str(containing)
-    res = CACHE_DICTS['get_ioa_array'].get(hash_str)
-    if res is not None:
-        return res
-
     prediction_masks = multiple_mask_pred(image, y_pred_bb, y_pred_mask)
     gt_masks = multiple_mask_gt(image, bb_gt, mask_gt)
 
@@ -46,10 +40,5 @@ def get_ioa_array(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt, containing='pre
         ioas = np.array([[ioa_mask(pred_mask, gt_mask) for gt_mask in gt_masks] for pred_mask in prediction_masks])
     else:
         ioas = np.array([[ioa_mask(gt_mask, pred_mask) for gt_mask in gt_masks] for pred_mask in prediction_masks])
-
-    if len(CACHE_DICTS['get_ioa_array'].keys()) > 2 * CONFIG['BATCH_SIZE']:
-        CACHE_DICTS['get_ioa_array'] = {hash_str: ioas}
-    else:
-        CACHE_DICTS['get_ioa_array'][hash_str] = ioas
 
     return ioas

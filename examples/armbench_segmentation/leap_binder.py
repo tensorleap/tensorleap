@@ -337,6 +337,7 @@ def count_small_bbs(idx: int, data: PreprocessResponse) -> float:
 
 
 def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, int, str]]:
+
     metadata_functions = {
         "idx": get_idx,
         "fname": get_fname,
@@ -372,20 +373,45 @@ def metadata_dict(idx: int, data: PreprocessResponse) -> Dict[str, Union[float, 
 
 def general_metrics_dict(bb_gt: tf.Tensor, detection_pred: tf.Tensor,
                          mask_gt: tf.Tensor, segmentation_pred: tf.Tensor) -> Dict[str, tf.Tensor]:
+    # reg_met, class_met, obj_met, mask_met = compute_losses(bb_gt, detection_pred, mask_gt, segmentation_pred)
+    # res = {
+    #     "Regression_metric": tf.reduce_sum(reg_met, axis=0)[:, 0],
+    #     "Classification_metric": tf.reduce_sum(class_met, axis=0)[:, 0],
+    #     "Objectness_metric": tf.reduce_sum(obj_met, axis=0)[:, 0],
+    #     "Mask_metric": tf.reduce_sum(mask_met, axis=0)[:, 0],
+    # }
+    # return res
     metric_functions = {
-        "Regression_metric": regression_metric,
-        "Classification_metric": classification_metric,
-        "Objectness_metric": object_metric,
-        "Mask_metric": mask_metric,
+        "Over_Segmented_metric": over_segmented,
+        "Under_Segmented_metric": under_segmented,
+        "Small_BB_Under_Segmtented": metric_small_bb_in_under_segment,
+        "Over_Segmented_Instances_count": over_segmented_instances_count,
+        "Under_Segmented_Instances_count": under_segmented_instances_count,
+        "Average_segments_num_Over_Segmented": average_segments_num_over_segment,
+        "Average_segments_num_Under_Segmented": average_segments_num_under_segmented,
+        "Over_Segment_confidences": over_segment_avg_confidence
     }
     res = dict()
     for func_name, func in metric_functions.items():
-        res[func_name] = func(bb_gt, detection_pred, mask_gt, segmentation_pred)
+
+        res[func_name] = func(image, y_pred_bb, y_pred_mask, bb_gt, mask_gt)
     return res
 
 
 def segmentation_metrics_dict(image: tf.Tensor, y_pred_bb: tf.Tensor, y_pred_mask: tf.Tensor, bb_gt: tf.Tensor,
                               mask_gt: tf.Tensor) -> Dict[str, Union[int, float]]:
+    #get_ioa_array('gt')
+    #get_ioa_array('pred')
+    #get_mask_list
+
+    # bb_gt_object, _ = get_mask_list(bb_gt, None, is_gt=True)
+    # bb_pred_object, _ = get_mask_list(y_pred_bb[i, ...], None, is_gt=False)
+    # bb_gt_object, _ = get_mask_list(bb_gt, None, is_gt=True)
+
+
+    # new_gt_objects = remove_label_from_bbs(bb_gt_object, "Tote", "gt")
+    # new_bb_pred_object = remove_label_from_bbs(bb_pred_object, "Tote", "pred")
+
     metric_functions = {
         "Over_Segmented_metric": over_segmented,
         "Under_Segmented_metric": under_segmented,
