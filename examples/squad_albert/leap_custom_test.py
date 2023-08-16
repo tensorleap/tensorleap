@@ -8,8 +8,6 @@ from squad_albert.loss import CE_loss
 from squad_albert.metrics import exact_match_metric, f1_metric, CE_start_index, CE_end_index
 from squad_albert.utils.utils import get_readibility_score
 
-
-
 def check():
     dir_path = os.path.dirname(os.path.abspath(__file__))
     model_path = ('squad_albert/model/albert.h5')
