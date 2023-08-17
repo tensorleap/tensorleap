@@ -1,0 +1,17 @@
+codeIntegrationId: 64de3ce8b023b00017b74632
+projectId: 64de47ebb023b00017b74668
+secretManagerId: 647d001e52fef500124ad25e
+entryFile: leap_binder.py
+include:
+    - leap_binder.py
+    - armbench_segmentation/data/preprocessing.py
+    - armbench_segmentation/visualizers/visualizers.py
+    - armbench_segmentation/visualizers/visualizers_getters.py
+    - armbench_segmentation/utils/general_utils.py
+    - armbench_segmentation/utils/gcs_utils.py
+    - armbench_segmentation/utils/ioa_utils.py
+    - armbench_segmentation/yolo_helpers/yolo_utils.py
+    - armbench_segmentation/metrics.py
+    - armbench_segmentation/config.py
+    - armbench_segmentation/object_detection_config.yml
+    - object_detection_config.yaml

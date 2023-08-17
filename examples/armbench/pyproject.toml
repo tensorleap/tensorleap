@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "armbench_segmentation"
+version = "0.1.0"
+description = ""
+authors = ["ranhomri <ran.homri@tensorleap.ai>"]
+readme = "README.md"
+packages = [{include = "armbench_segmentation"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+code-loader = "0.2.91"
+pycocotools = "^2.0.6"
+tqdm = "^4.65.0"
+google-cloud-storage = "^2.10.0"
+pyyaml = "^6.0"
+torch = "1.12.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "leap_test: check_integration"
+integration_test = "leap_custom_test: check_integration"
