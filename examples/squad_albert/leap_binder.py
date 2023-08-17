@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-# from readability import Readability
+from readability import Readability
 
 # Tensorleap imports
 from code_loader import leap_binder
@@ -249,29 +249,29 @@ leap_binder.set_metadata(function=metadata_length, name='metadata_length')
 leap_binder.set_metadata(function=metadata_is_truncated, name='is_truncated')
 
 
-# readability_scores = [
-#     ("ARI", "ari"),
-#     ("Coleman Liau", "coleman_liau"),
-#     ("Dale Chall", "dale_chall"),
-#     ("Flesch Reading Ease", "flesch"),
-#     ("Flesch-Kincaid Grade Level", "flesch_kincaid"),
-#     ("Gunning Fog", "gunning_fog"),
-#     ("Linsear Write", "linsear_write"),
-#     ("SMOG Index", "smog"),
-#     ("Spache Index", "spache")
-# ]
-#
-# for score_name, method_name in readability_scores:
-#     leap_binder.set_metadata(
-#         lambda idx, preprocess, method_name=method_name: get_readibility_score(get_analyzer(idx, preprocess).__getattribute__(method_name)),
-#         name=f"context_{method_name.lower()}_score"
-#     )
-#
-# # Statistics metadata
-# for stat in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
-#              'avg_syllables_per_word']:
-#     leap_binder.set_metadata(lambda idx, preprocess, key=stat: get_statistics(key, idx, preprocess, 'context'),
-#                              name=f'context_{stat}')
+readability_scores = [
+    ("ARI", "ari"),
+    ("Coleman Liau", "coleman_liau"),
+    ("Dale Chall", "dale_chall"),
+    ("Flesch Reading Ease", "flesch"),
+    ("Flesch-Kincaid Grade Level", "flesch_kincaid"),
+    ("Gunning Fog", "gunning_fog"),
+    ("Linsear Write", "linsear_write"),
+    ("SMOG Index", "smog"),
+    ("Spache Index", "spache")
+]
+
+for score_name, method_name in readability_scores:
+    leap_binder.set_metadata(
+        lambda idx, preprocess, method_name=method_name: get_readibility_score(get_analyzer(idx, preprocess).__getattribute__(method_name)),
+        name=f"context_{method_name.lower()}_score"
+    )
+
+# Statistics metadata
+for stat in ['num_letters', 'num_words', 'num_sentences', 'num_polysyllabic_words', 'avg_words_per_sentence',
+             'avg_syllables_per_word']:
+    leap_binder.set_metadata(lambda idx, preprocess, key=stat: get_statistics(key, idx, preprocess, 'context'),
+                             name=f'context_{stat}')
 
 # ------- Loss and Metrics ---------
 leap_binder.add_custom_loss(CE_loss, 'qa_cross_entropy')
@@ -289,41 +289,3 @@ leap_binder.set_visualizer(tokens_question_decoder_leap, 'tokens_question_decode
 leap_binder.set_visualizer(tokens_context_decoder_leap, 'tokens_context_decoder', LeapDataType.Text)
 leap_binder.set_visualizer(segmented_tokens_decoder_leap, 'segmented_tokens_decoder', LeapDataType.TextMask)
 
-
-import textstat
-
-
-def get_analyzer(idx: int, preprocess: PreprocessResponse, section='context') -> textstat.TextStats:
-    idx = convert_index(idx, preprocess)
-    text: str = preprocess.data['ds'][idx][section]
-    return textstat.TextStats(text)
-
-
-def get_statistics(key: str, idx: int, subset: PreprocessResponse, section='context') -> float:
-    analyzer = get_analyzer(idx, subset, section)
-    return float(getattr(analyzer, key))
-
-
-readability_scores = [
-    ("ARI", "ari"),
-    ("Coleman Liau", "coleman_liau"),
-    ("Dale Chall", "dale_chall"),
-    ("Flesch Reading Ease", "flesch_reading_ease"),
-    ("Flesch-Kincaid Grade Level", "flesch_kincaid_grade_level"),
-    ("Gunning Fog", "gunning_fog"),
-    ("Linsear Write", "linsear_write"),
-    ("SMOG Index", "smog_index"),
-    ("Spache Index", "spache_index")
-]
-
-for score_name, method_name in readability_scores:
-    leap_binder.set_metadata(
-        lambda idx, preprocess, method_name=method_name: get_statistics(method_name, idx, preprocess, 'context'),
-        name=f"context_{method_name.lower()}_score"
-    )
-
-# Statistics metadata
-for stat in ['num_words', 'num_sentences', 'num_polysyllable_words', 'avg_words_per_sentence',
-             'avg_syllables_per_word']:
-    leap_binder.set_metadata(lambda idx, preprocess, key=stat: get_statistics(key, idx, preprocess, 'context'),
-                             name=f'context_{stat}')

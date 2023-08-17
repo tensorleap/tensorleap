@@ -1,5 +1,7 @@
-datasetId: 64aff30fc0e3b300186d4e5f
-entryFile: 'tensorleap.py'
+codeIntegrationId: 64aff30fc0e3b300186d4e5f
+projectId: ""
+secretManagerId: ""
+entryFile: tensorleap.py
 include:
     - leap_binder.py
     - optical_flow_raft/config.py
