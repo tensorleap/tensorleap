@@ -13,6 +13,9 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import Metric, DatasetMetadataType
 from code_loader.contract.visualizer_classes import LeapHorizontalBar
 
+from mnist.utils import *
+
+
 # Preprocess Function
 def preprocess_func() -> List[PreprocessResponse]:
     (train_X, train_Y), (val_X, val_Y) = mnist.load_data()
@@ -48,35 +51,18 @@ def gt_encoder(idx: int, preprocessing: PreprocessResponse) -> np.ndarray:
 def metadata_sample_index(idx: int, preprocess: PreprocessResponse) -> int:
     return idx
 
-def metadata_label(idx: int, preprocess: PreprocessResponse) -> int:
+def metadata_one_hot_digit(idx: int, preprocess: PreprocessResponse) -> int:
     one_hot_digit = gt_encoder(idx, preprocess)
     digit = one_hot_digit.argmax()
     digit_int = int(digit)
-    return digit_int
 
-def metadata_label_name(idx: int, preprocess: PreprocessResponse) -> str:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    digit = one_hot_digit.argmax()
-    digit_int = int(digit)
-    return CONFIG['LABELS_NAMES'][digit_int]
-
-def metadata_even_odd(idx: int, preprocess: PreprocessResponse) -> str:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    digit = one_hot_digit.argmax()
-    digit_int = int(digit)
-    if digit_int % 2 == 0:
-        return "even"
-    else:
-        return "odd"
-
-def metadata_circle(idx: int, preprocess: PreprocessResponse) -> str:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    digit = one_hot_digit.argmax()
-    digit_int = int(digit)
-    if digit_int in [0, 6, 8,9]:
-        return 'yes'
-    else:
-        return 'no'
+    res = {
+            'label': metadata_label(digit_int),
+            'label_name': metadata_label_name(digit_int),
+            'even_odd': metadata_even_odd(digit_int),
+            'circle': metadata_circle(digit_int)
+    }
+    return res
 
 
 def bar_visualizer(data: np.ndarray) -> LeapHorizontalBar:
@@ -91,10 +77,7 @@ leap_binder.set_preprocess(function=preprocess_func)
 leap_binder.set_input(function=input_encoder, name='image')
 leap_binder.set_ground_truth(function=gt_encoder, name='classes')
 leap_binder.set_metadata(function=metadata_sample_index, name='metadata_sample_index')
-leap_binder.set_metadata(function=metadata_label, name='metadata_label')
-leap_binder.set_metadata(function=metadata_label_name, name='metadata_label_name')
-leap_binder.set_metadata(function=metadata_even_odd, name='metadata_even_odd')
-leap_binder.set_metadata(function=metadata_circle, name='metadata_circle')
+leap_binder.set_metadata(function=metadata_one_hot_digit, name='metadata_one_hot_digit')
 leap_binder.add_prediction(name='classes', labels=CONFIG['LABELS'])
 leap_binder.set_visualizer(name='horizontal_bar_classes', function=bar_visualizer, visualizer_type=LeapHorizontalBar.type)
 leap_binder.set_visualizer(name='horizontal_bar_classes_names', function=horizontal_bar_visualizer_with_labels_name, visualizer_type=LeapHorizontalBar.type)
