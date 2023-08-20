@@ -1,10 +1,12 @@
 from typing import List, Union
 
 import numpy as np
+
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.utils import to_categorical
 
+from mnist.config import CONFIG
 # Tensorleap imports
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse 
@@ -43,22 +45,37 @@ def gt_encoder(idx: int, preprocessing: PreprocessResponse) -> np.ndarray:
 
 # Metadata functions allow to add extra data for a later use in analysis.
 # This metadata adds the int digit of each sample (not a hot vector).
+def metadata_sample_index(idx: int, preprocess: PreprocessResponse) -> int:
+    return idx
+
 def metadata_label(idx: int, preprocess: PreprocessResponse) -> int:
     one_hot_digit = gt_encoder(idx, preprocess)
     digit = one_hot_digit.argmax()
     digit_int = int(digit)
     return digit_int
 
+def metadata_label_name(idx: int, preprocess: PreprocessResponse) -> int:
+    one_hot_digit = gt_encoder(idx, preprocess)
+    digit = one_hot_digit.argmax()
+    digit_int = int(digit)
+    return CONFIG['LABELS_NAMES'][digit_int]
+
 
 def bar_visualizer(data: np.ndarray) -> LeapHorizontalBar:
-    return LeapHorizontalBar(data, LABELS)
+    return LeapHorizontalBar(data, CONFIG['LABELS'])
 
+def horizontal_bar_visualizer_with_labels_name(data: np.ndarray) -> LeapHorizontalBar:
+    labels_names = [CONFIG['LABELS_NAMES'][index] for index in range(data.shape[-1])]
+    return LeapHorizontalBar(data, labels_names)
 
-LABELS = ['0','1','2','3','4','5','6','7','8','9']
 # Dataset binding functions to bind the functions above to the `Dataset Instance`.
 leap_binder.set_preprocess(function=preprocess_func)
 leap_binder.set_input(function=input_encoder, name='image')
 leap_binder.set_ground_truth(function=gt_encoder, name='classes')
-leap_binder.set_metadata(function=metadata_label, metadata_type=DatasetMetadataType.int, name='label')
-leap_binder.add_prediction(name='classes', labels=LABELS)
+leap_binder.set_metadata(function=metadata_sample_index, name='sample_index')
+leap_binder.set_metadata(function=metadata_label, name='label')
+leap_binder.set_metadata(function=metadata_label_name, name='label_name')
+leap_binder.add_prediction(name='classes', labels=CONFIG['LABELS'])
 leap_binder.set_visualizer(name='horizontal_bar_classes', function=bar_visualizer, visualizer_type=LeapHorizontalBar.type)
+leap_binder.set_visualizer(name='horizontal_bar_classes_names', function=horizontal_bar_visualizer_with_labels_name, visualizer_type=LeapHorizontalBar.type)
+
