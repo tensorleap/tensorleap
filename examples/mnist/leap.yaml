@@ -7,3 +7,4 @@ include:
   - leap_custom_test.py
   - mnist/config.py
   - mnist/project_config.yaml
+  - mnist/utils.py
