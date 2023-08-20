@@ -4,6 +4,8 @@ secretManagerId: ""
 entryFile: leap_binder.py
 include:
     - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
     - cifar10_resnet/data/preprocess.py
     - cifar10_resnet/config.py
     - cifar10_resnet/encoders.py

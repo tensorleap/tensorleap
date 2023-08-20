@@ -4,6 +4,8 @@ secretManagerId: ""
 entryFile: leap_binder.py
 include:
     - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
     - domain_gap/configs.py
     - domain_gap/data/preprocess.py
     - domain_gap/data/cs_data.py
