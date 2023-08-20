@@ -4,6 +4,8 @@ secretManagerId: ""
 entryFile: leap_binder.py
 include:
     - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
     - cityscapes_od/data/preprocess.py
     - cityscapes_od/utils/gcs_utils.py
     - cityscapes_od/utils/general_utils.py

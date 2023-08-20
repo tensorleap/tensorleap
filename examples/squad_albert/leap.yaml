@@ -4,6 +4,8 @@ secretManagerId: ""
 entryFile: leap_binder.py
 include:
     - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
     - squad_albert/data/preprocess.py
     - squad_albert/utils/utils.py
     - squad_albert/config.py
