@@ -9,3 +9,5 @@ LABELS_NAMES:
   - horse
   - ship
   - truck
+
+local_file_path: ~

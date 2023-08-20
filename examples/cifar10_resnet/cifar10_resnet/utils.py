@@ -3,6 +3,10 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 
 from cifar10_resnet.config import CONFIG
 
+import os
+from tensorflow.keras.utils import to_categorical
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.datasets import cifar10
 
 #
 
