@@ -1,3 +1,4 @@
+import numpy as np
 
 import re, string
 from tensorflow.keras.preprocessing.sequence import pad_sequences

@@ -88,6 +88,6 @@ def text_visualizer_func(data: np.ndarray) -> LeapText:
 leap_binder.set_preprocess(function=preprocess_func)
 leap_binder.set_input(function=input_tokens, name='tokens')
 leap_binder.set_ground_truth(function=gt_sentiment, name='sentiment')
-leap_binder.set_metadata(function=gt_metadata, metadata_type=DatasetMetadataType.string, name='gt')
+leap_binder.set_metadata(function=gt_metadata, name='gt')
 leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text, name='text_from_token')
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])

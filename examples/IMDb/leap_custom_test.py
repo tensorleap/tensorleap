@@ -14,15 +14,15 @@ def check_custom_test():
 
     #model
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    model_path = ('model/model.h5')
-    cnn = tf.keras.models.load_model(os.path.join(dir_path, model_path))
+    model_path = ('model/imdb-dense.h5')
+    imdb_dense = tf.keras.models.load_model(os.path.join(dir_path, model_path))
 
     # get input and gt
     input = input_tokens(idx, responses_set)
     gt = gt_sentiment(idx, responses_set)
 
     concat = np.expand_dims(input, axis=0)
-    y_pred = cnn([concat])
+    y_pred = imdb_dense([concat])
     gt = np.expand_dims(gt, axis=0)
     y_true = tf.convert_to_tensor(gt)
 
