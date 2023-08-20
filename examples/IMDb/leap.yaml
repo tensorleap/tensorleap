@@ -5,3 +5,9 @@ include:
   - leap_binder.py
   - leap_test.py
   - leap_custom_test.py
+  - IMDb/data/preprocess.py
+  - IMDb/config.py
+  - IMDb/gcs_utils.py
+  - IMDb/project_config.yaml
+  - IMDb/utils.py
+

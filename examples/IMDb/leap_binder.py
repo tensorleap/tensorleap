@@ -1,64 +1,93 @@
-from typing import List, Union
+from typing import List, Optional, Callable, Tuple, Dict
 
+import json, os, re, string
+from os.path import basename, dirname, join
+
+import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
+
+
+
+from pandas.core.frame import DataFrame as DataFrameType
 
 # Tensorleap imports
 from code_loader import leap_binder
-from code_loader.contract.datasetclasses import PreprocessResponse 
-from code_loader.contract.enums import Metric, DatasetMetadataType
-from code_loader.contract.visualizer_classes import LeapHorizontalBar
+from code_loader.contract.datasetclasses import PreprocessResponse
+from code_loader.contract.enums import DatasetMetadataType, LeapDataType, Metric
+from code_loader.contract.visualizer_classes import LeapText
+
+from IMDb.config import CONFIG
+from IMDb.data.preprocess import download_load_assets
+from IMDb.gcs_utils import _download
+from IMDb.utils import prepare_input
+
+
 
 # Preprocess Function
 def preprocess_func() -> List[PreprocessResponse]:
-    (train_X, train_Y), (val_X, val_Y) = mnist.load_data()
-
-    train_X = np.expand_dims(train_X, axis=-1)  # Reshape :,28,28 -> :,28,28,1
-    train_X = train_X / 255                       # Normalize to [0,1]
-    train_Y = to_categorical(train_Y)           # Hot Vector
-    
-    val_X = np.expand_dims(val_X, axis=-1)  # Reshape :,28,28 -> :,28,28,1
-    val_X = val_X / 255                     # Normalize to [0,1]
-    val_Y = to_categorical(val_Y)           # Hot Vector
+    tokenizer, df = download_load_assets()
+    train_label_size = int(0.9 * CONFIG['NUMBER_OF_SAMPLES'] / 2)
+    val_label_size = int(0.1 * CONFIG['NUMBER_OF_SAMPLES'] / 2)
+    df = df[df['subset'] == 'train']
+    train_df = pd.concat([df[df['gt'] == 'pos'][:train_label_size], df[df['gt'] == 'neg'][:train_label_size]],
+                         ignore_index=True)
+    val_df = pd.concat([df[df['gt'] == 'pos'][train_label_size:train_label_size + val_label_size],
+                        df[df['gt'] == 'neg'][train_label_size:train_label_size + val_label_size]], ignore_index=True)
+    ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
 
     # Generate a PreprocessResponse for each data slice, to later be read by the encoders.
     # The length of each data slice is provided, along with the data dictionary.
-    # In this example we pass `images` and `labels` that later are encoded into the inputs and outputs 
-    train = PreprocessResponse(length=len(train_X), data={'images': train_X, 'labels': train_Y})
-    val = PreprocessResponse(length=len(val_X), data={'images': val_X, 'labels': val_Y})
+    # In this example we pass `images` and `labels` that later are encoded into the inputs and outputs
+    train = PreprocessResponse(length=2 * train_label_size, data={"df": train_df, "tokenizer": tokenizer, "ohe": ohe})
+    val = PreprocessResponse(length=2 * val_label_size, data={"df": val_df, "tokenizer": tokenizer, "ohe": ohe})
     response = [train, val]
+
+    # Adding custom data to leap_binder for later usage within the visualizer function
+    leap_binder.custom_tokenizer = tokenizer
+
     return response
 
-# Input encoder fetches the image with the index `idx` from the `images` array set in
-# the PreprocessResponse data. Returns a numpy array containing the sample's image. 
-def input_encoder(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
-    return preprocess.data['images'][idx].astype('float32')
 
-# Ground truth encoder fetches the label with the index `idx` from the `labels` array set in
-# the PreprocessResponse's data. Returns a numpy array containing a hot vector label correlated with the sample.
-def gt_encoder(idx: int, preprocessing: PreprocessResponse) -> np.ndarray:
-    return preprocessing.data['labels'][idx].astype('float32')
+# Input Encoder - fetches the text with the index `idx` from the `paths` array set in
+# the PreprocessResponse's data. Returns a numpy array containing padded tokenized input.
+def input_tokens(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
+    comment_path = preprocess.data['df']['paths'][idx]
+    local_path = _download(comment_path)
+    with open(local_path, 'r') as f:
+        comment = f.read()
+    tokenizer = preprocess.data['tokenizer']
+    padded_input = prepare_input(tokenizer, comment)
+    return padded_input
+
+
+# Ground Truth Encoder - fetches the label with the index `idx` from the `gt` array set in
+# the PreprocessResponse's  data. Returns a numpy array containing a hot vector label correlated with the sample.
+def gt_sentiment(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    gt_str = preprocess.data['df']['gt'][idx]
+    return preprocess.data['ohe'][gt_str]
+
 
 # Metadata functions allow to add extra data for a later use in analysis.
-# This metadata adds the int digit of each sample (not a hot vector).
-def metadata_label(idx: int, preprocess: PreprocessResponse) -> int:
-    one_hot_digit = gt_encoder(idx, preprocess)
-    digit = one_hot_digit.argmax()
-    digit_int = int(digit)
-    return digit_int
+# This metadata adds the ground truth of each sample (not a hot vector).
+def gt_metadata(idx: int, preprocess: PreprocessResponse) -> str:
+    if preprocess.data['df']['gt'][idx] == "pos":
+        return "positive"
+    else:
+        return "negative"
 
 
-def bar_visualizer(data: np.ndarray) -> LeapHorizontalBar:
-    return LeapHorizontalBar(data, LABELS)
+# Visualizer functions define how to interpet the data and visualize it.
+# In this example we define a tokens-to-text visualizer.
+def text_visualizer_func(data: np.ndarray) -> LeapText:
+    tokenizer = leap_binder.custom_tokenizer
+    texts = tokenizer.sequences_to_texts([data])
+    return LeapText(texts[0].split(' '))
 
 
-LABELS = ['0','1','2','3','4','5','6','7','8','9']
-# Dataset binding functions to bind the functions above to the `Dataset Instance`.
+# Binders
 leap_binder.set_preprocess(function=preprocess_func)
-leap_binder.set_input(function=input_encoder, name='image')
-leap_binder.set_ground_truth(function=gt_encoder, name='classes')
-leap_binder.set_metadata(function=metadata_label, metadata_type=DatasetMetadataType.int, name='label')
-leap_binder.add_prediction(name='classes', labels=LABELS)
-leap_binder.set_visualizer(name='horizontal_bar_classes', function=bar_visualizer, visualizer_type=LeapHorizontalBar.type)
+leap_binder.set_input(function=input_tokens, name='tokens')
+leap_binder.set_ground_truth(function=gt_sentiment, name='sentiment')
+leap_binder.set_metadata(function=gt_metadata, metadata_type=DatasetMetadataType.string, name='gt')
+leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text, name='text_from_token')
+leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
