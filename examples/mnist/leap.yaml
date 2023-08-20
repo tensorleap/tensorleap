@@ -5,3 +5,5 @@ include:
   - leap_binder.py
   - leap_test.py
   - leap_custom_test.py
+  - mnist/config.py
+  - mnist/project_config.yaml

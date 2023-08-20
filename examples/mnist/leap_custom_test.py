@@ -31,9 +31,8 @@ def check_custom_test():
     sample_index = metadata_sample_index(idx, responses_set)
     label = metadata_label(idx, responses_set)
     label_name = metadata_label_name(idx, responses_set)
-
-    a=11
-
+    even_odd = metadata_even_odd(idx, responses_set)
+    circle = metadata_circle(idx, responses_set)
 
 if __name__=='__main__':
     check_custom_test()
