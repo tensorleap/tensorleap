@@ -4,9 +4,6 @@ from mnist.config import CONFIG
 def metadata_label(digit_int) -> int:
     return digit_int
 
-def metadata_label_name(digit_int) -> str:
-    return CONFIG['LABELS_NAMES'][digit_int]
-
 def metadata_even_odd(digit_int) -> str:
     if digit_int % 2 == 0:
         return "even"
