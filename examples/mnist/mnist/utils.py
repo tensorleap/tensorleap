@@ -11,7 +11,7 @@ def metadata_even_odd(digit_int) -> str:
         return "odd"
 
 def metadata_circle(digit_int) -> str:
-    if digit_int in [0, 6, 8,9]:
+    if digit_int in [0, 6, 8, 9]:
         return 'yes'
     else:
         return 'no'
