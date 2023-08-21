@@ -31,6 +31,7 @@ def check_custom_test():
     #get meatdata
     gt_mdata = gt_metadata(idx, responses_set)
     automated_readability_index = automated_readability_index_metadata(idx, responses_set)
+    all_raw_md = all_raw_metadata(idx, responses_set)
 
     print("finish tests")
 
