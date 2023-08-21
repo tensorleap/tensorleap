@@ -1,5 +1,5 @@
 from typing import List, Optional, Callable, Tuple, Dict
-
+import tensorflow as tf
 import json, os, re, string
 from os.path import basename, dirname, join
 
@@ -71,6 +71,7 @@ def gt_metadata(idx: int, preprocess: PreprocessResponse) -> str:
         return "positive"
     else:
         return "negative"
+
 def all_raw_metadata(idx: int, preprocess: PreprocessResponse):
     df = preprocess.data['df']
 
@@ -104,6 +105,15 @@ def text_visualizer_func(data: np.ndarray) -> LeapText:
     texts = tokenizer.sequences_to_texts([data])
     return LeapText(texts[0].split(' '))
 
+# def gt_visualizer_func(gt: tf.Tensor) -> LeapText:
+#     if gt == [1.0, 0.0]:
+#         text = 'positive'
+#     else:
+#         text = 'negative'
+#
+#     text = List[text]
+#
+#     return LeapText(text)
 
 # Binders
 leap_binder.set_preprocess(function=preprocess_func)

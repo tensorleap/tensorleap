@@ -27,10 +27,21 @@ def check_custom_test():
     y_true = tf.convert_to_tensor(gt)
 
     # get visualizer
+    #1
+    tokenizer = leap_binder.custom_tokenizer
+    texts = tokenizer.sequences_to_texts([input])
+    print(texts[0].split(' '))
+
+    #2
+    if y_true == [1.0, 0.0]:
+        text = 'positive'
+    else:
+        text = 'negative'
+    print(text)
+
 
     #get meatdata
     gt_mdata = gt_metadata(idx, responses_set)
-    automated_readability_index = automated_readability_index_metadata(idx, responses_set)
     all_raw_md = all_raw_metadata(idx, responses_set)
 
     print("finish tests")
