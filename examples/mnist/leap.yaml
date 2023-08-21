@@ -8,3 +8,4 @@ include:
   - mnist/config.py
   - mnist/project_config.yaml
   - mnist/utils.py
+  - mnist/data/preprocess.py
