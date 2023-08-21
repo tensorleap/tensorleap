@@ -2,10 +2,6 @@ from typing import List, Union
 
 import numpy as np
 
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
-
 from mnist.config import CONFIG
 # Tensorleap imports
 from code_loader import leap_binder
@@ -13,20 +9,14 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import Metric, DatasetMetadataType
 from code_loader.contract.visualizer_classes import LeapHorizontalBar
 
+from mnist.data.preprocess import preprocess_func
 from mnist.utils import *
 
 
 # Preprocess Function
-def preprocess_func() -> List[PreprocessResponse]:
-    (train_X, train_Y), (val_X, val_Y) = mnist.load_data()
-
-    train_X = np.expand_dims(train_X, axis=-1)  # Reshape :,28,28 -> :,28,28,1
-    train_X = train_X / 255                       # Normalize to [0,1]
-    train_Y = to_categorical(train_Y)           # Hot Vector
-    
-    val_X = np.expand_dims(val_X, axis=-1)  # Reshape :,28,28 -> :,28,28,1
-    val_X = val_X / 255                     # Normalize to [0,1]
-    val_Y = to_categorical(val_Y)           # Hot Vector
+def preprocess_func_leap() -> List[PreprocessResponse]:
+    data = preprocess_func(CONFIG['local_file_path'])
+    train_X, val_X, train_Y, val_Y = data['train_X'], data['val_X'], data['train_Y'], data['val_Y']
 
     # Generate a PreprocessResponse for each data slice, to later be read by the encoders.
     # The length of each data slice is provided, along with the data dictionary.
@@ -73,7 +63,7 @@ def horizontal_bar_visualizer_with_labels_name(data: np.ndarray) -> LeapHorizont
     return LeapHorizontalBar(data, labels_names)
 
 # Dataset binding functions to bind the functions above to the `Dataset Instance`.
-leap_binder.set_preprocess(function=preprocess_func)
+leap_binder.set_preprocess(function=preprocess_func_leap)
 leap_binder.set_input(function=input_encoder, name='image')
 leap_binder.set_ground_truth(function=gt_encoder, name='classes')
 leap_binder.set_metadata(function=metadata_sample_index, name='metadata_sample_index')

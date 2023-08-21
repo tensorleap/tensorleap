@@ -5,7 +5,7 @@ import numpy as np
 
 def check_custom_test():
     print("started custom tests")
-    responses = preprocess_func()
+    responses = preprocess_func_leap()
     train = responses[0]
     val = responses[1]
     responses_set = val
