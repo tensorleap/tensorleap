@@ -2,6 +2,13 @@ from leap_binder import *
 import tensorflow as tf
 import os
 import numpy as np
+import pandas as pd
+
+
+
+def plot_horizontal_bar(y):
+    df = pd.DataFrame({'labels': CONFIG['LABELS'], 'val': y})
+    ax = df.plot.barh(x='labels', y='val')
 
 def check_custom_test():
     print("started custom tests")
@@ -22,10 +29,12 @@ def check_custom_test():
 
     concat = np.expand_dims(image, axis=0)
     y_pred = cnn([concat])
-    gt = np.expand_dims(gt, axis=0)
-    y_true = tf.convert_to_tensor(gt)
+    gt_expend = np.expand_dims(gt, axis=0)
+    y_true = tf.convert_to_tensor(gt_expend)
 
     # get visualizer
+    plot_horizontal_bar(gt)
+    plot_horizontal_bar(y_pred.numpy().reshape(10,))
 
     #get meatdata
     sample_index = metadata_sample_index(idx, responses_set)
