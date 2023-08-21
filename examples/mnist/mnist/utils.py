@@ -1,5 +1,3 @@
-from mnist.config import CONFIG
-
 
 def metadata_label(digit_int) -> int:
     return digit_int

@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from mnist.config import CONFIG
 
 
 def plot_horizontal_bar(y):

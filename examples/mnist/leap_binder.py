@@ -8,6 +8,7 @@ from code_loader.contract.visualizer_classes import LeapHorizontalBar
 
 from mnist.data.preprocess import preprocess_func
 from mnist.utils import *
+from mnist.config import CONFIG
 
 
 # Preprocess Function
