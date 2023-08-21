@@ -75,6 +75,80 @@ def gt_metadata(idx: int, preprocess: PreprocessResponse) -> str:
     else:
         return "negative"
 
+def automated_readability_index_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    ari = preprocess.data['df']['automated_readability_index'][idx]
+    return ari
+
+def coleman_liau_index_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    liau = preprocess.data['df']['coleman_liau_index'][idx]
+    return liau
+
+def crawford_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    crawford = preprocess.data['df']['crawford'][idx]
+    return crawford
+
+def dale_chall_readability_score_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    dale_chall_readability_score = preprocess.data['df']['dale_chall_readability_score'][idx]
+    return dale_chall_readability_score
+
+def difficult_words_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    difficult_words = preprocess.data['df']['difficult_words'][idx]
+    return difficult_words
+
+def fernandez_huerta_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    fernandez_huerta = preprocess.data['df']['fernandez_huerta'][idx]
+    return fernandez_huerta
+
+def flesch_kincaid_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    flesch_kincaid = preprocess.data['df']['flesch_kincaid'][idx]
+    return flesch_kincaid
+
+
+def flesch_reading_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    flesch_reading = preprocess.data['df']['flesch_reading'][idx]
+    return flesch_reading
+
+def gulpease_index_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    gulpease_index = preprocess.data['df']['gulpease_index'][idx]
+    return gulpease_index
+
+def gunning_fog_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    gunning_fog = preprocess.data['df']['gunning_fog'][idx]
+    return gunning_fog
+
+def gutierrez_polini_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    gutierrez_polini = preprocess.data['df']['gutierrez_polini'][idx]
+    return gutierrez_polini
+
+
+def length_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    length = preprocess.data['df']['length'][idx]
+    return length
+
+def linsear_write_formula_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    linsear_write_formula = preprocess.data['df']['linsear_write_formula'][idx]
+    return linsear_write_formula
+
+def oov_count_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    oov_count = preprocess.data['df']['oov_count'][idx]
+    return oov_count
+
+def osman_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    osman = preprocess.data['df']['osman'][idx]
+    return osman
+
+def polarity_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    polarity = preprocess.data['df']['polarity'][idx]
+    return polarity
+
+def subjectivity_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    subjectivity = preprocess.data['df']['subjectivity'][idx]
+    return subjectivity
+
+def szigriszt_pazos_metadata(idx: int, preprocess: PreprocessResponse) -> List[float]:
+    szigriszt_pazos = preprocess.data['df']['szigriszt_pazos'][idx]
+    return szigriszt_pazos
+
 
 # Visualizer functions define how to interpet the data and visualize it.
 # In this example we define a tokens-to-text visualizer.
