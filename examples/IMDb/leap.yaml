@@ -1,13 +1,13 @@
-codeIntegrationId: 64e207bcba121c0018702f53
-projectId: 
-entryFile: 'leap_binder.py'
+codeIntegrationId: 64e369a6a7c8030018dd85a9
+projectId: ""
+secretManagerId: ""
+entryFile: leap_binder.py
 include:
-  - leap_binder.py
-  - leap_test.py
-  - leap_custom_test.py
-  - IMDb/data/preprocess.py
-  - IMDb/config.py
-  - IMDb/gcs_utils.py
-  - IMDb/project_config.yaml
-  - IMDb/utils.py
-
+    - leap_binder.py
+    - leap_test.py
+    - leap_custom_test.py
+    - IMDb/data/preprocess.py
+    - IMDb/config.py
+    - IMDb/gcs_utils.py
+    - IMDb/project_config.yaml
+    - IMDb/utils.py
