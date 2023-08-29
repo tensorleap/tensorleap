@@ -1,0 +1,4 @@
+# Ignore create model files
+
+model/model_onnx.py
+model/new_model.py
