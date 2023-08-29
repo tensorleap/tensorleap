@@ -3,4 +3,7 @@ BUCKET_NAME: 'example-datasets-47ml982d'
 PROJECT_ID: 'example-dev-project-nmrksf0o'
 
 MAX_FEATURES: 10000
-SEQUENCE_LENGTH: 250
+SEQUENCE_LENGTH: 512
+
+MODEL_NAME: "fabriceyhc/bert-base-uncased-imdb"
+
