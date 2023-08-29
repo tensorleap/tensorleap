@@ -49,8 +49,8 @@ def preprocess_func() -> List[PreprocessResponse]:
 
 
 # Input Encoder - fetches the text with the index `idx` from the `paths` array set in
-# the PreprocessResponse's data. Returns a numpy array containing padded tokenized input.
-def input_tokens(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
+# the PreprocessResponse's data. Returns a numpy array containing padded tokenized input
+def input_func(idx, preprocess):
     comment_path = preprocess.data['df']['paths'][idx]
     local_path = _download(comment_path)
     with open(local_path, 'r') as f:
@@ -59,6 +59,30 @@ def input_tokens(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
     padded_input = prepare_input(tokenizer, comment)
     return padded_input
 
+def input_tokens(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
+    padded_input = input_func(idx, preprocess)
+    padded_input = padded_input.squeeze()
+    return padded_input
+
+# Input Encoder - fetches the text with the index `idx` from the `paths` array set in
+# the PreprocessResponse's data. Returns a numpy array containing padded tokenized input.
+def input_ids(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
+    padded_input = input_func(idx, preprocess)
+    padded_input = np.array(padded_input['input_ids'])
+    padded_input = padded_input.squeeze()
+    return padded_input
+
+def attention_masks(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
+    padded_input = input_func(idx, preprocess)
+    padded_input = np.array(padded_input['attention_mask'])
+    padded_input = padded_input.squeeze()
+    return np.array(padded_input)
+
+def token_type_ids(idx: int, preprocess: PreprocessResponse) -> np.ndarray:
+    padded_input = input_func(idx, preprocess)
+    padded_input = np.array(padded_input['token_type_ids'])
+    padded_input = padded_input.squeeze()
+    return np.array(padded_input)
 
 # Ground Truth Encoder - fetches the label with the index `idx` from the `gt` array set in
 # the PreprocessResponse's  data. Returns a numpy array containing a hot vector label correlated with the sample.
@@ -98,27 +122,68 @@ def all_raw_metadata(idx: int, preprocess: PreprocessResponse):
 
     return res
 
+def tokenizer_decoder(tokenizer, input_ids: np.ndarray) -> List[str]:
+    """
+    Description: Decodes the input tokens from their corresponding input IDs using the provided tokenizer.
+    Parameters:
+    tokenizer: The tokenizer used to convert token IDs to text.
+    input_ids (np.ndarray): Array of input token IDs.
+    Returns:
+    decoded (List[str]): List of decoded tokens as strings.
+    """
+    decoded = tokenizer.decode(input_ids)
+    return decoded
+
+
+
+def tokenizer_decoder_gt(tokenizer, gt: np.ndarray) -> str:
+    """
+    Description: Decodes the input tokens from their corresponding input IDs using the provided tokenizer.
+    Parameters:
+    tokenizer: The tokenizer used to convert token IDs to text.
+    input_ids (np.ndarray): Array of input token IDs.
+    Returns:
+    decoded (List[str]): List of decoded tokens as strings.
+    """
+    if gt[0] == 1.0:
+        return 'Positive'
+    return 'Negative'
+
 # Visualizer functions define how to interpet the data and visualize it.
 # In this example we define a tokens-to-text visualizer.
+def text_visualizer_func_old(input_ids: np.ndarray) -> LeapText:
+    tokenizer = leap_binder.custom_tokenizer
+    text = tokenizer_decoder(tokenizer, input_ids)
+    tokens = [token for token in text.split('[PAD]') if token.strip() != '']
+    cleaned_text = ''.join(tokens)
+    return LeapText(cleaned_text)
+
 def text_visualizer_func(data: np.ndarray) -> LeapText:
     tokenizer = leap_binder.custom_tokenizer
     texts = tokenizer.sequences_to_texts([data])
-    return LeapText(texts[0].split(' '))
+    text_input = texts[0].split(' ')
+    text_input = [text for text in text_input if text != '[OOV]']
+    return LeapText(text_input)
 
-# def gt_visualizer_func(gt: tf.Tensor) -> LeapText:
-#     if gt == [1.0, 0.0]:
-#         text = 'positive'
-#     else:
-#         text = 'negative'
-#
-#     text = List[text]
-#
-#     return LeapText(text)
+def text_visualizer_output(y_true) -> LeapText:
+    ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
+    text = []
+    if (y_true[0] == np.array(ohe["pos"])).all():
+        text.append("pos")
+    else:
+        text.append("neg")
+    return LeapText(text)
+
 
 # Binders
 leap_binder.set_preprocess(function=preprocess_func)
-leap_binder.set_input(function=input_tokens, name='tokens')
+# leap_binder.set_input(function=input_tokens, name='tokens')
+leap_binder.set_input(function=input_ids, name='input_ids')
+leap_binder.set_input(function=attention_masks, name='attention_masks')
+leap_binder.set_input(function=token_type_ids, name='token_type_ids')
 leap_binder.set_ground_truth(function=gt_sentiment, name='sentiment')
 leap_binder.set_metadata(function=gt_metadata, name='gt')
-leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text, name='text_from_token')
+leap_binder.set_metadata(function=all_raw_metadata, name='all_raw_metadata')
+leap_binder.set_visualizer(function=text_visualizer_func_old, visualizer_type=LeapDataType.Text, name='text_from_token_input')
+leap_binder.set_visualizer(function=text_visualizer_output, visualizer_type=LeapDataType.Text, name='gt_text')
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
