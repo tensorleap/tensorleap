@@ -151,14 +151,13 @@ def tokenizer_decoder_gt(tokenizer, gt: np.ndarray) -> str:
 
 # Visualizer functions define how to interpet the data and visualize it.
 # In this example we define a tokens-to-text visualizer.
-def text_visualizer_func_old(input_ids: np.ndarray) -> LeapText:
+def text_visualizer_func(input_ids: np.ndarray) -> LeapText:
     tokenizer = leap_binder.custom_tokenizer
     text = tokenizer_decoder(tokenizer, input_ids)
     tokens = [token for token in text.split('[PAD]') if token.strip() != '']
-    cleaned_text = ''.join(tokens)
-    return LeapText(cleaned_text)
+    return LeapText(tokens)
 
-def text_visualizer_func(data: np.ndarray) -> LeapText:
+def text_visualizer_func_old(data: np.ndarray) -> LeapText:
     tokenizer = leap_binder.custom_tokenizer
     texts = tokenizer.sequences_to_texts([data])
     text_input = texts[0].split(' ')
@@ -184,6 +183,6 @@ leap_binder.set_input(function=token_type_ids, name='token_type_ids')
 leap_binder.set_ground_truth(function=gt_sentiment, name='sentiment')
 leap_binder.set_metadata(function=gt_metadata, name='gt')
 leap_binder.set_metadata(function=all_raw_metadata, name='all_raw_metadata')
-leap_binder.set_visualizer(function=text_visualizer_func_old, visualizer_type=LeapDataType.Text, name='text_from_token_input')
+leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text, name='text_from_token_input')
 leap_binder.set_visualizer(function=text_visualizer_output, visualizer_type=LeapDataType.Text, name='gt_text')
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
