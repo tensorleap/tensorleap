@@ -15,39 +15,33 @@ The samples shown below were taken from the **training set** and are colored bas
 ![Population Exploration Analysis of Training Samples](images/population_exploration_training.png)
 
 
-
-#### Validation Set:
-
-The plot below is a similarity map within the **validation set** and we can see that there is still a nice separation, but there are quite a few samples with higher error loss (larger dot size). Interestingly, those false predictions are located within clusters of classes different from their **ground truth** class.
-
-![Population Exploration of the Validation Set](<../.gitbook/assets/image (19) (1).png>)
-
-#### Similar Classes
-
-In the visualization below we can see that the samples from class **7** _(peach-colored)_ and class **1** _(light-blue)_ are relatively close to each other. This makes sense since the digit **7** is visually similar to the digit **1**.
-
-![Close Similar Clusters of Classes 1 and 7](../.gitbook/assets/mnist-similar-classes-2.gif)
-
 ### Error Analysis <a href="#error-analysis" id="error-analysis"></a>
 
-The dot's size in the visualization below represents the sample's loss. The selected sample is a challenging one, and we can also see that it has a relatively high loss. The sample's metadata shown on the right panel shows a distance of 6.83 to class `6` and 7.71 to the ground truth - class `5,`and indeed prediction was class `6`.
+The true class label for this sample is `2`, but the model's prediction assigns it to `1`.
+Furthermore, the visualization shows that this sample appears to be more closely related to samples from class `1` 
+(indicated by the light blue color) rather than samples from class `2` (indicated by the turquoise color).
 
-![Prediction: 6](../.gitbook/assets/img_3.png) ![GT:5](../.gitbook/assets/img_4.png)
+![error-analysis_1](images/error-analysis_1.png)
 
 ### Sample Analysis <a href="#sample-analysis" id="sample-analysis"></a>
 
-The Tensorleap platform provides a way to further explore the model's response to specific data samples. For example, from the results below, we can see that the model's prediction was **9** while the ground truth is **8**. Additionally, we can use the heat map to see which features of the data contributed to each of the output classes.
+The Tensorleap platform provides a way to further explore the model's response to specific data samples. For example, from the results below, we can see that the model's prediction was **9** while the ground truth is **8**. 
 
 ![Heat Maps Correlated for each Output](../.gitbook/assets/mnist-sample-analysis.gif)
+.............
+
+### Loss analysis
+
+In the image below we can see a sample with true class label of `7`, but the model's prediction assigns it to `4`.
+When examining the loss analysis feature, we can identify specific regions within the image that contribute to the 
+higher loss, thereby causing the model's prediction to be inaccurate.
+
+![loss_analysis](images/loss_analysis.png)
 
 ### Fetch Similars <a href="#fetch-similars" id="fetch-similars"></a>
 
 As explained, Tensorleap tracks how each learned feature responds to each sample. This allows finding samples that the model considers similar, as they _activate_ similar learned features.
-
 This functionality also allows to automatically find **candidates for labeling**, detect **ambiguities** in the data and **mislabeled** samples.&#x20;
-
-#### Fetch Similars to a Sample - Example
-
 In the example below we ran a **Fetch Similars** operation to find similar samples to the sample <img src="../.gitbook/assets/image (26) (1).png" alt="" data-size="line">. The result is a cluster of similar samples:
 
 ![Fetch Similar Results](<../.gitbook/assets/image (16) (2).png>) ![Similar Samples](<../.gitbook/assets/image (13) (1) (1) (1) (1) (1) (1).png>)
