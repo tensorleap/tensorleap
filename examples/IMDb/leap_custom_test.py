@@ -6,8 +6,8 @@ import os
 import numpy as np
 import onnxruntime
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from tensorflow.keras.losses import BinaryCrossentropy
-from tensorflow.keras.metrics import BinaryAccuracy
+from keras.losses import BinaryCrossentropy
+from keras.metrics import BinaryAccuracy
 
 def type_check(arr, name):
     unique_types = np.unique(arr.dtype)
