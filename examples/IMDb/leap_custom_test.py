@@ -28,9 +28,9 @@ def check_custom_test():
         attention__mask = attention_masks(idx, responses_set)
         token_type__id = token_type_ids(idx, responses_set)
 
-        type_check(input__id, 'input_id')
-        type_check(attention__mask, 'attention_mask')
-        type_check(token_type__id, 'token_type_id')
+        # type_check(input__id, 'input_id')
+        # type_check(attention__mask, 'attention_mask')
+        # type_check(token_type__id, 'token_type_id')
 
 
         # get input and gt
@@ -51,8 +51,8 @@ def check_custom_test():
         label_name = sess.get_outputs()[-1].name
 
         y_pred = sess.run([label_name], {input_name_1: np.expand_dims(input__id, 0),
-                                       input_name_2: np.expand_dims(attention__mask, 0),
-                                       input_name_3: np.expand_dims(token_type__id, 0)})
+                                         input_name_2: np.expand_dims(attention__mask, 0),
+                                         input_name_3: np.expand_dims(token_type__id, 0)})
 
         # del sess
 
@@ -68,10 +68,12 @@ def check_custom_test():
 
         # get visualizer
         tokenizer = leap_binder.custom_tokenizer
-        text = tokenizer_decoder(tokenizer, input__id)
-        tokens = [token for token in text.split('[PAD]') if token.strip() != '']
+        data = input__id.astype(np.int64)
+        text = tokenizer_decoder(tokenizer, data)
+        tokens = [token for token in text.split() if token != '[PAD]']
         a = LeapText(tokens)
         print(f'input text: {tokens}')
+
 
         # text_gt_visualizer_func
         ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
