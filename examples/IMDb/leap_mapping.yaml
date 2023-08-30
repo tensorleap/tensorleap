@@ -1,0 +1,164 @@
+decorators:
+  - operation: Input
+    data:
+      type: Input
+      output_name: input_ids
+    id: '363'
+    inputs: {}
+    outputs:
+      input_ids:
+        - inputKey: input
+          operation: Permute
+          name: permute_1
+          id: '362'
+        - inputKey: input_ids
+          operation: Visualizer
+          id: '635'
+  - operation: Input
+    data:
+      type: Input
+      output_name: token_type_ids
+    id: '368'
+    inputs: {}
+    outputs:
+      token_type_ids:
+        - inputKey: input
+          operation: Permute
+          name: permute_3
+          id: '367'
+  - operation: Input
+    data:
+      type: Input
+      output_name: attention_masks
+    id: '386'
+    inputs: {}
+    outputs:
+      attention_masks:
+        - inputKey: input
+          operation: Permute
+          name: permute_5
+          id: '385'
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      name: text_from_token_input
+      visualizer_name: text_from_token_input
+      visualizer_type: Text
+      arg_names:
+        - input_ids
+      user_unique_name: text_from_token_input
+    id: '635'
+    inputs:
+      input_ids:
+        - outputKey: input_ids
+          operation: Input
+          id: '363'
+    outputs: {}
+  - operation: GroundTruth
+    data:
+      type: GroundTruth
+      output_name: sentiment
+      selected: sentiment
+    id: '636'
+    inputs: {}
+    outputs:
+      sentiment:
+        - inputKey: ground_truth
+          operation: BinaryCrossentropy
+          id: '639'
+        - inputKey: ground_truth
+          operation: Metric
+          id: '642'
+        - inputKey: y_true
+          operation: Visualizer
+          id: '643'
+  - operation: BinaryCrossentropy
+    data:
+      type: Loss
+    id: '639'
+    inputs:
+      prediction:
+        - outputKey: feature_map
+          operation: Dense
+          name: logits__classifier
+          id: '1'
+      ground_truth:
+        - outputKey: sentiment
+          operation: GroundTruth
+          id: '636'
+    outputs:
+      loss:
+        - inputKey: '0'
+          operation: Adam
+          id: '641'
+  - operation: Adam
+    data:
+      type: Optimizer
+      custom_input_keys:
+        - 641-0
+    id: '641'
+    inputs:
+      '0':
+        - outputKey: loss
+          operation: BinaryCrossentropy
+          id: '639'
+    outputs: {}
+  - operation: Metric
+    data:
+      type: Metric
+      name: BinaryAccuracy
+      metric_name: BinaryAccuracy
+      arg_names:
+        - ground_truth
+        - prediction
+      user_unique_name: BinaryAccuracy
+    id: '642'
+    inputs:
+      prediction:
+        - outputKey: feature_map
+          operation: Dense
+          name: logits__classifier
+          id: '1'
+      ground_truth:
+        - outputKey: sentiment
+          operation: GroundTruth
+          id: '636'
+    outputs: {}
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      name: gt_text
+      visualizer_name: gt_text
+      visualizer_type: Text
+      arg_names:
+        - y_true
+      user_unique_name: gt_text
+    id: '643'
+    inputs:
+      y_true:
+        - outputKey: sentiment
+          operation: GroundTruth
+          id: '636'
+    outputs: {}
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      visualizer_name: HorizontalBar
+      visualizer_type: HorizontalBar
+      arg_names:
+        - data
+      user_unique_name: HorizontalBar
+    id: '644'
+    inputs:
+      data:
+        - outputKey: feature_map
+          operation: Dense
+          name: logits__classifier
+          id: '1'
+    outputs: {}
+layers:
+  - operation: Dense
+    data:
+      prediction_type: sentiment
+    name: logits__classifier
+    id: '1'
