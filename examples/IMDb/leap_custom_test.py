@@ -10,16 +10,15 @@ from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.metrics import BinaryAccuracy
 
 def type_check(arr, name):
-    are_all_int = np.all(np.isin(arr, [int]))
-    if are_all_int:
-        print(f"All values in the {name} are of type int.")
+    unique_types = np.unique(arr.dtype)
+    print(f"Unique data types in the {name}:", unique_types)
 
 def check_custom_test():
     print("started custom tests")
     responses = preprocess_func()
     train = responses[0]
     val = responses[1]
-    responses_set = val
+    responses_set = train
     dir_path = os.path.dirname(os.path.abspath(__file__))
     # model_path = ('model/imdb-dense.h5')
     model_path = 'model/fabriceyhc-bert-base-uncased-imdb.onnx'
@@ -51,9 +50,9 @@ def check_custom_test():
         input_name_3 = sess.get_inputs()[2].name
         label_name = sess.get_outputs()[-1].name
 
-        y_pred = sess.run([label_name], {input_name_1: np.expand_dims(input__id,0),
-                                       input_name_2: np.expand_dims(attention__mask,0),
-                                       input_name_3: np.expand_dims(token_type__id,0)})
+        y_pred = sess.run([label_name], {input_name_1: np.expand_dims(input__id, 0),
+                                       input_name_2: np.expand_dims(attention__mask, 0),
+                                       input_name_3: np.expand_dims(token_type__id, 0)})
 
         # del sess
 
@@ -69,16 +68,10 @@ def check_custom_test():
 
         # get visualizer
         tokenizer = leap_binder.custom_tokenizer
-        # text_visualizer_func
-        # texts = tokenizer.sequences_to_texts([input1])
-        # text_input = texts[0].split(' ')
-        # text_input = [text for text in text_input if text != '[OOV]']
-        # print(f'text_input: {text_input}')
-
         text = tokenizer_decoder(tokenizer, input__id)
         tokens = [token for token in text.split('[PAD]') if token.strip() != '']
-        cleaned_text = ''.join(tokens)
-        print(f'text_input: {cleaned_text}')
+        a = LeapText(tokens)
+        print(f'input text: {tokens}')
 
         # text_gt_visualizer_func
         ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
