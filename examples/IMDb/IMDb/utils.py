@@ -1,7 +1,6 @@
 import numpy as np
-
 import re, string
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.sequence import pad_sequences
 from transformers import AutoTokenizer
 
 from IMDb.config import CONFIG

@@ -1,7 +1,5 @@
 from pathlib import Path
-
 from code_loader import LeapLoader
-
 
 def check_integration():
     dir_path = str(Path(__file__).parent)
