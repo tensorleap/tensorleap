@@ -1,6 +1,6 @@
 
 import json
-from tensorflow.keras.preprocessing.text import tokenizer_from_json
+from keras.preprocessing.text import tokenizer_from_json
 import pandas as pd
 from os.path import join
 

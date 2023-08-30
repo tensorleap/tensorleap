@@ -156,9 +156,11 @@ def tokenizer_decoder_gt(tokenizer, gt: np.ndarray) -> str:
 # In this example we define a tokens-to-text visualizer.
 def text_visualizer_func(input_ids: np.ndarray) -> LeapText:
     tokenizer = leap_binder.custom_tokenizer
-    text = tokenizer_decoder(tokenizer, input_ids)
-    tokens = [token for token in text.split('[PAD]') if token.strip() != '']
+    data = input_ids.astype(np.int64)
+    text = tokenizer_decoder(tokenizer, data)
+    tokens = [token for token in text.split() if token != '[PAD]']
     return LeapText(tokens)
+
 
 def text_visualizer_func_old(data: np.ndarray) -> LeapText:
     tokenizer = leap_binder.custom_tokenizer
@@ -190,3 +192,7 @@ leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDa
                            name='text_from_token_input')
 leap_binder.set_visualizer(function=text_visualizer_output, visualizer_type=LeapDataType.Text, name='gt_text')
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
+
+
+if __name__ == '__main__':
+    leap_binder.check()
