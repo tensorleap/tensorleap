@@ -120,6 +120,9 @@ def all_raw_metadata(idx: int, preprocess: PreprocessResponse):
         'szigriszt_pazos_metadata': df['szigriszt_pazos'][idx],
     }
 
+    for key, value in res.items():
+        if not isinstance(value, (float, np.float64)):
+            res[key] = np.float64(value)
     return res
 
 def tokenizer_decoder(tokenizer, input_ids: np.ndarray) -> List[str]:
@@ -183,6 +186,7 @@ leap_binder.set_input(function=token_type_ids, name='token_type_ids')
 leap_binder.set_ground_truth(function=gt_sentiment, name='sentiment')
 leap_binder.set_metadata(function=gt_metadata, name='gt')
 leap_binder.set_metadata(function=all_raw_metadata, name='all_raw_metadata')
-leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text, name='text_from_token_input')
+leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text,
+                           name='text_from_token_input')
 leap_binder.set_visualizer(function=text_visualizer_output, visualizer_type=LeapDataType.Text, name='gt_text')
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
