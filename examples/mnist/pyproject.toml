@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "mnist"
+version = "0.1.0"
+description = ""
+authors = ["Chen Rothschild <chen.rothschild@tensorleap.ai>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.11"
+code-loader = "^0.2.91"
+sklearn = "^0.0.post7"
+scikit-learn = "^1.3.0"
+keras = "^2.13.1"
+pyyaml = "^6.0.1"
+matplotlib = "^3.7.2"
+pandas = "^2.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+test = "leap_test: check_integration"
+custom_test = "leap_custom_test: check_custom_test"
