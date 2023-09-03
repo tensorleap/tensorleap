@@ -54,13 +54,16 @@ def check_custom_test():
                                          input_name_2: np.expand_dims(attention__mask, 0),
                                          input_name_3: np.expand_dims(token_type__id, 0)})
 
+        class_probabilities = np.exp(y_pred[0]) / np.sum(np.exp(y_pred[0]), axis=1, keepdims=True)
+        predicted_class = np.argmax(class_probabilities, axis=1)
+
         # del sess
 
         #loss
-        ls = BinaryCrossentropy()(y_true, y_pred)
+        ls = BinaryCrossentropy()(y_true, class_probabilities)
 
         #metrices
-        # accuracy = BinaryAccuracy()(y_true, y_pred)
+        # accuracy = BinaryAccuracy()(y_true, class_probabilities)
 
         # get meatdata
         gt_mdata = gt_metadata(idx, responses_set)
@@ -76,14 +79,13 @@ def check_custom_test():
 
 
         # text_gt_visualizer_func
-        ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
+        ohe = {"pos": [0., 1.0], "neg": [1.0, 0.]}
         text = []
         if (y_true[0].numpy() == np.array(ohe["pos"])).all():
             text.append("pos")
         else:
             text.append("neg")
         print(f'gt: {text[0]}')
-
 
     print("finish tests")
 
