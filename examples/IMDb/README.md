@@ -17,15 +17,15 @@ A straightforward approach to solving this problem is by using a densely connect
 
 Below is the model's block representation within our platform:
 
-![Dense Model (click-to-zoom)](<../.gitbook/assets/image (35) (1).png>)
+![Dense Model (click-to-zoom)](images/img_1.png)
 
 #### Training Metrics
 
 During the training our platform collects various performance metrics and metadata that are presented interactively within a customizable Dashboard. This enables further performance and data analysis.\
-After training the model for 5 epochs, the **accuracy** is **0.89** and the error **loss** is **0.26**. \
+After training the model for 20 epochs, the **accuracy** is **0.9595** and the error **loss** is **0.149**. \
 Visualization of the error loss / accuracy vs batch:
 
-![Loss and Accuracy Metrics after Training](<../.gitbook/assets/image (24) (1).png>)
+![Loss and Accuracy Metrics after Training](images/img.png)
 
 ### Error Analysis
 
@@ -35,8 +35,9 @@ The plot below is a **population exploration** plot. It represents a samples' si
 
 The samples shown below were taken from the **training set** and are colored based on their **ground truth** class. The dot's size represents the model's error loss for that specific sample. We can see that there is a clear separation of the samples based on their classes.There are also failing samples (large dots).
 
-![Population Exploration Analysis of Training Samples](<../.gitbook/assets/image (17).png>)
+![Population Exploration Analysis of Training Samples](images/img_2.png)
 
+#----------------------------
 #### Sample Analysis
 
 The Tensorleap platform provides us with a way to further explore the model's response to specific data samples.
