@@ -7,3 +7,7 @@ SEQUENCE_LENGTH: 512
 
 MODEL_NAME: "fabriceyhc/bert-base-uncased-imdb"
 
+LABELS_NAMES:
+  - neg
+  - pos
+
