@@ -1,4 +1,5 @@
 from typing import List, Optional, Callable, Tuple, Dict
+import numpy.typing as npt
 import tensorflow as tf
 import json, os, re, string
 from os.path import basename, dirname, join
@@ -14,7 +15,7 @@ from pandas.core.frame import DataFrame as DataFrameType
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import DatasetMetadataType, LeapDataType, Metric
-from code_loader.contract.visualizer_classes import LeapText
+from code_loader.contract.visualizer_classes import LeapText, LeapHorizontalBar
 
 from IMDb.config import CONFIG
 from IMDb.data.preprocess import download_load_assets
@@ -33,7 +34,7 @@ def preprocess_func() -> List[PreprocessResponse]:
                          ignore_index=True)
     val_df = pd.concat([df[df['gt'] == 'pos'][train_label_size:train_label_size + val_label_size],
                         df[df['gt'] == 'neg'][train_label_size:train_label_size + val_label_size]], ignore_index=True)
-    ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
+    ohe = {"pos": [0., 1.0], "neg": [1.0, 0.]}
 
     # Generate a PreprocessResponse for each data slice, to later be read by the encoders.
     # The length of each data slice is provided, along with the data dictionary.
@@ -139,18 +140,18 @@ def tokenizer_decoder(tokenizer, input_ids: np.ndarray) -> List[str]:
 
 
 
-def tokenizer_decoder_gt(tokenizer, gt: np.ndarray) -> str:
-    """
-    Description: Decodes the input tokens from their corresponding input IDs using the provided tokenizer.
-    Parameters:
-    tokenizer: The tokenizer used to convert token IDs to text.
-    input_ids (np.ndarray): Array of input token IDs.
-    Returns:
-    decoded (List[str]): List of decoded tokens as strings.
-    """
-    if gt[0] == 1.0:
-        return 'Positive'
-    return 'Negative'
+# def tokenizer_decoder_gt(tokenizer, gt: np.ndarray) -> str:
+#     """
+#     Description: Decodes the input tokens from their corresponding input IDs using the provided tokenizer.
+#     Parameters:
+#     tokenizer: The tokenizer used to convert token IDs to text.
+#     input_ids (np.ndarray): Array of input token IDs.
+#     Returns:
+#     decoded (List[str]): List of decoded tokens as strings.
+#     """
+#     if gt[0] == 1.0:
+#         return 'Positive'
+#     return 'Negative'
 
 # Visualizer functions define how to interpet the data and visualize it.
 # In this example we define a tokens-to-text visualizer.
@@ -170,13 +171,18 @@ def text_visualizer_func_old(data: np.ndarray) -> LeapText:
     return LeapText(text_input)
 
 def text_visualizer_output(y_true) -> LeapText:
-    ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
+    ohe = {"pos": [0., 1.0], "neg": [1.0, 0.]}
     text = []
-    if (y_true[0] == np.array(ohe["pos"])).all():
+    if (y_true == np.array(ohe["pos"])).all():
         text.append("pos")
     else:
         text.append("neg")
     return LeapText(text)
+
+
+def horizontal_bar_visualizer_with_labels_name(y_pred: npt.NDArray[np.float32]) -> LeapHorizontalBar:
+    labels_names = [CONFIG['LABELS_NAMES'][index] for index in range(y_pred.shape[-1])]
+    return LeapHorizontalBar(y_pred, labels_names)
 
 
 # Binders
@@ -191,6 +197,9 @@ leap_binder.set_metadata(function=all_raw_metadata, name='all_raw_metadata')
 leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text,
                            name='text_from_token_input')
 leap_binder.set_visualizer(function=text_visualizer_output, visualizer_type=LeapDataType.Text, name='gt_text')
+leap_binder.set_visualizer(function=horizontal_bar_visualizer_with_labels_name,
+                           visualizer_type=LeapDataType.HorizontalBar, name='pred_labels')
+
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
 
 
