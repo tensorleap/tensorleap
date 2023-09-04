@@ -1,18 +1,19 @@
 from typing import List, Dict
 import pandas as pd
 import numpy as np
+import numpy.typing as npt
 import tensorflow as tf
 
 # Tensorleap imports
 from code_loader import leap_binder
 from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import LeapDataType
-from code_loader.contract.visualizer_classes import LeapText
+from code_loader.contract.visualizer_classes import LeapText, LeapHorizontalBar
 
 from IMDb.config import CONFIG
 from IMDb.data.preprocess import download_load_assets
 from IMDb.gcs_utils import _download
-from IMDb.utils import prepare_input
+from IMDb.utils import prepare_input, prepare_input_dense_model
 
 
 # Preprocess Function
@@ -214,8 +215,8 @@ def text_visualizer_func(input_ids: np.ndarray) -> LeapText:
     tokenizer = leap_binder.custom_tokenizer
     data = input_ids.astype(np.int64)
     text = tokenizer_decoder(tokenizer, data)
-    tokens = [token for token in text.split()]
-    padded_list = pad_list(tokens)
+    text_input = [token for token in text.split()]
+    padded_list = pad_list(text_input)
     return LeapText(padded_list)
 
 
@@ -230,23 +231,12 @@ def text_visualizer_func_dense_model(data: np.ndarray) -> LeapText:
     texts = tokenizer.sequences_to_texts([data])
     text_input = texts[0].split(' ')
     text_input = [text for text in text_input]
-    return LeapText(text_input)
+    padded_list = pad_list(text_input)
+    return LeapText(padded_list)
 
-
-def text_visualizer_output(y_true: tf.Tensor) -> LeapText:
-    """
-    Converts the true sentiment label into a LeapText object for visualization.
-
-    :param y_true: The true sentiment label in one-hot encoded format.
-    :return: A LeapText object representing the sentiment label for visualization (either "pos" or "neg").
-    """
-    ohe = {"pos": [1.0, 0.], "neg": [0., 1.0]}
-    text = []
-    if (y_true[0] == np.array(ohe["pos"])).all():
-        text.append("pos")
-    else:
-        text.append("neg")
-    return LeapText(text)
+def horizontal_bar_visualizer_with_labels_name(y_pred: npt.NDArray[np.float32]) -> LeapHorizontalBar:
+    labels_names = [CONFIG['LABELS_NAMES'][index] for index in range(y_pred.shape[-1])]
+    return LeapHorizontalBar(y_pred, labels_names)
 
 
 # Binders
@@ -259,7 +249,8 @@ leap_binder.set_metadata(function=gt_metadata, name='gt')
 leap_binder.set_metadata(function=all_raw_metadata, name='all_raw_metadata')
 leap_binder.set_visualizer(function=text_visualizer_func, visualizer_type=LeapDataType.Text,
                            name='text_from_token_input')
-leap_binder.set_visualizer(function=text_visualizer_output, visualizer_type=LeapDataType.Text, name='gt_text')
+leap_binder.set_visualizer(function=horizontal_bar_visualizer_with_labels_name,
+                           visualizer_type=LeapDataType.HorizontalBar, name='pred_labels')
 leap_binder.add_prediction(name='sentiment', labels=['positive', 'negative'])
 
 if __name__ == '__main__':
