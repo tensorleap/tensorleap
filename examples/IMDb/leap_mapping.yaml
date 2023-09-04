@@ -75,6 +75,7 @@ decorators:
   - operation: BinaryCrossentropy
     data:
       type: Loss
+      from_logits: true
     id: '639'
     inputs:
       prediction:
@@ -151,6 +152,23 @@ decorators:
     id: '644'
     inputs:
       data:
+        - outputKey: feature_map
+          operation: Dense
+          name: logits__classifier
+          id: '1'
+    outputs: {}
+  - operation: Visualizer
+    data:
+      type: Visualizer
+      name: pred_labels
+      visualizer_name: pred_labels
+      visualizer_type: HorizontalBar
+      arg_names:
+        - y_pred
+      user_unique_name: pred_labels
+    id: '645'
+    inputs:
+      y_pred:
         - outputKey: feature_map
           operation: Dense
           name: logits__classifier

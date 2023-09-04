@@ -7,11 +7,21 @@ from typing import Optional
 
 from IMDb.config import CONFIG
 def _connect_to_gcs() -> Bucket:
+    '''
+    Establishes a connection to Google Cloud Storage and returns a bucket object.
+    Return: A GCS bucket object.
+    '''
     gcs_client = storage.Client(project=CONFIG['PROJECT_ID'], credentials=AnonymousCredentials())
     return gcs_client.bucket(CONFIG['BUCKET_NAME'])
 
 
 def _download(cloud_file_path: str, local_file_path: Optional[str] = None) -> str:
+    '''
+    Downloads a file from Google Cloud Storage to a local directory, ensuring it exists locally for further use.
+    :param cloud_file_path: The path to the file in Google Cloud Storage.
+    :param local_file_path:  The optional local path to save the downloaded file.
+    :return:The path to the downloaded local file.
+    '''
     BASE_PATH = "imdb"
     cloud_file_path = join(BASE_PATH, cloud_file_path)
     # if local_file_path is not specified saving in home dir

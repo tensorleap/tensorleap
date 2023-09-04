@@ -1,17 +1,9 @@
-from IMDb.data import preprocess
-from IMDb.gcs_utils import _download
 from leap_binder import *
 import tensorflow as tf
 import os
 import numpy as np
 import onnxruntime
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from keras.losses import BinaryCrossentropy
-from keras.metrics import BinaryAccuracy
-
-def type_check(arr, name):
-    unique_types = np.unique(arr.dtype)
-    print(f"Unique data types in the {name}:", unique_types)
 
 def check_custom_test():
     print("started custom tests")
@@ -20,7 +12,6 @@ def check_custom_test():
     val = responses[1]
     responses_set = train
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    # model_path = ('model/imdb-dense.h5')
     model_path = 'model/fabriceyhc-bert-base-uncased-imdb.onnx'
 
     for idx in range(20):
@@ -28,20 +19,11 @@ def check_custom_test():
         attention__mask = attention_masks(idx, responses_set)
         token_type__id = token_type_ids(idx, responses_set)
 
-        # type_check(input__id, 'input_id')
-        # type_check(attention__mask, 'attention_mask')
-        # type_check(token_type__id, 'token_type_id')
-
-
         # get input and gt
-        # input1 = input_tokens(idx, responses_set)
         gt = gt_sentiment(idx, responses_set)
-
-        #model
-        # model = tf.keras.models.load_model(os.path.join(dir_path, model_path))
-        # y_pred = model([np.expand_dims(input1, axis=0)])
         y_true = tf.convert_to_tensor(np.expand_dims(gt, axis=0))
 
+        # model
         sess = onnxruntime.InferenceSession(os.path.join(dir_path, model_path))
 
         # get inputs
@@ -55,15 +37,9 @@ def check_custom_test():
                                          input_name_3: np.expand_dims(token_type__id, 0)})
 
         class_probabilities = np.exp(y_pred[0]) / np.sum(np.exp(y_pred[0]), axis=1, keepdims=True)
-        predicted_class = np.argmax(class_probabilities, axis=1)
 
-        # del sess
-
-        #loss
+        # get loss
         ls = BinaryCrossentropy()(y_true, class_probabilities)
-
-        #metrices
-        # accuracy = BinaryAccuracy()(y_true, class_probabilities)
 
         # get meatdata
         gt_mdata = gt_metadata(idx, responses_set)
@@ -73,10 +49,9 @@ def check_custom_test():
         tokenizer = leap_binder.custom_tokenizer
         data = input__id.astype(np.int64)
         text = tokenizer_decoder(tokenizer, data)
-        tokens = [token for token in text.split() if token != '[PAD]']
-        a = LeapText(tokens)
-        print(f'input text: {tokens}')
-
+        tokens = text.split()
+        input_list = pad_list(tokens)
+        print(f'input text: {input_list}')
 
         # text_gt_visualizer_func
         ohe = {"pos": [0., 1.0], "neg": [1.0, 0.]}
