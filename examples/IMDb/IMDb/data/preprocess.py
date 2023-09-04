@@ -21,6 +21,5 @@ def download_load_assets():
     df = pd.read_csv(local_path)
     cloud_path = join("assets", "tokenizer_v2.json")
     local_path = _download(cloud_path)
-    # tokenizer = load_tokenizer(local_path)
     tokenizer = AutoTokenizer.from_pretrained(CONFIG['MODEL_NAME'], skip_special_tokens=False, clean_up_tokenization_spaces=False, use_fast=False)
     return tokenizer, df

@@ -43,31 +43,24 @@ Tensorleap's platform provides an unsupervised clustering of samples based on th
 
 In our use-case we can see that this clustering technique was able to group together samples with common features. For example, in this Population Exploration plot, each cluster is colored, while the size of the dot represents the number accuracy each sample:
 
-![Population Exploration - Unsupervised Clustering + OOV Dot Size](images/img_4.png)
+![Population Exploration - Unsupervised Clustering](images/img_4.png)
 
 It can be seen that the left-side groups consist of samples with a known ground truth of "positive".
-![Focus on the Green Cluster - High OOV](../.gitbook/assets/img_22.png) ![Focus on the Blue Cluster - Low OOV ](../.gitbook/assets/img_23.png)
+![Population Exploration - Unsupervised Clustering2](images/img_5.png)
 
-
-#----------------------------
 #### Sample Analysis
 
 The Tensorleap platform provides us with a way to further explore the model's response to specific data samples.
 
 For example, performing **Sample Analysis** of one of the failing samples shows a **false-positive** prediction made by the model, with a heat-map overlay that scores the significance of each word to the `positive` prediction:
 
-![Sample Analysis of High Loss Samples (click-to-zoom)](<../.gitbook/assets/image (29) (1).png>)
+![Sample Analysis of High Loss Samples (click-to-zoom)](images/img_6.png)
 
-The heat-map highlighted words such as "**brilliant**", "**entertaining**", "**masterpiece**" which indeed translates positively. But when we review their context, we get "**mildly entertaining**", "**not... brilliant**", and "**masterpiece because of sympathy**", which resonates as negative.
-
-The dense model makes its prediction using a single word context, which can lead to inaccurate sentiment analysis. To improve upon this, next we will evaluate a separate convolutional model.
-
-#------------------------------------
+The heat-map highlighted words such as "**appreciated**", "**favourite**", "**appreciate**" which indeed translates positively. 
+But when we review their context, we get "**other comments... appreciated**", "**favourite... but**", and "**appreciate.. but do not**", which resonates as negative.
 
 ### Bert model
-
-Our second model is a pretrained Bert (Bidirectional Encoder Representations from Transformers) model.
-
+We have tried other model- a pretrained Bert (Bidirectional Encoder Representations from Transformers) model.
 
 #----------------------------------
 #### Sample Analysis

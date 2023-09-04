@@ -69,9 +69,6 @@ decorators:
         - inputKey: ground_truth
           operation: Metric
           id: '642'
-        - inputKey: y_true
-          operation: Visualizer
-          id: '643'
   - operation: BinaryCrossentropy
     data:
       type: Loss
@@ -121,22 +118,6 @@ decorators:
           name: logits__classifier
           id: '1'
       ground_truth:
-        - outputKey: sentiment
-          operation: GroundTruth
-          id: '636'
-    outputs: {}
-  - operation: Visualizer
-    data:
-      type: Visualizer
-      name: gt_text
-      visualizer_name: gt_text
-      visualizer_type: Text
-      arg_names:
-        - y_true
-      user_unique_name: gt_text
-    id: '643'
-    inputs:
-      y_true:
         - outputKey: sentiment
           operation: GroundTruth
           id: '636'
