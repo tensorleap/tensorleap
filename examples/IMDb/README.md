@@ -62,16 +62,16 @@ But when we review their context, we get "**other comments... appreciated**", "*
 ### Bert model
 We have tried other model- a pretrained Bert (Bidirectional Encoder Representations from Transformers) model.
 
-#----------------------------------
-#### Sample Analysis
+Running **Sample Analysis** on the same sample, now with the Bert model, got different results. 
+The bert model predicted the sample as "negative" as it should be.
 
-Running **Sample Analysis** on the same sample, now with the new CNN model, results in a 67% improvement in the error loss. Below are the heat-maps correlated with the `positive` and `negative` outputs:
+![Sample Analysis of High Loss Samples](images/img_7.png)
 
-![Positive Heat-map (click-to-zoom)](<../.gitbook/assets/image (40) (1).png>) ![Negative Heat-map (click-to-zoom)](<../.gitbook/assets/image (39).png>)
+It is evident that terms such as "**but**", "**not**", "**waste of**", "**the worst**" and so on, contribute to a lower loss.
 
-As expected, the convolutional model has a much wider context window, which results in the attention being spread over longer phrases. One result of this change is that "**entertaining**" is no longer an indication of a positive sentiment. In fact, the bigram "**entertaining mildly**" is now an indicator of a `negative` sentiment.
-
-#--------------------------------------
+Here's another instance of loss analysis depicted in the image below. However, this example pertains to mislabeled data.
+In this case, the test data is labeled as 'positive', but the model incorrectly predicted it as 'negative.' 
+In reality, the text is actually a negative review of the movie, so the model's prediction is, in fact, correct.
 
 #### Data Exploration
 
