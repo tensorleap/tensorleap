@@ -24,9 +24,9 @@ def preprocess_func() -> List[PreprocessResponse]:
     :return: A list of PreprocessResponse objects containing preprocessed data and associated information.
     """
     tokenizer, df = download_load_assets()
-    train_label_size = int(0.9 * CONFIG['NUMBER_OF_SAMPLES'] / 2)
-    val_label_size = int(0.1 * CONFIG['NUMBER_OF_SAMPLES'] / 2)
     df = df[df['subset'] == 'train']
+    train_label_size = int(0.9 * len(df) / 2)
+    val_label_size = int(0.1 * len(df) / 2)
     train_df = pd.concat([df[df['gt'] == 'pos'][:train_label_size], df[df['gt'] == 'neg'][:train_label_size]],
                          ignore_index=True)
     val_df = pd.concat([df[df['gt'] == 'pos'][train_label_size:train_label_size + val_label_size],
