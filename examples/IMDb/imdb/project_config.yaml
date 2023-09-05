@@ -1,6 +1,6 @@
-NUMBER_OF_SAMPLES: 20000
 BUCKET_NAME: 'example-datasets-47ml982d'
 PROJECT_ID: 'example-dev-project-nmrksf0o'
+BASE_PATH: "imdb"
 
 MAX_FEATURES: 10000
 SEQUENCE_LENGTH: 512
@@ -11,7 +11,6 @@ LABELS_NAMES:
   - neg
   - pos
 
-BASE_PATH: "imdb"
 
 
 
