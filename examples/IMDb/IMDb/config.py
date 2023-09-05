@@ -2,7 +2,7 @@ import os
 from typing import Dict, Any
 import yaml
 
-def load_od_config() -> Dict[str, Any]:
+def load_config() -> Dict[str, Any]:
     # Load the existing YAML config
     root = os.path.abspath(os.path.dirname(__file__))
     file_path = os.path.join(root, 'project_config.yaml')
@@ -11,4 +11,4 @@ def load_od_config() -> Dict[str, Any]:
 
     return config
 
-CONFIG = load_od_config()
+CONFIG = load_config()

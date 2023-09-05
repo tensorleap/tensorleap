@@ -29,7 +29,7 @@ Visualization of the error loss / accuracy vs batch:
 
 ### Error Analysis
 
-#### Population Exploration
+### Population Exploration
 
 The plot below is a **population exploration** plot. It represents a samples' similarity map based on the model's latent space, built using the extracted features from the trained model.
 
@@ -37,7 +37,7 @@ The samples shown below were taken from the **training set** and are colored bas
 
 ![Population Exploration Analysis of Training Samples](images/img_2.png)
 
-#### Unsupervised Clustering
+### Unsupervised Clustering
 
 Tensorleap's platform provides an unsupervised clustering of samples based on their similarities.
 
@@ -48,7 +48,7 @@ In our use-case we can see that this clustering technique was able to group toge
 It can be seen that the left-side groups consist of samples with a known ground truth of "positive".
 ![Population Exploration - Unsupervised Clustering2](images/img_5.png)
 
-#### Sample Analysis
+### Sample Analysis
 
 The Tensorleap platform provides us with a way to further explore the model's response to specific data samples.
 
@@ -59,7 +59,7 @@ For example, performing **Sample Analysis** of one of the failing samples shows 
 The heat-map highlighted words such as "**appreciated**", "**favourite**", "**appreciate**" which indeed translates positively. 
 But when we review their context, we get "**other comments... appreciated**", "**favourite... but**", and "**appreciate.. but do not**", which resonates as negative.
 
-### Bert model
+#### Bert model
 We have tried other model- a pretrained Bert (Bidirectional Encoder Representations from Transformers) model.
 
 Running **Sample Analysis** on the same sample, now with the Bert model, got different results. 
@@ -73,7 +73,7 @@ Here's another instance of loss analysis depicted in the image below. However, t
 In this case, the test data is labeled as 'positive', but the model incorrectly predicted it as 'negative.' 
 In reality, the text is actually a negative review of the movie, so the model's prediction is, in fact, correct.
 
-#### Data Exploration
+### Data Exploration
 
 The Tensorleap's Dashboard enables you to see how your data is distributed across various features. Below is a dashboard showing 5 histogram vs loss of informative features:
 
