@@ -33,7 +33,7 @@ Visualization of the error loss / accuracy vs batch:
 
 The plot below is a **population exploration** plot. It represents a samples' similarity map based on the model's latent space, built using the extracted features from the trained model.
 
-The samples shown below were taken from the **training set** and are colored based on their **ground truth** class. The dot's size represents the model's error loss for that specific sample. We can see that there is a clear separation of the samples based on their classes.There are also failing samples (large dots).
+The samples shown below were taken from the **training set** and are colored based on their **ground truth** class. The dot's size represents the model's error loss for that specific sample. We can see that there is a clear separation of the samples based on their classes.There are also high loss sample (large dots).
 
 ![Population Exploration Analysis of Training Samples](images/img_2.png)
 
@@ -45,7 +45,7 @@ In our use-case we can see that this clustering technique was able to group toge
 
 ![Population Exploration - Unsupervised Clustering](images/img_4.png)
 
-It can be seen that the left-side groups consist of samples with a known ground truth of "positive".
+It can be seen that the left-side groups consist of positively labelled samples.
 ![Population Exploration - Unsupervised Clustering2](images/img_5.png)
 
 ### Sample Analysis
@@ -87,8 +87,6 @@ Different correlation insights from this visualization:
 ## Summary
 
 The **Tensorleap** platform provides powerful tools for analyzing and understanding deep learning models. In this example, we presented only a few examples of the types of insights that can be gained using the platform.&#x20;
-
-
 
 
 

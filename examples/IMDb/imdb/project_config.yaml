@@ -11,5 +11,8 @@ LABELS_NAMES:
   - neg
   - pos
 
+BASE_PATH: "imdb"
+
+
 
 

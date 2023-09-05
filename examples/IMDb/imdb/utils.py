@@ -1,7 +1,7 @@
 import numpy as np
 import re, string
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from IMDb.config import CONFIG
+from imdb.config import CONFIG
 
 
 def standardize(comment: str) -> str:
