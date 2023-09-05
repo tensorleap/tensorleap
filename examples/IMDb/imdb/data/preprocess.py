@@ -4,8 +4,8 @@ from keras.preprocessing.text import tokenizer_from_json
 import pandas as pd
 from os.path import join
 
-from IMDb.config import CONFIG
-from IMDb.gcs_utils import _download
+from imdb.config import CONFIG
+from imdb.gcs_utils import _download
 from transformers import AutoTokenizer
 
 def load_tokenizer(tokenizer_path: str):

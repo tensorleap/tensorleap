@@ -118,5 +118,4 @@ def check_custom_test_dense():
 
 if __name__ == '__main__':
     check_custom_test()
-    # check_custom_test_dense()
 

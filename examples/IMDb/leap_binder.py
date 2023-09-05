@@ -10,10 +10,10 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from code_loader.contract.enums import LeapDataType
 from code_loader.contract.visualizer_classes import LeapText, LeapHorizontalBar
 
-from IMDb.config import CONFIG
-from IMDb.data.preprocess import download_load_assets
-from IMDb.gcs_utils import _download
-from IMDb.utils import prepare_input, prepare_input_dense_model
+from imdb.config import CONFIG
+from imdb.data.preprocess import download_load_assets
+from imdb.gcs_utils import _download
+from imdb.utils import prepare_input, prepare_input_dense_model
 
 
 # Preprocess Function
