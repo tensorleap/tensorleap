@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "librispeech-clean"
+version = "0.1.0"
+description = ""
+authors = ["ranhomri <ran.homri@tensorleap.ai>"]
+readme = "README.md"
+packages = [{include = "librispeech_clean"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <3.10"
+code-loader = "^1.0.9"
+onnxruntime = "^1.15.1"
+transformers = "^4.32.1"
+evaluate = "^0.4.0"
+google-cloud-storage = "^2.10.0"
+onnx2kerastl = "^0.0.114"
+jiwer = "^3.0.3"
+librosa = "^0.10.1"
+matplotlib = "^3.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,16 @@
+codeIntegrationId: 6547a089a95b6c0019933448
+projectId: ""
+secretId: ""
+entryFile: leap_binder.py
+include:
+    - leap_mapping.yaml
+    - leap_binder.py
+    - leap_custom_test.py
+    - librispeech_clean/asr_config.yml
+    - librispeech_clean/packages.py
+    - librispeech_clean/configuration.py
+    - librispeech_clean/gcs_utils.py
+    - librispeech_clean/metrics.py
+    - librispeech_clean/utils.py
+    - librispeech_clean/visualizers.py
+    - librispeech_clean/wav2vec_processor.py

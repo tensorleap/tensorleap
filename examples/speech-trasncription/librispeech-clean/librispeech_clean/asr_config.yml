@@ -1,0 +1,27 @@
+bucket_name: example-datasets-47ml982d
+dataset_slices:
+  train.100:
+    path: librispeech-asr/train.100/data.csv
+    n_samples: 8  # out of 28539
+  validation:
+    path: librispeech-asr/validation/data.csv
+    n_samples: 8  #  out of 2703
+  test:
+    path: librispeech-asr/test/data.csv
+    n_samples: 8  # out of 2620
+
+model_hf_id: facebook/wav2vec2-base-960h
+
+sampling_rate: 16000
+
+output_length: 1747  # 1747 for base model
+max_sequence_length: 559280
+max_gt_length: 600
+clip_visualizers: 150000
+
+seed: 2023
+
+
+packages:
+  - librosa
+  - jiwer

@@ -1,0 +1,62 @@
+decorators:
+  - operation: Input
+    data:
+      type: Input
+      output_name: audio_array
+    id: '182'
+    inputs: {}
+    outputs:
+      audio_array:
+        - inputKey: sample
+          operation: Permute
+          name: permute_17
+          id: '181'
+  - operation: CustomLoss
+    data:
+      arg_names:
+        - logits
+        - labels
+      name: ctc_loss
+      selected: ctc_loss
+      type: CustomLoss
+    id: '759'
+    inputs:
+      logits:
+        - outputKey: feature_map
+          operation: Permute
+          name: permute_18
+          id: '1'
+      labels:
+        - outputKey: transcription
+          operation: GroundTruth
+          id: '760'
+    outputs:
+      loss:
+        - inputKey: '0'
+          operation: Adam
+          id: '761'
+  - operation: GroundTruth
+    data:
+      type: GroundTruth
+      output_name: transcription
+      selected: transcription
+    id: '760'
+    inputs: {}
+    outputs:
+      transcription:
+        - inputKey: labels
+          operation: CustomLoss
+          id: '759'
+  - operation: Adam
+    data:
+      type: Optimizer
+      custom_input_keys:
+        - 761-0
+    id: '761'
+    inputs:
+      '0':
+        - outputKey: loss
+          operation: CustomLoss
+          id: '759'
+    outputs: {}
+layers: []
